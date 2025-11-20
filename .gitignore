@@ -4,10 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
-venv/
-.venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -24,38 +20,51 @@ wheels/
 .installed.cfg
 *.egg
 
-# Environment
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables
 .env
 .env.local
-*.key
-
-# Results and data
-results/*/
-datasets/raw/
-*.csv
-*.json
-*.parquet
-
-# Keep structure but ignore content
-!results/.gitkeep
-!datasets/.gitkeep
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 .DS_Store
 
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# Benchmarking data and results
+data/queries/*.jsonl
+results/
+*.db
+*.sqlite
 
 # Logs
 *.log
 logs/
 
-# API keys and secrets
-credentials/
-secrets/
-*.pem
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride

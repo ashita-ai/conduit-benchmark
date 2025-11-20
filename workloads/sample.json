@@ -1,0 +1,17 @@
+{
+  "name": "Sample Workload",
+  "description": "Small sample for testing benchmark infrastructure",
+  "domain": "mixed",
+  "queries": [
+    "What is 2+2?",
+    "Explain quantum entanglement in simple terms",
+    "Write a short poem about the ocean",
+    "Debug this Python error: NameError: name 'x' is not defined",
+    "Summarize the key points of the French Revolution"
+  ],
+  "expected_cost_range": {
+    "baseline_gpt4o": 0.001,
+    "conduit_target": 0.0005
+  },
+  "notes": "Replace with real 1000-query workload for production benchmark"
+}
