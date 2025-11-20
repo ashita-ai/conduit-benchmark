@@ -1,15 +1,25 @@
-"""Bandit algorithms for LLM routing comparison."""
+"""Bandit algorithms - imported from Conduit.
 
-from .base import BanditAlgorithm, ModelArm, BanditContext, BanditFeedback
-from .thompson_sampling import ThompsonSamplingBandit
-from .ucb import UCB1Bandit
-from .epsilon_greedy import EpsilonGreedyBandit
-from .baselines import RandomBaseline, OracleBaseline, AlwaysBestBaseline, AlwaysCheapestBaseline
+All bandit algorithm implementations now live in Conduit.
+This module re-exports them for backward compatibility.
+"""
+
+from conduit.engines.bandits import (
+    AlwaysBestBaseline,
+    AlwaysCheapestBaseline,
+    BanditAlgorithm,
+    BanditFeedback,
+    EpsilonGreedyBandit,
+    ModelArm,
+    OracleBaseline,
+    RandomBaseline,
+    ThompsonSamplingBandit,
+    UCB1Bandit,
+)
 
 __all__ = [
     "BanditAlgorithm",
     "ModelArm",
-    "BanditContext",
     "BanditFeedback",
     "ThompsonSamplingBandit",
     "UCB1Bandit",

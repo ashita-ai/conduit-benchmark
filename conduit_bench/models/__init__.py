@@ -1,6 +1,10 @@
-"""Model registry and management."""
+"""Model registry - imported from Conduit.
 
-from .registry import (
+All model registry code now lives in Conduit.
+This module re-exports for backward compatibility.
+"""
+
+from conduit.models import (
     DEFAULT_REGISTRY,
     PRICING,
     create_model_registry,
