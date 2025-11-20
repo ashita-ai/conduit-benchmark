@@ -76,21 +76,31 @@ Compare Results (statistical significance tests)
 
 ### 3. Integration Strategy
 
-**Arbiter (ESSENTIAL)**:
-- Use for quality evaluation: `evaluate(output, reference, evaluators=["semantic"])`
-- Automatic cost tracking: `result.total_llm_cost()`
-- Batch evaluation: `batch_evaluate(items)`
-- **Why**: Provider-agnostic, battle-tested, handles all 17 models
+**Conduit (ALGORITHM SOURCE - ESSENTIAL)**:
+- **Role**: Contains ALL bandit algorithm implementations
+- **Location**: `conduit.engines.bandits` (7 algorithms) + `conduit.models` (registry)
+- **Import**: `from conduit.engines.bandits import ThompsonSamplingBandit, UCB1Bandit, ...`
+- **Why**: Single source of truth, no code duplication, algorithms usable by Router and benchmark
 
-**Conduit (REFERENCE ONLY)**:
-- NOT used in benchmark execution
-- We're TESTING bandit algorithms, not USING Conduit's routing
-- Optional: Compare our Thompson Sampling against Conduit's implementation
+**Arbiter (EVALUATION - ESSENTIAL)**:
+- **Role**: Quality evaluation for model responses
+- **Usage**: `evaluate(output, reference, evaluators=["semantic"])`
+- **Integration**: Used by benchmark runner for quality scoring
+- **Why**: Provider-agnostic, battle-tested, handles all 17 models
 
 **Loom (NOT NEEDED)**:
 - Too heavyweight for research benchmark
 - Adds unnecessary complexity (pipelines, quality gates)
 - Use for production later, not for algorithm comparison
+
+**Architecture**:
+```
+Conduit (algorithms + model registry)
+    ↑
+    | imports from
+    |
+conduit-bench (benchmark runner + analysis)
+```
 
 ### 4. Model Pool
 
@@ -254,20 +264,31 @@ high_quality_models = filter_models(
 ### Running Benchmark
 
 ```python
-from conduit_bench.algorithms import (
+# Import from Conduit (algorithms live here)
+from conduit.engines.bandits import (
     ThompsonSamplingBandit,
     UCB1Bandit,
     EpsilonGreedyBandit,
-    RandomBaseline
+    RandomBaseline,
+    OracleBaseline,
+    AlwaysBestBaseline,
+    AlwaysCheapestBaseline,
 )
-from conduit_bench.models import DEFAULT_REGISTRY
+from conduit.models import DEFAULT_REGISTRY
 
-# Create algorithms
+# Or import from conduit_bench (re-exports for convenience)
+# from conduit_bench.algorithms import ThompsonSamplingBandit, ...
+# from conduit_bench.models import DEFAULT_REGISTRY
+
+# Create all 7 algorithms
 algorithms = [
     ThompsonSamplingBandit(DEFAULT_REGISTRY),
     UCB1Bandit(DEFAULT_REGISTRY, c=1.5),
     EpsilonGreedyBandit(DEFAULT_REGISTRY, epsilon=0.1),
     RandomBaseline(DEFAULT_REGISTRY),
+    OracleBaseline(DEFAULT_REGISTRY),
+    AlwaysBestBaseline(DEFAULT_REGISTRY),
+    AlwaysCheapestBaseline(DEFAULT_REGISTRY),
 ]
 
 # Run experiment (to be implemented)

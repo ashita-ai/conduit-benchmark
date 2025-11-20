@@ -257,18 +257,29 @@ For algorithm to converge: **≥ 30 samples per arm** (Central Limit Theorem)
 
 **Integration**: Direct Python import, no configuration needed
 
-### Conduit (REFERENCE ONLY)
+### Conduit (ALGORITHM SOURCE - ESSENTIAL)
 
-**NOT Used in Benchmark**:
-- We're TESTING bandit algorithms, not USING Conduit's routing
-- Conduit is the SUBJECT of validation, not the TOOL
+**What We Use**:
+- `from conduit.engines.bandits import ThompsonSamplingBandit, UCB1Bandit, ...` - All 7 bandit algorithms
+- `from conduit.models import DEFAULT_REGISTRY` - 17 models with pricing data
+- Single source of truth for all algorithm implementations
 
-**Optional Comparison**:
-- Could run Conduit's Thompson Sampling as one of the test algorithms
-- Compare our implementations against Conduit's production implementation
-- Validate that our Thompson Sampling matches or improves upon Conduit
+**Why Essential**:
+- All bandit algorithms implemented in Conduit (not duplicated in benchmark)
+- Model registry with real pricing/quality data lives in Conduit
+- Benchmark imports from Conduit and runs experiments
+- Enables Router to use same algorithms validated by benchmark
 
-**Why Not Used**: Benchmark must be independent to validate Conduit objectively
+**Architecture**:
+```
+Conduit (algorithms + model registry)
+    ↑
+    | imports from
+    |
+conduit-bench (benchmark runner + analysis)
+```
+
+**Integration**: Direct Python import, no configuration needed
 
 ### Loom (NOT NEEDED)
 
