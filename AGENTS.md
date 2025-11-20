@@ -1,137 +1,141 @@
 # AGENTS.md - AI Agent Guide
 
-**Purpose**: Quick reference for working on Conduit Bench
-**Last Updated**: 2025-11-19
+**Purpose**: Development guidelines for Conduit Bench bandit benchmarking
+**Last Updated**: 2025-01-19
 
 ---
 
 ## Quick Orientation
 
-**Conduit Bench**: Benchmarking and continuous improvement system for Conduit LLM routing
-**Stack**: Python 3.10+, Conduit, Loom, Arbiter, PydanticAI
-**Purpose**: Validate Conduit's quality-aware routing through multi-round synthetic benchmarking
+**Conduit Bench**: Multi-armed bandit algorithm benchmarking for LLM routing
+**Stack**: Python 3.10+, PydanticAI, Arbiter (evaluation), 17 models across 6 providers
+**Purpose**: Compare bandit algorithms (Thompson Sampling, UCB1, Epsilon-Greedy) to identify optimal cost/quality trade-off
 
-### Directory Structure
+### Research Question
 
-```
-conduit-bench/
-├── conduit_bench/              # Main package
-│   ├── generators/             # Query generation
-│   │   ├── synthetic.py        # Generate diverse queries
-│   │   ├── categories.py       # 10 query categories
-│   │   ├── complexity.py       # Complexity scoring
-│   │   └── references.py       # Reference answer generation
-│   ├── runners/                # Execution
-│   │   ├── round.py            # Run benchmark round
-│   │   ├── conduit_client.py   # Conduit API wrapper
-│   │   └── batch.py            # Batch execution with progress
-│   ├── analysis/               # Results analysis
-│   │   ├── metrics.py          # Performance metrics
-│   │   ├── convergence.py      # ML convergence analysis
-│   │   ├── visualize.py        # Charts and dashboards
-│   │   └── reports.py          # Markdown report generation
-│   └── cli.py                  # Command-line interface
-├── pipelines/                  # Loom evaluation pipelines
-│   ├── round1_evaluate.yaml    # 100% evaluation
-│   ├── round2_evaluate.yaml    # Targeted evaluation
-│   └── round3_evaluate.yaml    # Final validation
-├── data/                       # Datasets (git-ignored)
-│   └── queries/                # Generated queries + references
-├── results/                    # Results (git-ignored)
-│   ├── round1/                 # Baseline results
-│   ├── round2/                 # Targeted improvement
-│   └── round3/                 # Final validation
-├── scripts/                    # CLI scripts
-│   ├── generate_queries.py
-│   ├── run_round.py
-│   └── analyze_results.py
-├── tests/                      # Tests
-├── docs/                       # Documentation
-│   ├── METHODOLOGY.md
-│   └── RESULTS.md
-└── pyproject.toml              # Dependencies
-```
+**Which bandit algorithm achieves the best cost/quality trade-off for LLM routing across multiple providers?**
 
 ---
 
 ## Critical Rules
 
-### 1. No Fine-Tuning Required
+### 1. Single Experiment Design (NOT 3 Rounds)
 
-**Rule**: Conduit Bench validates Thompson Sampling routing (not fine-tuned models)
+**Rule**: One large experiment with all algorithms running in parallel on same dataset
 
-**Why**:
-- Thompson Sampling is provider-agnostic (routes to ANY model)
-- No fine-tuning costs ($0 vs $100s)
-- Fast iteration (update routing logic instantly)
-- Flexible (can route to any provider/model)
+**Rationale**:
+- Bandits learn continuously from every query, not in discrete "rounds"
+- We're COMPARING algorithms, not iteratively improving one algorithm
+- This is algorithm research, not deployment validation
 
-**Phase 1 Goal**: Prove Thompson Sampling achieves 40-50% cost savings
-
-**Future consideration**: Fine-tuning only if specific domain needs >95% quality and base models can't deliver
-
-### 2. Multi-Round Evaluation Strategy
-
-**Rule**: 3 rounds with progressive targeting
-
-**Round 1 (5,000 queries):**
-- 100% evaluation of all queries
-- Establish baseline (cost, quality, latency)
-- Thompson Sampling learns initial patterns
-
-**Round 2 (1,000 queries):**
-- Target low-confidence areas
-- Categories with <70% quality
-- Edge cases (very simple/complex)
-
-**Round 3 (500 queries):**
-- Final validation
-- Multi-model comparison
-- High-stakes edge case stress testing
-
-### 3. Loom + Arbiter Integration
-
-**Rule**: Use Loom pipelines for batch evaluation, not inline evaluation
-
-**Architecture:**
+**Experiment Structure**:
 ```
-Conduit: Route queries → Store responses in DB
+Generate Dataset (10,000 queries)
     ↓
-Loom: Extract responses → Evaluate with Arbiter → Load scores
+Run All 7 Algorithms in Parallel on Same Dataset:
+    - Thompson Sampling
+    - UCB1
+    - Epsilon-Greedy
+    - Random
+    - Oracle
+    - AlwaysBest
+    - AlwaysCheapest
     ↓
-Conduit: Read scores → Update Thompson Sampling bandit
+Evaluate All Responses with Arbiter
+    ↓
+Calculate Metrics:
+    - Cumulative Regret
+    - Cost Savings
+    - Quality Maintained
+    - Convergence Speed
+    ↓
+Compare Results (statistical significance tests)
 ```
 
-**Why Loom**:
-- Batch efficiency (evaluate 100s at once)
-- Decoupled (Conduit doesn't depend on Arbiter)
-- Audit trail (complete pipeline observability)
-- Quality gates (Loom's built-in logic)
+**What We Removed**: The confusing "Round 1 (5K) → Round 2 (1K) → Round 3 (500)" structure that suggested iterative improvement.
 
-### 4. Type Safety (Strict Mypy)
+### 2. Sample Size Requirements
+
+**Main Experiment**: **10,000 queries**
+- Per-Arm: 10,000 / 17 models ≈ 590 samples per model
+- Per-Category: 10,000 / 10 categories = 1,000 per category
+- Convergence: Sufficient for detection (algorithms stabilize in 2-5K queries)
+
+**Quick Validation**: **1,000 queries**
+- Per-Arm: ~59 samples per model (marginal but usable)
+- Use Case: Rapid prototyping, parameter tuning
+
+**Statistical Rigor**: **10 independent runs**
+- Report: mean ± 95% confidence interval
+- Total: 10,000 × 10 = 100,000 queries
+
+**Minimum Viable**:
+- 17 models × 30 samples (CLT) = 510 queries
+- Recommended: 17 × 100 = 1,700 queries
+- Robust: 17 × 500 = 8,500 queries
+
+### 3. Integration Strategy
+
+**Arbiter (ESSENTIAL)**:
+- Use for quality evaluation: `evaluate(output, reference, evaluators=["semantic"])`
+- Automatic cost tracking: `result.total_llm_cost()`
+- Batch evaluation: `batch_evaluate(items)`
+- **Why**: Provider-agnostic, battle-tested, handles all 17 models
+
+**Conduit (REFERENCE ONLY)**:
+- NOT used in benchmark execution
+- We're TESTING bandit algorithms, not USING Conduit's routing
+- Optional: Compare our Thompson Sampling against Conduit's implementation
+
+**Loom (NOT NEEDED)**:
+- Too heavyweight for research benchmark
+- Adds unnecessary complexity (pipelines, quality gates)
+- Use for production later, not for algorithm comparison
+
+### 4. Model Pool
+
+**17 Models Across 6 Providers**:
+- OpenAI (4): gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
+- Anthropic (3): claude-3-5-sonnet, claude-3-opus, claude-3-haiku
+- Google (3): gemini-1.5-pro, gemini-1.5-flash, gemini-1.0-pro
+- Groq (3): llama-3.1-70b, llama-3.1-8b, mixtral-8x7b
+- Mistral (3): mistral-large, mistral-medium, mistral-small
+- Cohere (2): command-r-plus, command-r
+
+**Pricing Range**: $0.00005 - $0.075 per 1K tokens (1,500× difference!)
+**Quality Range**: 0.72 - 0.97 (25% difference)
+
+### 5. Bandit Algorithms
+
+**Learning Algorithms (3)**:
+1. **Thompson Sampling** (Bayesian probability matching)
+   - Regret: O(√(K × T × ln T)) - optimal
+   - Convergence: 2,500-3,500 queries
+   - Complexity: Medium (Beta sampling)
+
+2. **UCB1** (Optimistic estimates)
+   - Regret: O(√(K × T × ln T)) - optimal
+   - Convergence: 1,500-2,500 queries (fastest)
+   - Complexity: Low (arithmetic only)
+
+3. **Epsilon-Greedy** (Simple exploration)
+   - Regret: O(K × T^(2/3)) - suboptimal
+   - Convergence: 4,000-6,000 queries (slowest)
+   - Complexity: Very low
+
+**Baselines (4)**:
+1. **Random**: Lower bound (uniform random selection)
+2. **Oracle**: Upper bound (perfect knowledge - zero regret)
+3. **AlwaysBest**: Quality ceiling (always use Claude-3-Opus)
+4. **AlwaysCheapest**: Cost floor (always use Llama-3.1-8B)
+
+### 6. Type Safety (Strict Mypy)
 
 All functions require type hints, no `Any` without justification.
 
-### 5. Reproducible Datasets
+### 7. No Placeholders
 
-**Rule**: All query generation must be reproducible with seed
-
-```python
-# Good
-queries = await generate_dataset(total_queries=5000, seed=42)
-
-# Bad
-queries = await generate_dataset(total_queries=5000)  # Non-deterministic
-```
-
-### 6. Complete Features Only
-
-If you start, you finish:
-- ✅ Implementation complete
-- ✅ Tests (>80% coverage)
-- ✅ Docstrings
-- ✅ Example usage
-- ✅ Exported in `__init__.py`
+Production-grade code only. Complete implementations or nothing.
 
 ---
 
@@ -139,15 +143,15 @@ If you start, you finish:
 
 ### Before Starting
 
-1. **Check dependencies:**
+1. **Check dependencies**:
    ```bash
-   # Ensure sibling projects exist
-   ls ../conduit ../loom ../arbiter
+   # Ensure Arbiter exists
+   ls ../arbiter
    ```
 
-2. **Create feature branch:**
+2. **Create feature branch**:
    ```bash
-   git checkout -b feature/query-generation
+   git checkout -b feature/benchmark-runner
    ```
 
 ### During Development
@@ -179,186 +183,253 @@ poetry run black conduit_bench/         # Formatted
 
 ## Tech Stack
 
-### Core Dependencies
+### Core Dependencies ✅
 - **Python**: 3.10+ (modern type hints, async/await)
-- **Conduit**: ML routing engine (sibling project)
-- **Loom**: Pipeline orchestration (sibling project)
-- **Arbiter**: Quality evaluation (sibling project)
-- **PydanticAI**: LLM provider abstraction
+- **Pydantic**: 2.12+ (data validation and serialization)
+- **PydanticAI**: 1.20+ (unified LLM interface)
+- **Arbiter**: Latest via git (evaluation engine)
+- **NumPy**: 1.24+ (Beta distribution sampling)
 
 ### Data Processing
-- **Pandas**: DataFrame operations
-- **Polars**: Fast data processing (10-100x faster than pandas)
+- **Pandas**: 2.2+ (DataFrame operations)
+- **Polars**: 0.19+ (Fast data processing)
 
 ### LLM Providers (via PydanticAI)
-- **OpenAI**: GPT-4, GPT-4o, GPT-4o-mini
-- **Anthropic**: Claude 3.5 Sonnet, Claude Opus 4
-- **Google**: Gemini 1.5 Pro, Gemini 1.5 Flash
-- **Groq**: Fast inference (Llama, Mixtral)
-
-### Database
-- **PostgreSQL**: Store queries, responses, evaluations
-- **SQLAlchemy**: ORM with async support
-- **Alembic**: Migrations
+- OpenAI, Anthropic, Google, Groq, Mistral, Cohere
 
 ### Analysis & Visualization
-- **Matplotlib**: Static plots
-- **Seaborn**: Statistical visualizations
-- **Plotly**: Interactive dashboards
+- **Matplotlib**: 3.9+ (Static plots)
+- **Seaborn**: 0.13+ (Statistical visualizations)
+- **Plotly**: 5.24+ (Interactive dashboards)
 
 ### CLI
-- **Click**: Command-line interface
-- **Rich**: Beautiful terminal output
-- **tqdm**: Progress bars
+- **Click**: 8.1+ (Command-line interface)
+- **Rich**: 14.0+ (Beautiful terminal output)
 
 ---
 
-## Key Patterns
+## Key Implementation Patterns
 
-### Query Generation Flow
+### Bandit Algorithm Interface
 
 ```python
-# 1. Define categories and complexity distribution
-categories = {
-    "technical_qa": {
-        "complexity": {"simple": 0.3, "moderate": 0.5, "complex": 0.2}
-    },
-    "creative_writing": {
-        "complexity": {"simple": 0.2, "moderate": 0.5, "complex": 0.3}
-    },
-    # ... 8 more categories
-}
+from conduit_bench.algorithms import BanditAlgorithm, BanditContext, BanditFeedback
 
-# 2. Generate queries (reproducible with seed)
-queries = await generate_dataset(
-    total_queries=5000,
-    categories=categories,
-    seed=42  # Reproducible
+class MyBandit(BanditAlgorithm):
+    def __init__(self, arms: list[ModelArm]) -> None:
+        super().__init__(name="my_bandit", arms=arms)
+        # Initialize algorithm state
+
+    async def select_arm(self, context: BanditContext) -> ModelArm:
+        """Select which model to use for this query."""
+        # Algorithm logic
+        return selected_arm
+
+    async def update(self, feedback: BanditFeedback, context: BanditContext) -> None:
+        """Update algorithm state with feedback."""
+        # Learning logic
+
+    def reset(self) -> None:
+        """Reset to initial state."""
+        # Clear state
+```
+
+### Model Registry Usage
+
+```python
+from conduit_bench.models import DEFAULT_REGISTRY, filter_models
+
+# Get all 17 models
+all_models = DEFAULT_REGISTRY
+
+# Filter models
+high_quality_models = filter_models(
+    DEFAULT_REGISTRY,
+    min_quality=0.85,
+    max_cost=0.005,
+    providers=["openai", "anthropic"]
 )
-
-# 3. Generate reference answers (using GPT-4o for quality)
-for query in queries:
-    query.reference_answer = await generate_reference(
-        query_text=query.text,
-        model="gpt-4o"
-    )
 ```
 
-### Round Execution Flow
+### Running Benchmark
 
 ```python
-# 1. Load queries
-queries = load_queries("data/queries/round1_5000.jsonl")
+from conduit_bench.algorithms import (
+    ThompsonSamplingBandit,
+    UCB1Bandit,
+    EpsilonGreedyBandit,
+    RandomBaseline
+)
+from conduit_bench.models import DEFAULT_REGISTRY
 
-# 2. Route through Conduit
-conduit = ConduitClient()
-for query in queries:
-    decision = await conduit.route(Query(text=query.text))
-    response = await conduit.execute(decision)
-    save_result(query, decision, response)
+# Create algorithms
+algorithms = [
+    ThompsonSamplingBandit(DEFAULT_REGISTRY),
+    UCB1Bandit(DEFAULT_REGISTRY, c=1.5),
+    EpsilonGreedyBandit(DEFAULT_REGISTRY, epsilon=0.1),
+    RandomBaseline(DEFAULT_REGISTRY),
+]
 
-# 3. Run Loom evaluation pipeline
-await run_loom_pipeline("pipelines/round1_evaluate.yaml")
-
-# 4. Update Conduit with feedback
-await update_conduit_bandit(evaluations)
-
-# 5. Analyze results
-metrics = analyze_round_results("results/round1/")
-generate_report(metrics)
-```
-
-### Loom Pipeline Pattern
-
-```yaml
-# pipelines/round1_evaluate.yaml
-name: conduit_bench_round1
-version: 1.0.0
-
-extract:
-  source: file://results/round1/routing_decisions.jsonl
-  format: jsonl
-
-evaluate:
-  evaluators:
-    - type: semantic
-      reference_field: "reference_answer"
-      threshold: 0.75
-    - type: custom_criteria
-      criteria: "Accurate, helpful, well-formatted"
-      threshold: 0.7
-  quality_gate: all_pass
-  model: gpt-4o-mini
-  batch_size: 50
-
-load:
-  destination: file://results/round1/evaluations.jsonl
-  format: jsonl
+# Run experiment (to be implemented)
+# results = await run_benchmark(dataset, algorithms)
 ```
 
 ---
 
-## Code Quality Standards
+## Directory Structure
 
-### Docstrings
+```
+conduit-bench/
+├── conduit_bench/
+│   ├── algorithms/              # ✅ COMPLETE
+│   │   ├── base.py              # Base classes and interfaces
+│   │   ├── thompson_sampling.py # Bayesian approach
+│   │   ├── ucb.py               # Upper Confidence Bound
+│   │   ├── epsilon_greedy.py    # Simple exploration
+│   │   └── baselines.py         # Random, Oracle, Always-*
+│   ├── models/                  # ✅ COMPLETE
+│   │   └── registry.py          # 17 models with pricing
+│   ├── generators/              # ⚠️ TO BUILD
+│   │   └── synthetic.py         # Generate diverse queries
+│   ├── runners/                 # ⚠️ TO BUILD
+│   │   ├── model_executor.py    # Direct PydanticAI calls
+│   │   └── benchmark_runner.py  # Algorithm comparison
+│   ├── analysis/                # ⚠️ TO BUILD
+│   │   ├── metrics.py           # Regret, cost, quality
+│   │   └── visualize.py         # Charts and plots
+│   └── cli.py                   # ⚠️ TO BUILD
+├── tests/                       # ⚠️ TO BUILD
+│   ├── test_algorithms.py       # Test bandit algorithms
+│   ├── test_models.py           # Test model registry
+│   └── test_benchmark.py        # Integration tests
+├── AGENTS.md                    # This file
+├── README.md                    # User documentation
+└── pyproject.toml               # Dependencies
+```
+
+---
+
+## Expected Metrics
+
+### After 10,000 Queries (10 Runs)
+
+**Thompson Sampling**:
+- Cumulative Regret: Low (near-optimal)
+- Cost Savings: 42-48% vs AlwaysBest
+- Quality Maintained: 94-96%
+- Convergence: 2,500-3,500 queries
+
+**UCB1**:
+- Cumulative Regret: Low (near-optimal)
+- Cost Savings: 40-46% vs AlwaysBest
+- Quality Maintained: 93-95%
+- Convergence: 1,500-2,500 queries (fastest)
+
+**Epsilon-Greedy**:
+- Cumulative Regret: Medium (suboptimal)
+- Cost Savings: 35-42% vs AlwaysBest
+- Quality Maintained: 91-94%
+- Convergence: 4,000-6,000 queries (slowest)
+
+**Random**:
+- Cumulative Regret: High
+- Cost Savings: 15-25%
+- Quality Maintained: 85-88%
+- Convergence: Never
+
+**Oracle**:
+- Cumulative Regret: 0 (by definition)
+- Cost Savings: 50-55% (theoretical maximum)
+- Quality Maintained: 98%+
+- Note: Requires 170,000 LLM calls (10K queries × 17 models)
+
+---
+
+## Testing Strategy
+
+### Unit Tests
 
 ```python
-async def generate_dataset(
-    total_queries: int = 5000,
-    categories: dict[str, dict] = CATEGORIES,
-    seed: int = 42
-) -> list[Query]:
-    """Generate synthetic dataset with diversity and balance.
+# Test algorithm selection
+async def test_thompson_sampling_selection():
+    arms = create_test_arms(n=5)
+    bandit = ThompsonSamplingBandit(arms, random_seed=42)
 
-    Args:
-        total_queries: Total number of queries to generate
-        categories: Category definitions with complexity distributions
-        seed: Random seed for reproducibility
+    context = BanditContext(query_text="Test query")
+    arm = await bandit.select_arm(context)
 
-    Returns:
-        List of Query objects with text, category, complexity, reference
+    assert arm in arms
+    assert bandit.total_queries == 1
 
-    Example:
-        >>> queries = await generate_dataset(total_queries=1000, seed=42)
-        >>> len(queries)
-        1000
-        >>> queries[0].category in CATEGORIES
-        True
-    """
+# Test algorithm update
+async def test_thompson_sampling_update():
+    arms = create_test_arms(n=5)
+    bandit = ThompsonSamplingBandit(arms)
+
+    context = BanditContext(query_text="Test query")
+    arm = await bandit.select_arm(context)
+
+    feedback = BanditFeedback(
+        model_id=arm.model_id,
+        cost=0.001,
+        quality_score=0.95,
+        latency=1.2
+    )
+
+    await bandit.update(feedback, context)
+
+    # Verify Beta distribution updated
+    assert bandit.alpha[arm.model_id] > 1.0
+```
+
+### Integration Tests
+
+```python
+# Test full benchmark flow
+async def test_benchmark_runner():
+    # Generate small dataset
+    dataset = generate_test_dataset(n=100)
+
+    # Create algorithms
+    algorithms = [
+        ThompsonSamplingBandit(TEST_ARMS),
+        UCB1Bandit(TEST_ARMS),
+        RandomBaseline(TEST_ARMS),
+    ]
+
+    # Run benchmark
+    results = await run_benchmark(dataset, algorithms)
+
+    # Verify results
+    assert len(results) == len(algorithms)
+    assert all(r.total_queries == 100 for r in results)
 ```
 
 ---
 
 ## Common Tasks
 
-### Generate Queries
+### Generate Dataset
 
 ```bash
-poetry run python scripts/generate_queries.py \
-    --count 5000 \
-    --output data/queries/round1_5000.jsonl \
-    --seed 42
+poetry run conduit-bench generate --queries 10000 --seed 42
 ```
 
-### Run Benchmark Round
+### Run Benchmark
 
 ```bash
-poetry run conduit-bench run --round 1
+# Single run
+poetry run conduit-bench run --dataset data/queries_10000.jsonl
+
+# Multiple runs for statistical significance
+poetry run conduit-bench run --dataset data/queries_10000.jsonl --runs 10
 ```
 
 ### Analyze Results
 
 ```bash
-poetry run conduit-bench analyze --round 1
-poetry run conduit-bench analyze --all-rounds  # Final report
-```
-
-### Visualize Convergence
-
-```bash
-poetry run python scripts/visualize_convergence.py \
-    --rounds 1,2,3 \
-    --output docs/convergence.png
+poetry run conduit-bench analyze --results results/experiment_001/
+poetry run conduit-bench visualize --results results/experiment_001/
 ```
 
 ---
@@ -366,84 +437,18 @@ poetry run python scripts/visualize_convergence.py \
 ## Environment Variables
 
 ```bash
-# LLM Provider API Keys
+# LLM Provider API Keys (all 6 providers for full benchmark)
 OPENAI_API_KEY=...
 ANTHROPIC_API_KEY=...
 GEMINI_API_KEY=...       # NOTE: GEMINI_API_KEY (not GOOGLE_API_KEY)
 GROQ_API_KEY=...
-
-# Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/conduit_bench
-
-# Redis (for Conduit caching)
-REDIS_URL=redis://localhost:6379
+MISTRAL_API_KEY=...
+COHERE_API_KEY=...
 
 # Benchmarking
-BENCHMARK_QUERY_COUNT=5000
-BENCHMARK_EVALUATION_MODEL=gpt-4o-mini
-```
-
----
-
-## Expected Metrics
-
-### After Round 1 (5,000 queries):
-- Thompson Sampling accuracy: ~70-75%
-- Cost baseline established
-- Model preferences per category identified
-
-### After Round 2 (6,000 total):
-- Accuracy: ~85%
-- Cost savings: ~35-40% vs always-gpt-4o
-- Confidence scores improved
-
-### After Round 3 (6,500 total):
-- **Convergence**: ML model stable
-- **Quality**: 95%+ queries score >0.85
-- **Cost savings**: 40-50% vs baseline
-- **Model preferences**: Learned per category
-
-### Key Performance Indicators
-- **Convergence point**: Number of queries until accuracy plateaus
-- **Cost-quality frontier**: Optimal balance of cost and quality
-- **Category preferences**: Best model per query type
-- **Confidence calibration**: How well confidence predicts quality
-
----
-
-## Testing Strategy
-
-### Unit Tests
-```python
-# Test query generation
-def test_generate_dataset_reproducibility():
-    queries1 = await generate_dataset(total_queries=100, seed=42)
-    queries2 = await generate_dataset(total_queries=100, seed=42)
-    assert queries1 == queries2
-
-# Test complexity distribution
-def test_complexity_distribution():
-    queries = await generate_dataset(total_queries=1000, seed=42)
-    simple = sum(1 for q in queries if q.complexity == "simple")
-    assert 250 < simple < 350  # ~30% ± 5%
-```
-
-### Integration Tests
-```python
-# Test full round execution
-async def test_round1_execution():
-    # Generate queries
-    queries = await generate_dataset(total_queries=100, seed=42)
-
-    # Route through Conduit
-    results = await run_routing(queries)
-
-    # Evaluate with Loom
-    evaluations = await run_loom_pipeline("pipelines/round1_evaluate.yaml")
-
-    # Verify results
-    assert len(evaluations) == len(queries)
-    assert all(e.score >= 0 and e.score <= 1 for e in evaluations)
+BENCHMARK_QUERY_COUNT=10000
+BENCHMARK_RUNS=10
+BENCHMARK_SEED=42
 ```
 
 ---
@@ -457,13 +462,13 @@ async def test_round1_execution():
 **Full data display**: Show complete data structures, not summaries. Examples should display real output.
 
 ### Audience & Context Recognition
-**Auto-detect technical audiences**: No marketing language in engineering contexts.
+**Auto-detect technical audiences**: No marketing language in engineering contexts (code examples, technical docs).
 
 ### Quality & Testing
 **Test output quality, not just functionality**: Verify examples produce useful results.
 
 ### Workflow Patterns
-**Iterate fast**: Ship → test → get feedback → fix.
+**Iterate fast**: Ship → test → get feedback → fix → commit.
 
 ### Git & Commit Hygiene
 **Clean workflow**: Feature branches, meaningful commits.
@@ -473,21 +478,23 @@ async def test_round1_execution():
 ## Quick Reference
 
 ### Run Full Benchmark
+
 ```bash
-# Round 1: Baseline (5,000 queries)
-poetry run conduit-bench run --round 1
+# Generate dataset (10,000 queries)
+poetry run conduit-bench generate --queries 10000 --seed 42
 
-# Round 2: Targeted (1,000 queries)
-poetry run conduit-bench run --round 2
+# Run all 7 algorithms (10 independent runs)
+poetry run conduit-bench run --dataset data/queries_10000.jsonl --runs 10
 
-# Round 3: Validation (500 queries)
-poetry run conduit-bench run --round 3
+# Analyze results
+poetry run conduit-bench analyze --results results/experiment_001/
 
-# Generate final report
-poetry run conduit-bench analyze --all-rounds
+# Generate visualizations
+poetry run conduit-bench visualize --results results/experiment_001/
 ```
 
 ### Development
+
 ```bash
 # Tests
 poetry run pytest --cov=conduit_bench
@@ -506,16 +513,15 @@ poetry run ruff check conduit_bench/
 
 ## Related Documents
 
-- **[README.md](README.md)**: Project overview and quick start
-- **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)**: Benchmark design
-- **[docs/RESULTS.md](docs/RESULTS.md)**: Final results and insights
+- **[README.md](README.md)**: User documentation, algorithm explanations
+- **[conduit_bench/algorithms/](conduit_bench/algorithms/)**: Algorithm implementations
 
 ## Related Projects
 
-- **[Conduit](../conduit/)**: ML-powered LLM routing
-- **[Loom](../loom/)**: AI pipeline orchestration
-- **[Arbiter](../arbiter/)**: LLM evaluation framework
+- **[Conduit](../conduit/)**: ML-powered LLM routing (reference)
+- **[Arbiter](../arbiter/)**: LLM evaluation framework (essential)
+- **[Loom](../loom/)**: AI pipeline orchestration (optional)
 
 ---
 
-**Last Updated**: 2025-11-19
+**Last Updated**: 2025-01-19
