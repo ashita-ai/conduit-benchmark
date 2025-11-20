@@ -10,7 +10,7 @@ packages = [{include = "conduit_bench"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 # Conduit dependencies (install from local or git)
-# conduit = {path = "../conduit", develop = true}
+conduit = {path = "../conduit", develop = true}
 pydantic = "^2.12"
 pydantic-ai = "^1.20"
 # Loom for evaluation pipelines

@@ -1,7 +1,8 @@
 # AGENTS.md - AI Agent Guide
 
 **Purpose**: Development guidelines for Conduit Bench bandit benchmarking
-**Last Updated**: 2025-01-19
+**Last Updated**: 2025-01-20
+**Status**: ✅ Synced with Conduit test improvements (85% coverage, bandit fixes)
 
 ---
 
