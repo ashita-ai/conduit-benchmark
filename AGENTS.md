@@ -150,6 +150,31 @@ Production-grade code only. Complete implementations or nothing.
 
 ---
 
+## Boundaries
+
+### 🚫 NEVER Do
+
+**CRITICAL SECURITY VIOLATION** ⚠️:
+- **NEVER EVER COMMIT CREDENTIALS TO GITHUB**
+- No API keys, tokens, passwords, secrets in ANY file
+- No credentials in code, documentation, examples, tests, or configuration files
+- Use environment variables (.env files in .gitignore) ONLY
+- This is NON-NEGOTIABLE - violating this rule has serious security consequences
+
+**Code Quality Violations**:
+- Skip tests to make builds pass
+- Disable type checking or linting errors
+- Leave TODO comments in production code
+- Create placeholder/stub implementations
+
+**Destructive Actions**:
+- Work directly on main/master branch
+- Force push to shared branches
+- Delete failing tests instead of fixing them
+- Remove error handling to "fix" issues
+
+---
+
 ## Development Workflow
 
 ### Before Starting
