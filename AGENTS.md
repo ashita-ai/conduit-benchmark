@@ -1,7 +1,12 @@
+---
+name: conduit-bench-agent
+description: Bandit algorithm benchmarking researcher - evaluating LLM routing strategies
+---
+
 # AGENTS.md - AI Agent Guide
 
 **Purpose**: Development guidelines for Conduit Bench bandit benchmarking
-**Last Updated**: 2025-01-20
+**Last Updated**: 2025-01-22
 **Status**: ✅ Synced with Conduit test improvements (85% coverage, bandit fixes)
 
 ---
@@ -12,70 +17,13 @@
 **Stack**: Python 3.10+, PydanticAI, Arbiter (evaluation), 17 models across 6 providers
 **Purpose**: Compare bandit algorithms (Thompson Sampling, UCB1, Epsilon-Greedy) to identify optimal cost/quality trade-off
 
-### Research Question
-
-**Which bandit algorithm achieves the best cost/quality trade-off for LLM routing across multiple providers?**
+**Research Methodology**: See [RESEARCH.md](RESEARCH.md) for experimental design, sample sizes, and expected results
 
 ---
 
 ## Critical Rules
 
-### 1. Single Experiment Design (NOT 3 Rounds)
-
-**Rule**: One large experiment with all algorithms running in parallel on same dataset
-
-**Rationale**:
-- Bandits learn continuously from every query, not in discrete "rounds"
-- We're COMPARING algorithms, not iteratively improving one algorithm
-- This is algorithm research, not deployment validation
-
-**Experiment Structure**:
-```
-Generate Dataset (10,000 queries)
-    ↓
-Run All 7 Algorithms in Parallel on Same Dataset:
-    - Thompson Sampling
-    - UCB1
-    - Epsilon-Greedy
-    - Random
-    - Oracle
-    - AlwaysBest
-    - AlwaysCheapest
-    ↓
-Evaluate All Responses with Arbiter
-    ↓
-Calculate Metrics:
-    - Cumulative Regret
-    - Cost Savings
-    - Quality Maintained
-    - Convergence Speed
-    ↓
-Compare Results (statistical significance tests)
-```
-
-**What We Removed**: The confusing "Round 1 (5K) → Round 2 (1K) → Round 3 (500)" structure that suggested iterative improvement.
-
-### 2. Sample Size Requirements
-
-**Main Experiment**: **10,000 queries**
-- Per-Arm: 10,000 / 17 models ≈ 590 samples per model
-- Per-Category: 10,000 / 10 categories = 1,000 per category
-- Convergence: Sufficient for detection (algorithms stabilize in 2-5K queries)
-
-**Quick Validation**: **1,000 queries**
-- Per-Arm: ~59 samples per model (marginal but usable)
-- Use Case: Rapid prototyping, parameter tuning
-
-**Statistical Rigor**: **10 independent runs**
-- Report: mean ± 95% confidence interval
-- Total: 10,000 × 10 = 100,000 queries
-
-**Minimum Viable**:
-- 17 models × 30 samples (CLT) = 510 queries
-- Recommended: 17 × 100 = 1,700 queries
-- Robust: 17 × 500 = 8,500 queries
-
-### 3. Integration Strategy
+### 1. Integration Strategy
 
 **Conduit (ALGORITHM SOURCE - ESSENTIAL)**:
 - **Role**: Contains ALL bandit algorithm implementations
@@ -103,48 +51,11 @@ Conduit (algorithms + model registry)
 conduit-bench (benchmark runner + analysis)
 ```
 
-### 4. Model Pool
-
-**17 Models Across 6 Providers**:
-- OpenAI (4): gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
-- Anthropic (3): claude-3-5-sonnet, claude-3-opus, claude-3-haiku
-- Google (3): gemini-1.5-pro, gemini-1.5-flash, gemini-1.0-pro
-- Groq (3): llama-3.1-70b, llama-3.1-8b, mixtral-8x7b
-- Mistral (3): mistral-large, mistral-medium, mistral-small
-- Cohere (2): command-r-plus, command-r
-
-**Pricing Range**: $0.00005 - $0.075 per 1K tokens (1,500× difference!)
-**Quality Range**: 0.72 - 0.97 (25% difference)
-
-### 5. Bandit Algorithms
-
-**Learning Algorithms (3)**:
-1. **Thompson Sampling** (Bayesian probability matching)
-   - Regret: O(√(K × T × ln T)) - optimal
-   - Convergence: 2,500-3,500 queries
-   - Complexity: Medium (Beta sampling)
-
-2. **UCB1** (Optimistic estimates)
-   - Regret: O(√(K × T × ln T)) - optimal
-   - Convergence: 1,500-2,500 queries (fastest)
-   - Complexity: Low (arithmetic only)
-
-3. **Epsilon-Greedy** (Simple exploration)
-   - Regret: O(K × T^(2/3)) - suboptimal
-   - Convergence: 4,000-6,000 queries (slowest)
-   - Complexity: Very low
-
-**Baselines (4)**:
-1. **Random**: Lower bound (uniform random selection)
-2. **Oracle**: Upper bound (perfect knowledge - zero regret)
-3. **AlwaysBest**: Quality ceiling (always use Claude-3-Opus)
-4. **AlwaysCheapest**: Cost floor (always use Llama-3.1-8B)
-
-### 6. Type Safety (Strict Mypy)
+### 2. Type Safety (Strict Mypy)
 
 All functions require type hints, no `Any` without justification.
 
-### 7. No Placeholders
+### 3. No Placeholders
 
 Production-grade code only. Complete implementations or nothing.
 
@@ -356,42 +267,6 @@ conduit-bench/
 
 ---
 
-## Expected Metrics
-
-### After 10,000 Queries (10 Runs)
-
-**Thompson Sampling**:
-- Cumulative Regret: Low (near-optimal)
-- Cost Savings: 42-48% vs AlwaysBest
-- Quality Maintained: 94-96%
-- Convergence: 2,500-3,500 queries
-
-**UCB1**:
-- Cumulative Regret: Low (near-optimal)
-- Cost Savings: 40-46% vs AlwaysBest
-- Quality Maintained: 93-95%
-- Convergence: 1,500-2,500 queries (fastest)
-
-**Epsilon-Greedy**:
-- Cumulative Regret: Medium (suboptimal)
-- Cost Savings: 35-42% vs AlwaysBest
-- Quality Maintained: 91-94%
-- Convergence: 4,000-6,000 queries (slowest)
-
-**Random**:
-- Cumulative Regret: High
-- Cost Savings: 15-25%
-- Quality Maintained: 85-88%
-- Convergence: Never
-
-**Oracle**:
-- Cumulative Regret: 0 (by definition)
-- Cost Savings: 50-55% (theoretical maximum)
-- Quality Maintained: 98%+
-- Note: Requires 170,000 LLM calls (10K queries × 17 models)
-
----
-
 ## Testing Strategy
 
 ### Unit Tests
@@ -560,15 +435,16 @@ poetry run ruff check conduit_bench/
 
 ## Related Documents
 
+- **[RESEARCH.md](RESEARCH.md)**: Experimental design and methodology
 - **[README.md](README.md)**: User documentation, algorithm explanations
 - **[conduit_bench/algorithms/](conduit_bench/algorithms/)**: Algorithm implementations
 
 ## Related Projects
 
-- **[Conduit](../conduit/)**: ML-powered LLM routing (reference)
+- **[Conduit](../conduit/)**: ML-powered LLM routing (algorithm source)
 - **[Arbiter](../arbiter/)**: LLM evaluation framework (essential)
 - **[Loom](../loom/)**: AI pipeline orchestration (optional)
 
 ---
 
-**Last Updated**: 2025-01-19
+**Last Updated**: 2025-01-22
