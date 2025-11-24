@@ -8,21 +8,21 @@ readme = "README.md"
 packages = [{include = "conduit_bench"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.11,<3.14"
 # Conduit dependencies (install from local or git)
-conduit = {path = "../conduit", develop = true}
+conduit-router = {path = "../conduit", develop = true}
 pydantic = "^2.12"
 pydantic-ai = "^1.20"
 # Loom for evaluation pipelines
 # loom = {path = "../loom", develop = true}
 # Arbiter for quality evaluation
-arbiter = {git = "https://github.com/evanvolgas/arbiter.git", branch = "main"}
+arbiter-ai = {git = "https://github.com/evanvolgas/arbiter.git", branch = "main"}
 # Data processing
 pandas = "^2.2"
 polars = "^0.19"
 # LLM providers
 openai = "^1.12"
-anthropic = "^0.34"
+anthropic = "^0.70"
 google-generativeai = "^0.8"
 # Database
 asyncpg = "^0.29"
