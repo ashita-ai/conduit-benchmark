@@ -16,7 +16,7 @@ pydantic-ai = "^1.20"
 # Loom for evaluation pipelines
 # loom = {path = "../loom", develop = true}
 # Arbiter for quality evaluation
-# arbiter = {path = "../arbiter", develop = true}
+arbiter = {git = "https://github.com/evanvolgas/arbiter.git", branch = "main"}
 # Data processing
 pandas = "^2.2"
 polars = "^0.19"
