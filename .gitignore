@@ -64,6 +64,11 @@ temp/
 .ipynb_checkpoints/
 *.ipynb
 
+# Session/Project context (Claude Code outputs)
+PROJECT_TODO.md
+GITHUB_ISSUES_SUMMARY.md
+claudedocs/
+
 # macOS
 .DS_Store
 .AppleDouble
