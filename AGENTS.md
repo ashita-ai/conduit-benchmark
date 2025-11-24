@@ -9,6 +9,8 @@ description: Bandit algorithm benchmarking researcher - evaluating LLM routing s
 **Last Updated**: 2025-01-22
 **Status**: ✅ Synced with Conduit test improvements (85% coverage, bandit fixes)
 
+**Design Philosophy**: Simplicity wins, use good defaults, YAML config where needed, no hardcoded assumptions.
+
 ---
 
 ## Quick Start (First Session Commands)
