@@ -46,6 +46,7 @@ htmlcov/
 .hypothesis/
 
 # Benchmarking data and results
+data/*.jsonl
 data/queries/*.jsonl
 results/
 *.db
