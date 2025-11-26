@@ -334,12 +334,12 @@ def run(
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
             "epsilon": EpsilonGreedyBandit(DEFAULT_ARMS, epsilon=0.1),
-            # Contextual bandits
-            "linucb": LinUCBBandit(DEFAULT_ARMS, alpha=1.0, feature_dim=5),
+            # Contextual bandits (feature_dim auto-detected from QueryAnalyzer = 387)
+            "linucb": LinUCBBandit(DEFAULT_ARMS, alpha=1.0),
             "contextual_thompson": ContextualThompsonSamplingBandit(
-                DEFAULT_ARMS, lambda_reg=1.0, feature_dim=5
+                DEFAULT_ARMS, lambda_reg=1.0
             ),
-            "dueling": DuelingBandit(DEFAULT_ARMS, feature_dim=5),
+            "dueling": DuelingBandit(DEFAULT_ARMS),
             # Baselines
             "random": RandomBaseline(DEFAULT_ARMS, random_seed=42),
             "oracle": OracleBaseline(DEFAULT_ARMS),
