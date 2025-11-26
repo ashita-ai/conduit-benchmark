@@ -76,3 +76,4 @@ claudedocs/
 .LSOverride
 analysis/
 charts/
+out.jsonl
