@@ -651,7 +651,7 @@ dev = [
 
 [[package]]
 name = "conduit-router"
-version = "0.0.4a0"
+version = "0.1.0"
 source = { editable = "../conduit" }
 dependencies = [
     { name = "alembic" },

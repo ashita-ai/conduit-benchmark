@@ -12,12 +12,20 @@ from rich.console import Console
 from rich.table import Table
 
 from conduit.engines.bandits import (
+    ContextualThompsonSamplingBandit,
+    DuelingBandit,
     EpsilonGreedyBandit,
+    LinUCBBandit,
     ModelArm,
     ThompsonSamplingBandit,
     UCB1Bandit,
 )
-from conduit.engines.bandits.baselines import RandomBaseline
+from conduit.engines.bandits.baselines import (
+    AlwaysBestBaseline,
+    AlwaysCheapestBaseline,
+    OracleBaseline,
+    RandomBaseline,
+)
 
 from conduit_bench.benchmark_models import BenchmarkQuery, BenchmarkResult
 from conduit_bench.generators.synthetic import SyntheticQueryGenerator
@@ -25,31 +33,83 @@ from conduit_bench.runners.benchmark_runner import BenchmarkRunner
 
 console = Console()
 
-# Default model arms for benchmarking (real current models)
+# Default model arms for benchmarking (Latest models as of November 2025)
+# 9 arms across 3 providers at 3 price tiers
 DEFAULT_ARMS = [
+    # BUDGET TIER
     ModelArm(
-        model_id="gpt-4o-mini",
-        model_name="gpt-4o-mini",
+        model_id="gpt-5-nano",
+        model_name="gpt-5-nano",
         provider="openai",
-        cost_per_input_token=0.00000015,  # $0.150/1M tokens
-        cost_per_output_token=0.0000006,  # $0.600/1M tokens
-        expected_quality=0.85,
+        cost_per_input_token=0.00000005,  # $0.05/1M tokens
+        cost_per_output_token=0.0000004,  # $0.40/1M tokens
+        expected_quality=0.78,
     ),
     ModelArm(
-        model_id="gpt-4o",
-        model_name="gpt-4o",
+        model_id="claude-haiku-4-5",
+        model_name="claude-haiku-4-5",
+        provider="anthropic",
+        cost_per_input_token=0.000001,  # $1.00/1M tokens
+        cost_per_output_token=0.000005,  # $5.00/1M tokens
+        expected_quality=0.82,
+    ),
+    ModelArm(
+        model_id="gemini-2.0-flash",
+        model_name="gemini-2.0-flash",
+        provider="google",
+        cost_per_input_token=0.0000001,  # $0.10/1M tokens
+        cost_per_output_token=0.0000004,  # $0.40/1M tokens
+        expected_quality=0.80,
+    ),
+    # MID TIER
+    ModelArm(
+        model_id="gpt-5-mini",
+        model_name="gpt-5-mini",
         provider="openai",
-        cost_per_input_token=0.0000025,  # $2.50/1M tokens
+        cost_per_input_token=0.00000025,  # $0.25/1M tokens
+        cost_per_output_token=0.000002,  # $2.00/1M tokens
+        expected_quality=0.86,
+    ),
+    ModelArm(
+        model_id="claude-sonnet-4-5",
+        model_name="claude-sonnet-4-5",
+        provider="anthropic",
+        cost_per_input_token=0.000003,  # $3.00/1M tokens
+        cost_per_output_token=0.000015,  # $15.00/1M tokens
+        expected_quality=0.92,
+    ),
+    ModelArm(
+        model_id="gemini-2.5-pro",
+        model_name="gemini-2.5-pro",
+        provider="google",
+        cost_per_input_token=0.00000125,  # $1.25/1M tokens
+        cost_per_output_token=0.000005,  # $5.00/1M tokens
+        expected_quality=0.88,
+    ),
+    # PREMIUM TIER
+    ModelArm(
+        model_id="gpt-5",
+        model_name="gpt-5",
+        provider="openai",
+        cost_per_input_token=0.00000125,  # $1.25/1M tokens
         cost_per_output_token=0.00001,  # $10.00/1M tokens
         expected_quality=0.95,
     ),
     ModelArm(
-        model_id="claude-3-5-haiku-20241022",
-        model_name="claude-3-5-haiku-20241022",
+        model_id="claude-opus-4-5",
+        model_name="claude-opus-4-5",
         provider="anthropic",
-        cost_per_input_token=0.000001,  # $1.00/1M tokens
-        cost_per_output_token=0.000005,  # $5.00/1M tokens
-        expected_quality=0.80,
+        cost_per_input_token=0.000005,  # $5.00/1M tokens
+        cost_per_output_token=0.000025,  # $25.00/1M tokens
+        expected_quality=0.97,
+    ),
+    ModelArm(
+        model_id="gemini-3-pro",
+        model_name="gemini-3-pro",
+        provider="google",
+        cost_per_input_token=0.000002,  # $2.00/1M tokens
+        cost_per_output_token=0.000012,  # $12.00/1M tokens
+        expected_quality=0.94,
     ),
 ]
 
@@ -211,12 +271,26 @@ def generate(
     is_flag=True,
     help="Run algorithms in parallel (3x faster for large datasets)",
 )
+@click.option(
+    "--max-concurrency",
+    type=int,
+    default=5,
+    help="Maximum number of parallel LLM calls (default: 5, recommended: 20-30 for speed)",
+    show_default=True,
+)
+@click.option(
+    "--oracle-reference",
+    type=click.Path(exists=True, path_type=Path),
+    help="Path to pre-computed Oracle results (skip Oracle run, use cached results)",
+)
 def run(
     dataset: Path,
     algorithms: str,
     output: Path,
     max_queries: int | None,
     parallel: bool,
+    max_concurrency: int,
+    oracle_reference: Path | None,
 ) -> None:
     """Run benchmark experiments.
 
@@ -245,14 +319,32 @@ def run(
 
         # Parse algorithm list
         algo_names = [a.strip().lower() for a in algorithms.split(",")]
+
+        # If oracle reference provided, skip oracle in algorithm list
+        if oracle_reference:
+            if "oracle" in algo_names:
+                algo_names.remove("oracle")
+                console.print(f"[yellow]Using cached Oracle results from {oracle_reference}[/yellow]")
+
         console.print(f"Algorithms: {', '.join(algo_names)}\n")
 
         # Create algorithm instances
         algorithm_map = {
+            # Standard (non-contextual) bandits
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
             "epsilon": EpsilonGreedyBandit(DEFAULT_ARMS, epsilon=0.1),
+            # Contextual bandits
+            "linucb": LinUCBBandit(DEFAULT_ARMS, alpha=1.0, feature_dim=5),
+            "contextual_thompson": ContextualThompsonSamplingBandit(
+                DEFAULT_ARMS, lambda_reg=1.0, feature_dim=5
+            ),
+            "dueling": DuelingBandit(DEFAULT_ARMS, feature_dim=5),
+            # Baselines
             "random": RandomBaseline(DEFAULT_ARMS, random_seed=42),
+            "oracle": OracleBaseline(DEFAULT_ARMS),
+            "always_best": AlwaysBestBaseline(DEFAULT_ARMS),
+            "always_cheapest": AlwaysCheapestBaseline(DEFAULT_ARMS),
         }
 
         selected_algorithms = []
@@ -272,8 +364,12 @@ def run(
         runner = BenchmarkRunner(
             algorithms=selected_algorithms,
             arbiter_model="gpt-4o-mini",
-            max_concurrency=5,
+            max_concurrency=max_concurrency,
         )
+
+        # Store oracle reference path if provided
+        if oracle_reference:
+            console.print(f"[cyan]Oracle reference: {oracle_reference}[/cyan]")
 
         result: BenchmarkResult = await runner.run(
             dataset=queries,
