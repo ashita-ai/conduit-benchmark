@@ -206,7 +206,6 @@ class BenchmarkRunner:
         cumulative_regret: list[float] = []
         total_cost = 0.0
         total_quality = 0.0
-        evaluated_count = 0  # Track queries with reference answers
 
         # Create algorithm run record in database
         if self.enable_db_write and self.database:
@@ -239,24 +238,30 @@ class BenchmarkRunner:
                 system_prompt="You are a helpful assistant.",
             )
 
-            # Evaluate quality using Arbiter (only if we have a reference)
-            quality_score = None
+            # Evaluate quality using Arbiter (always evaluate, strategy depends on reference)
             has_reference = bool(query.reference_answer)
 
-            if execution_result.success and has_reference:
-                quality_score = await self._evaluate_quality(
-                    output=execution_result.response_text,
-                    reference=query.reference_answer,
-                )
-            elif not execution_result.success:
+            if execution_result.success:
+                if has_reference:
+                    quality_score = await self._evaluate_with_reference(
+                        output=execution_result.response_text,
+                        query=query.query_text,
+                        reference=query.reference_answer,
+                    )
+                else:
+                    quality_score = await self._evaluate_without_reference(
+                        output=execution_result.response_text,
+                        query=query.query_text,
+                    )
+            else:
                 quality_score = 0.0  # Failed execution = zero quality
 
-            # Create evaluation record (quality_score may be None if no reference)
+            # Create evaluation record (all queries now evaluated)
             evaluation = QueryEvaluation(
                 query_id=query.query_id,
                 model_id=selected_arm.model_id,
                 response_text=execution_result.response_text,
-                quality_score=quality_score if quality_score is not None else 0.5,  # For record-keeping
+                quality_score=quality_score,
                 cost=execution_result.cost,
                 latency=execution_result.latency,
                 success=execution_result.success,
@@ -271,7 +276,7 @@ class BenchmarkRunner:
                         run_id=run_id,
                         query_id=query.query_id,
                         model_id=selected_arm.model_id,
-                        quality_score=quality_score if quality_score is not None else 0.5,
+                        quality_score=quality_score,
                         cost=execution_result.cost,
                         latency=execution_result.latency,
                         success=execution_result.success,
@@ -283,29 +288,25 @@ class BenchmarkRunner:
                 except Exception as e:
                     console.print(f"[yellow]Warning: Failed to write query evaluation: {e}[/yellow]")
 
-            # Update algorithm with feedback ONLY if we have a quality score
-            if quality_score is not None:
-                bandit_feedback = BanditFeedback(
-                    model_id=selected_arm.model_id,
-                    cost=execution_result.cost,
-                    quality_score=quality_score,
-                    latency=execution_result.latency,
-                    success=execution_result.success,
-                )
-                await algorithm.update(bandit_feedback, features)
+            # Update algorithm with feedback (all queries now evaluated)
+            bandit_feedback = BanditFeedback(
+                model_id=selected_arm.model_id,
+                cost=execution_result.cost,
+                quality_score=quality_score,
+                latency=execution_result.latency,
+                success=execution_result.success,
+            )
+            await algorithm.update(bandit_feedback, features)
 
-                # Track cumulative metrics (only for evaluated queries)
-                total_quality += quality_score
-                evaluated_count += 1
-
-            # Always track cost
+            # Track cumulative metrics
+            total_quality += quality_score
             total_cost += execution_result.cost
             cumulative_regret.append(total_cost)  # Simplified regret (actual cumulative cost)
 
         completed_at = datetime.now(timezone.utc)
 
-        # Calculate final metrics (only average over queries with references)
-        average_quality = total_quality / evaluated_count if evaluated_count > 0 else 0.0
+        # Calculate final metrics (all queries are now evaluated)
+        average_quality = total_quality / len(dataset) if dataset else 0.0
 
         # Update algorithm run with final metrics in database
         if self.enable_db_write and self.database:
@@ -335,20 +336,45 @@ class BenchmarkRunner:
         )
 
 
-    async def _evaluate_quality(self, output: str, reference: str) -> float:
-        """Evaluate response quality using Arbiter with mixed evaluators.
+    async def _evaluate_with_reference(self, output: str, query: str, reference: str) -> float:
+        """Evaluate response quality when reference answer is available.
 
-        Uses a probabilistic mix of evaluators (all require reference):
-        - 40% semantic (embedding similarity)
-        - 30% semantic + groundedness (comprehensive grounding)
-        - 20% semantic + factuality (comprehensive fact-checking)
-        - 10% factuality (pure fact checking)
-
-        Note: groundedness is NEVER used standalone (always paired with semantic)
+        Always uses ALL reference-based evaluators to maximize evaluation quality:
+        - semantic: Embedding similarity to reference
+        - groundedness: Output grounded in reference
+        - factuality: Facts verified against reference
 
         Args:
             output: Model's response
+            query: Original query (unused but kept for consistency)
             reference: Reference answer
+
+        Returns:
+            Quality score (0-1 scale)
+        """
+        try:
+            result = await evaluate(
+                output=output,
+                reference=reference,
+                evaluators=["semantic", "groundedness", "factuality"],
+                model=self.arbiter_model,
+            )
+            return result.overall_score
+        except Exception as e:
+            console.print(f"[red]Warning: Reference-based evaluation failed: {e}[/red]")
+            return 0.5  # Neutral score on evaluation failure
+
+    async def _evaluate_without_reference(self, output: str, query: str) -> float:
+        """Evaluate response quality when NO reference answer is available.
+
+        Uses probabilistic mix of query-based evaluators:
+        - 50% relevance + semantic (query alignment + semantic similarity to query)
+        - 30% factuality + semantic (fact-checking + query topic alignment)
+        - 20% relevance + factuality + semantic (comprehensive check)
+
+        Args:
+            output: Model's response
+            query: Original query
 
         Returns:
             Quality score (0-1 scale)
@@ -357,23 +383,21 @@ class BenchmarkRunner:
 
         # Probabilistic evaluator selection
         rand = random.random()
-        if rand < 0.4:
-            evaluators = ["semantic"]
-        elif rand < 0.7:
-            evaluators = ["semantic", "groundedness"]
-        elif rand < 0.9:
-            evaluators = ["semantic", "factuality"]
+        if rand < 0.5:
+            evaluators = ["relevance", "semantic"]
+        elif rand < 0.8:
+            evaluators = ["factuality", "semantic"]
         else:
-            evaluators = ["factuality"]
+            evaluators = ["relevance", "factuality", "semantic"]
 
         try:
             result = await evaluate(
                 output=output,
-                reference=reference,
+                reference=query,  # Use query as reference for relevance/semantic
                 evaluators=evaluators,
                 model=self.arbiter_model,
             )
             return result.overall_score
         except Exception as e:
-            console.print(f"[red]Warning: Arbiter evaluation failed: {e}[/red]")
+            console.print(f"[red]Warning: Query-based evaluation failed: {e}[/red]")
             return 0.5  # Neutral score on evaluation failure
