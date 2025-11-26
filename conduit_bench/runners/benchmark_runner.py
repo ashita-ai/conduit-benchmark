@@ -206,6 +206,7 @@ class BenchmarkRunner:
         cumulative_regret: list[float] = []
         total_cost = 0.0
         total_quality = 0.0
+        evaluated_count = 0  # Track queries with reference answers
 
         # Create algorithm run record in database
         if self.enable_db_write and self.database:
@@ -238,24 +239,24 @@ class BenchmarkRunner:
                 system_prompt="You are a helpful assistant.",
             )
 
-            # Evaluate quality using Arbiter
-            quality_score = 0.0
-            if execution_result.success and query.reference_answer:
+            # Evaluate quality using Arbiter (only if we have a reference)
+            quality_score = None
+            has_reference = bool(query.reference_answer)
+
+            if execution_result.success and has_reference:
                 quality_score = await self._evaluate_quality(
                     output=execution_result.response_text,
                     reference=query.reference_answer,
                 )
             elif not execution_result.success:
                 quality_score = 0.0  # Failed execution = zero quality
-            else:
-                quality_score = 0.5  # No reference answer = neutral quality
 
-            # Create evaluation record
+            # Create evaluation record (quality_score may be None if no reference)
             evaluation = QueryEvaluation(
                 query_id=query.query_id,
                 model_id=selected_arm.model_id,
                 response_text=execution_result.response_text,
-                quality_score=quality_score,
+                quality_score=quality_score if quality_score is not None else 0.5,  # For record-keeping
                 cost=execution_result.cost,
                 latency=execution_result.latency,
                 success=execution_result.success,
@@ -270,34 +271,41 @@ class BenchmarkRunner:
                         run_id=run_id,
                         query_id=query.query_id,
                         model_id=selected_arm.model_id,
-                        quality_score=quality_score,
+                        quality_score=quality_score if quality_score is not None else 0.5,
                         cost=execution_result.cost,
                         latency=execution_result.latency,
                         success=execution_result.success,
-                        metadata={"response_length": len(execution_result.response_text)},
+                        metadata={
+                            "response_length": len(execution_result.response_text),
+                            "has_reference": has_reference,
+                        },
                     )
                 except Exception as e:
                     console.print(f"[yellow]Warning: Failed to write query evaluation: {e}[/yellow]")
 
-            # Update algorithm with feedback
-            bandit_feedback = BanditFeedback(
-                model_id=selected_arm.model_id,
-                cost=execution_result.cost,
-                quality_score=quality_score,
-                latency=execution_result.latency,
-                success=execution_result.success,
-            )
-            await algorithm.update(bandit_feedback, features)
+            # Update algorithm with feedback ONLY if we have a quality score
+            if quality_score is not None:
+                bandit_feedback = BanditFeedback(
+                    model_id=selected_arm.model_id,
+                    cost=execution_result.cost,
+                    quality_score=quality_score,
+                    latency=execution_result.latency,
+                    success=execution_result.success,
+                )
+                await algorithm.update(bandit_feedback, features)
 
-            # Track cumulative metrics
+                # Track cumulative metrics (only for evaluated queries)
+                total_quality += quality_score
+                evaluated_count += 1
+
+            # Always track cost
             total_cost += execution_result.cost
-            total_quality += quality_score
             cumulative_regret.append(total_cost)  # Simplified regret (actual cumulative cost)
 
         completed_at = datetime.now(timezone.utc)
 
-        # Calculate final metrics
-        average_quality = total_quality / len(dataset) if dataset else 0.0
+        # Calculate final metrics (only average over queries with references)
+        average_quality = total_quality / evaluated_count if evaluated_count > 0 else 0.0
 
         # Update algorithm run with final metrics in database
         if self.enable_db_write and self.database:
@@ -330,12 +338,13 @@ class BenchmarkRunner:
     async def _evaluate_quality(self, output: str, reference: str) -> float:
         """Evaluate response quality using Arbiter with mixed evaluators.
 
-        Uses a probabilistic mix of evaluators:
-        - 30% semantic (embedding similarity)
-        - 30% groundedness (factual grounding)
-        - 10% semantic + groundedness (comprehensive grounding)
-        - 10% semantic + factuality (comprehensive fact-checking)
-        - 20% factuality (pure fact checking)
+        Uses a probabilistic mix of evaluators (all require reference):
+        - 40% semantic (embedding similarity)
+        - 30% semantic + groundedness (comprehensive grounding)
+        - 20% semantic + factuality (comprehensive fact-checking)
+        - 10% factuality (pure fact checking)
+
+        Note: groundedness is NEVER used standalone (always paired with semantic)
 
         Args:
             output: Model's response
@@ -348,13 +357,11 @@ class BenchmarkRunner:
 
         # Probabilistic evaluator selection
         rand = random.random()
-        if rand < 0.3:
+        if rand < 0.4:
             evaluators = ["semantic"]
-        elif rand < 0.6:
-            evaluators = ["groundedness"]
         elif rand < 0.7:
             evaluators = ["semantic", "groundedness"]
-        elif rand < 0.8:
+        elif rand < 0.9:
             evaluators = ["semantic", "factuality"]
         else:
             evaluators = ["factuality"]
