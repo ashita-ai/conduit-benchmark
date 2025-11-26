@@ -1,0 +1,50 @@
+{
+  "benchmark_id": "cf3779ba-5129-4b4b-a409-98e7d77cfbf7",
+  "dataset_size": 3,
+  "algorithms": {
+    "ucb1": {
+      "total_cost": 0.00800905,
+      "average_quality": 0.47222222222222215,
+      "quality_ci_lower": 0.3499999999999999,
+      "quality_ci_upper": 0.6,
+      "cumulative_regret": 0.00800905,
+      "normalized_regret": 0.0026696833333333335,
+      "regret_per_query": 0.0026696833333333335,
+      "converged": false,
+      "convergence_point": null,
+      "coefficient_of_variation": Infinity
+    }
+  },
+  "comparative_analysis": {
+    "friedman_test": {
+      "statistic": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    "quality_ranking": [
+      [
+        "ucb1",
+        0.47222222222222215
+      ]
+    ],
+    "cost_ranking": [
+      [
+        "ucb1",
+        0.00800905
+      ]
+    ],
+    "regret_ranking": [
+      [
+        "ucb1",
+        0.00800905
+      ]
+    ],
+    "pareto_optimal": [
+      "ucb1"
+    ],
+    "convergence_speeds": {
+      "ucb1": null
+    },
+    "pairwise_effect_sizes": {}
+  }
+}

@@ -332,58 +332,92 @@ def _display_summary(result: BenchmarkResult) -> None:
     show_default=True,
 )
 def analyze(results: Path, output: Path) -> None:
-    """Analyze benchmark results and calculate metrics.
+    """Analyze benchmark results with comprehensive statistical metrics.
 
-    Calculates cumulative regret, cost savings, quality metrics,
-    and convergence analysis.
-
-    NOTE: Full implementation coming in Issue #17.
-    Currently provides basic metrics from BenchmarkResult.
+    Calculates:
+    - Cumulative regret and convergence analysis
+    - Statistical significance tests (Friedman, effect sizes)
+    - Cost-quality Pareto frontier
+    - Confidence intervals (95% via bootstrap)
+    - Algorithm rankings and comparisons
 
     Example:
         conduit-bench analyze --results results/benchmark.json
     """
+    from conduit_bench.analysis.metrics import analyze_benchmark_results
+
     console.print("\n[bold cyan]Analyzing benchmark results...[/bold cyan]")
 
     # Load results
     with open(results) as f:
-        result = BenchmarkResult.model_validate_json(f.read())
+        result_data = json.load(f)
 
-    console.print(f"Dataset size: {result.dataset_size} queries")
-    console.print(f"Algorithms analyzed: {len(result.algorithms)}\n")
+    console.print(f"Dataset size: {result_data['dataset_size']} queries")
+    console.print(f"Algorithms analyzed: {len(result_data['algorithms'])}\n")
 
-    # Calculate basic metrics
-    metrics = {
-        "benchmark_id": result.benchmark_id,
-        "dataset_size": result.dataset_size,
-        "algorithms": {},
-    }
-
-    for algo_run in result.algorithms:
-        metrics["algorithms"][algo_run.algorithm_name] = {
-            "total_cost": algo_run.total_cost,
-            "average_quality": algo_run.average_quality,
-            "total_queries": algo_run.total_queries,
-            "cumulative_regret": algo_run.cumulative_regret[-1]
-            if algo_run.cumulative_regret
-            else 0.0,
-        }
+    # Calculate comprehensive metrics
+    analysis = analyze_benchmark_results(result_data)
 
     # Ensure output directory exists
     output.parent.mkdir(parents=True, exist_ok=True)
 
     # Save metrics
     with open(output, "w") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(analysis, f, indent=2)
 
-    console.print(f"[bold green]✓ Basic metrics saved to {output}[/bold green]")
-    console.print(
-        "\n[yellow]ℹ Full metrics implementation coming in Issue #17:[/yellow]"
-    )
-    console.print("  - Statistical significance tests")
-    console.print("  - Per-category breakdown")
-    console.print("  - Convergence speed detection")
-    console.print("  - Cost savings vs baselines")
+    console.print(f"[bold green]✓ Comprehensive metrics saved to {output}[/bold green]\n")
+
+    # Display summary
+    _display_analysis_summary(analysis)
+
+
+def _display_analysis_summary(analysis: dict) -> None:
+    """Display analysis summary table."""
+    console.print("[bold]Algorithm Performance Summary[/bold]\n")
+
+    # Quality ranking table
+    table = Table(show_header=True, header_style="bold cyan", title="Quality Ranking")
+    table.add_column("Rank", style="yellow", width=6)
+    table.add_column("Algorithm", style="green")
+    table.add_column("Avg Quality", justify="right")
+    table.add_column("95% CI", justify="right")
+    table.add_column("Converged", justify="center")
+
+    comp = analysis["comparative_analysis"]
+    for rank, (algo_name, quality) in enumerate(comp["quality_ranking"], 1):
+        algo_metrics = analysis["algorithms"][algo_name]
+        ci_lower = algo_metrics["quality_ci_lower"]
+        ci_upper = algo_metrics["quality_ci_upper"]
+        converged = "✓" if algo_metrics["converged"] else "✗"
+
+        table.add_row(
+            str(rank),
+            algo_name,
+            f"{quality:.3f}",
+            f"[{ci_lower:.3f}, {ci_upper:.3f}]",
+            converged,
+        )
+
+    console.print(table)
+
+    # Cost ranking
+    console.print("\n[bold]Cost Ranking[/bold]")
+    for rank, (algo_name, cost) in enumerate(comp["cost_ranking"], 1):
+        console.print(f"  {rank}. {algo_name}: ${cost:.4f}")
+
+    # Pareto frontier
+    console.print(f"\n[bold]Pareto Optimal Algorithms:[/bold] {', '.join(comp['pareto_optimal'])}")
+
+    # Statistical significance
+    friedman = comp["friedman_test"]
+    if friedman["significant"]:
+        console.print(
+            f"\n[bold green]✓ Friedman test: Significant differences detected (p={friedman['p_value']:.4f})[/bold green]"
+        )
+    else:
+        console.print(
+            f"\n[yellow]Friedman test: No significant differences (p={friedman['p_value']:.4f})[/yellow]"
+        )
 
 
 @main.command()
