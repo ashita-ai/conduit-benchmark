@@ -4,6 +4,7 @@ Provides async PostgreSQL connection handling and result storage for streaming b
 """
 
 import json
+import math
 import os
 import uuid
 from datetime import datetime, timezone
@@ -14,6 +15,37 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+
+def sanitize_metadata(metadata: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Sanitize metadata by converting Infinity/NaN to JSON-safe values.
+
+    PostgreSQL JSONB cannot store float Infinity or NaN values. This function
+    converts them to string representations for database persistence.
+
+    Args:
+        metadata: Metadata dictionary that may contain Infinity/NaN values
+
+    Returns:
+        Sanitized metadata dictionary safe for JSON serialization
+    """
+    if not metadata:
+        return metadata
+
+    def sanitize_value(v: Any) -> Any:
+        """Recursively sanitize a value."""
+        if isinstance(v, float):
+            if math.isinf(v):
+                return "Infinity" if v > 0 else "-Infinity"
+            if math.isnan(v):
+                return "NaN"
+        elif isinstance(v, dict):
+            return {k: sanitize_value(val) for k, val in v.items()}
+        elif isinstance(v, list):
+            return [sanitize_value(val) for val in v]
+        return v
+
+    return sanitize_value(metadata)
 
 
 class BenchmarkDatabase:
@@ -81,7 +113,7 @@ class BenchmarkDatabase:
             """,
             benchmark_id,
             dataset_size,
-            json.dumps(metadata) if metadata else None,
+            json.dumps(sanitize_metadata(metadata)) if metadata else None,
         )
 
     async def create_algorithm_run(
@@ -120,7 +152,7 @@ class BenchmarkDatabase:
             0.0,
             0,
             started_at,
-            json.dumps(metadata) if metadata else None,
+            json.dumps(sanitize_metadata(metadata)) if metadata else None,
         )
 
     async def write_query_evaluation(
@@ -167,7 +199,7 @@ class BenchmarkDatabase:
             cost,
             latency,
             success,
-            json.dumps(metadata) if metadata else None,
+            json.dumps(sanitize_metadata(metadata)) if metadata else None,
         )
 
     async def update_algorithm_run(
