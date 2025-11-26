@@ -3,6 +3,7 @@
 ## 🐛 UCB1 Infinity Serialization to PostgreSQL
 
 **Status**: Open
+**GitHub Issue**: [#20](https://github.com/ashita-ai/conduit-benchmark/issues/20)
 **Severity**: High (blocks database persistence for UCB1 algorithm)
 **Discovered**: 2025-11-25
 **Affects**: UCB1 algorithm, potentially all algorithms with Infinity/NaN values in metadata
