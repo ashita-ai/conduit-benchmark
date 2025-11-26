@@ -17,6 +17,7 @@ from conduit.engines.bandits import (
     ThompsonSamplingBandit,
     UCB1Bandit,
 )
+from conduit.engines.bandits.baselines import RandomBaseline
 
 from conduit_bench.benchmark_models import BenchmarkQuery, BenchmarkResult
 from conduit_bench.generators.synthetic import SyntheticQueryGenerator
@@ -251,6 +252,7 @@ def run(
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
             "epsilon": EpsilonGreedyBandit(DEFAULT_ARMS, epsilon=0.1),
+            "random": RandomBaseline(DEFAULT_ARMS, random_seed=42),
         }
 
         selected_algorithms = []
@@ -436,28 +438,60 @@ def _display_analysis_summary(analysis: dict) -> None:
     help="Output directory for visualizations",
     show_default=True,
 )
-def visualize(results: Path, output: Path) -> None:
-    """Generate visualizations from benchmark results.
+@click.option(
+    "--analysis",
+    "-a",
+    type=click.Path(exists=True, path_type=Path),
+    help="Path to analysis metrics JSON (if separate from results)",
+)
+def visualize(results: Path, output: Path, analysis: Path | None) -> None:
+    """Generate publication-quality visualizations from benchmark results.
 
-    Creates regret curves, cost-quality plots, heatmaps, and HTML reports.
-
-    NOTE: Full implementation coming in Issue #18.
-    Currently a placeholder.
+    Creates:
+    - Regret curves with 95% CI bands
+    - Cost-quality scatter plot (Pareto frontier)
+    - Convergence speed comparison
+    - Quality ranking with error bars
+    - Comprehensive HTML report
 
     Example:
-        conduit-bench visualize --results results/benchmark.json
+        conduit-bench visualize --results results/benchmark.json --output charts/
     """
-    console.print("\n[bold yellow]Visualization module placeholder[/bold yellow]")
-    console.print(f"Results: {results}")
-    console.print(f"Output directory: {output}\n")
+    from conduit_bench.analysis.metrics import analyze_benchmark_results
+    from conduit_bench.analysis.visualize import create_all_visualizations
 
-    console.print("[yellow]ℹ Full visualization implementation coming in Issue #18:[/yellow]")
-    console.print("  - Regret curves over time")
-    console.print("  - Cost-quality Pareto frontier")
-    console.print("  - Model selection heatmaps")
-    console.print("  - Convergence detection plots")
-    console.print("  - HTML report generation")
-    console.print("\n[dim]For now, use the analyze command to get JSON metrics.[/dim]")
+    console.print("\n[bold cyan]Generating visualizations...[/bold cyan]")
+
+    # Load results
+    with open(results) as f:
+        result_data = json.load(f)
+
+    # Get analysis (either from separate file or compute from results)
+    if analysis:
+        with open(analysis) as f:
+            analysis_data = json.load(f)
+    else:
+        console.print("Computing metrics from results...")
+        analysis_data = analyze_benchmark_results(result_data)
+
+    # Create output directory
+    output.mkdir(parents=True, exist_ok=True)
+
+    # Generate all visualizations
+    console.print(f"Output directory: {output}\n")
+    console.print("Creating visualizations:")
+
+    chart_paths = create_all_visualizations(analysis_data, output, result_data)
+
+    # Display created files
+    for viz_type, path in chart_paths.items():
+        if path.suffix == ".html":
+            console.print(f"  📄 {viz_type}: {path}")
+        else:
+            console.print(f"  📊 {viz_type}: {path}")
+
+    console.print(f"\n[bold green]✓ All visualizations saved to {output}[/bold green]")
+    console.print(f"[bold]View HTML report:[/bold] {output / 'benchmark_report.html'}")
 
 
 if __name__ == "__main__":
