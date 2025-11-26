@@ -16,16 +16,17 @@ class BenchmarkQuery(BaseModel):
     Attributes:
         query_id: Unique query identifier
         query_text: The text of the query
-        category: Query category (e.g., "technical", "creative", "factual")
-        complexity: Complexity score (0-1 scale)
         reference_answer: Reference answer from GPT-4o for evaluation
-        metadata: Additional query metadata
+        metadata: Additional query metadata (may include category/complexity for analysis only)
+
+    Note: category and complexity are NOT exposed as fields because Conduit
+    wouldn't have access to them in production. They can be stored in metadata
+    for analysis purposes only, but the benchmark must use QueryAnalyzer to
+    determine features just like production Conduit does.
     """
 
     query_id: str = Field(default_factory=lambda: str(uuid4()))
     query_text: str = Field(..., min_length=1)
-    category: str
-    complexity: float = Field(..., ge=0.0, le=1.0)
     reference_answer: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -41,6 +42,7 @@ class QueryEvaluation(BaseModel):
         cost: Actual cost in USD
         latency: Response time in seconds
         success: Whether execution succeeded
+        error: Error message if execution failed
         metadata: Additional evaluation data
     """
 
@@ -51,6 +53,7 @@ class QueryEvaluation(BaseModel):
     cost: float = Field(..., ge=0.0)
     latency: float = Field(..., ge=0.0)
     success: bool = True
+    error: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

@@ -116,22 +116,29 @@ class ModelExecutor:
                     timeout=self.timeout,
                 )
 
-                # Calculate cost from token usage
-                cost_result = result.cost()
-                input_tokens = cost_result.request_tokens or 0
-                output_tokens = cost_result.response_tokens or 0
+                # Get token usage from result
+                usage = result.usage()
+
+                # Extract tokens (handle both naming conventions)
+                if hasattr(usage, "request_tokens"):
+                    input_tokens = usage.request_tokens or 0
+                    output_tokens = usage.response_tokens or 0
+                else:
+                    # Fallback to alternative naming
+                    input_tokens = getattr(usage, "input_tokens", 0)
+                    output_tokens = getattr(usage, "output_tokens", 0)
 
                 # Calculate cost in USD
                 cost_usd = (
-                    input_tokens * arm.cost_per_input_token / 1000.0
-                    + output_tokens * arm.cost_per_output_token / 1000.0
+                    input_tokens * arm.cost_per_input_token
+                    + output_tokens * arm.cost_per_output_token
                 )
 
                 latency = time.time() - start_time
 
                 return ModelExecutionResult(
                     model_id=arm.model_id,
-                    response_text=result.data,
+                    response_text=result.output if hasattr(result, 'output') else str(result.data),
                     cost=cost_usd,
                     latency=latency,
                     input_tokens=input_tokens,

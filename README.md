@@ -1,8 +1,8 @@
 # Conduit Bench 🎯
 
-**Multi-armed bandit algorithm benchmarking for LLM routing**
+**Multi-armed bandit algorithm benchmarking for the Conduit Router**
 
-Compare Thompson Sampling, UCB, and Epsilon-Greedy algorithms across 17 models from 6 providers to identify the optimal cost/quality trade-off for intelligent LLM routing.
+Compare Thompson Sampling, UCB, and Epsilon-Greedy algorithms across 17 models from 6 providers to identify the optimal cost/quality trade-off for the Conduit Router's intelligent LLM routing.
 
 ---
 
