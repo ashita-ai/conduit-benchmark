@@ -56,7 +56,7 @@ DEFAULT_ARMS = [
     ModelArm(
         model_id="gemini-2.0-flash",
         model_name="gemini-2.0-flash",
-        provider="google",
+        provider="google-vertex",
         cost_per_input_token=0.0000001,  # $0.10/1M tokens
         cost_per_output_token=0.0000004,  # $0.40/1M tokens
         expected_quality=0.80,
@@ -81,7 +81,7 @@ DEFAULT_ARMS = [
     ModelArm(
         model_id="gemini-2.5-pro",
         model_name="gemini-2.5-pro",
-        provider="google",
+        provider="google-vertex",
         cost_per_input_token=0.00000125,  # $1.25/1M tokens
         cost_per_output_token=0.000005,  # $5.00/1M tokens
         expected_quality=0.88,
@@ -106,7 +106,7 @@ DEFAULT_ARMS = [
     ModelArm(
         model_id="gemini-3-pro",
         model_name="gemini-3-pro",
-        provider="google",
+        provider="google-vertex",
         cost_per_input_token=0.000002,  # $2.00/1M tokens
         cost_per_output_token=0.000012,  # $12.00/1M tokens
         expected_quality=0.94,
