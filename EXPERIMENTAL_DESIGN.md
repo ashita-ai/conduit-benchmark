@@ -1,36 +1,106 @@
 # Conduit Benchmark Experimental Design
 
 ## 🎯 Objectives
-1. Compare 11 bandit algorithms for LLM routing
-2. Test across 9 modern frontier models (Claude, OpenAI, Google)
-3. Measure convergence, quality, cost, and regret with statistical rigor
-4. **Enable PCA by default** (387 → 67 dims) to ensure contextual algorithm convergence at N=2,500
-5. (Optional) Compare PCA vs full embeddings in ablation study at higher N
 
-## 🤖 Algorithms Under Test (11 Total)
+1. **Validate HybridRouter** - the production routing algorithm conduit ships
+2. **Use objective evaluation** - exact-match and code execution, NOT LLM-as-judge
+3. **Benchmark on established datasets** - GSM8K, MMLU, HumanEval (credible, reproducible)
+4. Measure accuracy, cost, latency across multiple domains
+5. Compare against baselines and alternative algorithms
 
-### Contextual Algorithms (3) - Use query features
-1. **LinUCBBandit** - Linear UCB with contextual features (387 dims default)
-2. **ContextualThompsonSamplingBandit** - Bayesian linear regression
-3. **DuelingBandit** - Pairwise preference learning
+## 📊 Benchmark Suite (3 Datasets)
 
-### Non-Contextual Algorithms (3) - No features
+### Overview
+
+| Dataset | Size | Domain | Evaluation | Est. Cost | Headline |
+|---------|------|--------|------------|-----------|----------|
+| **GSM8K** | 1,319 | Math reasoning | Exact match (`#### N`) | ~$100-150 | "85% accuracy at 40% cost" |
+| **MMLU** | 1,000 | Knowledge (57 subjects) | Exact match (A/B/C/D) | ~$80-100 | "Matches GPT-4 at 50% cost" |
+| **HumanEval** | 164 | Python coding | Code execution | ~$20-30 | "75% pass rate, 60% savings" |
+| **Total** | **2,483** | | | **~$200-300** | |
+
+### Why These Datasets?
+
+**GSM8K** (Grade School Math 8K)
+- Source: [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k)
+- 1,319 test problems with step-by-step solutions
+- Answer format: `#### 72` - objectively correct/incorrect
+- No LLM-as-judge needed - eliminates circular dependency
+
+**MMLU** (Massive Multitask Language Understanding)
+- Source: [cais/mmlu](https://huggingface.co/datasets/cais/mmlu)
+- 14,042 questions across 57 subjects (using 1k subset)
+- Multiple choice (A/B/C/D) - exact match on answer
+- Broad coverage: STEM, humanities, social sciences
+
+**HumanEval** (OpenAI Code Benchmark)
+- Source: [openai/openai_humaneval](https://huggingface.co/datasets/openai/openai_humaneval)
+- 164 Python function completion problems
+- Execute code + run unit tests - pass/fail evaluation
+- Most credible to developers - executable tests > LLM judges
+
+## 🔧 Evaluation Methods
+
+### Exact Match (GSM8K, MMLU)
+
+**No LLM-as-judge.** Extract answer, compare to ground truth.
+
+```python
+# GSM8K: Extract "#### N" from response
+def extract_gsm8k_answer(text: str) -> str | None:
+    match = re.search(r'####\s*(-?\d+(?:,\d+)*(?:\.\d+)?)', text)
+    return match.group(1).replace(',', '') if match else None
+
+# MMLU: Extract A/B/C/D from response
+def extract_mmlu_answer(text: str) -> str | None:
+    match = re.search(r'\b([ABCD])\b', text.upper())
+    return match.group(1) if match else None
+
+# Evaluation: 1.0 if correct, 0.0 if incorrect
+reward = 1.0 if predicted == expected else 0.0
+```
+
+### Code Execution (HumanEval)
+
+**Execute code, run tests.** Pass/fail based on actual execution.
+
+```python
+# Combine prompt + model response + test cases
+full_code = f"{prompt}{response}\n\n{test_code}\ncheck({entry_point})"
+
+# Execute in sandboxed subprocess with timeout
+result = subprocess.run(['python', temp_file], timeout=10, capture_output=True)
+reward = 1.0 if result.returncode == 0 else 0.0
+```
+
+### Arbiter (Production Use Only)
+
+Arbiter (LLM-as-judge) is still available for:
+- Production routing where no ground truth exists
+- Open-ended query quality evaluation
+- A/B testing in deployment
+
+**NOT used for benchmarking** due to circular dependency (LLM judging LLM).
+
+## 🤖 Algorithms Under Test (7 Total)
+
+### Production Algorithm (1) - What conduit ships ⭐
+1. **HybridRouter** - UCB1 (0-2000 queries) → LinUCB (2000+)
+   - Cold-start: UCB1 explores efficiently without needing context
+   - Warm: LinUCB exploits query features after sufficient data
+   - **This is the algorithm we're validating**
+
+### Component Algorithms (2) - HybridRouter building blocks
+2. **LinUCBBandit** - Linear UCB with contextual features
+3. **UCB1Bandit** - Upper confidence bound (non-contextual)
+
+### Alternative Algorithms (2) - Comparison
 4. **ThompsonSamplingBandit** - Bayesian probability matching
-5. **UCB1Bandit** - Upper confidence bound
-6. **EpsilonGreedyBandit** - Simple exploration-exploitation
+5. **EpsilonGreedyBandit** - Simple exploration-exploitation
 
-### Baselines (4) - For comparison
-7. **RandomBaseline** - Uniform random (lower bound)
-8. **OracleBaseline** - Perfect knowledge (upper bound, requires reference=1.0)
-9. **AlwaysBestBaseline** - Always highest quality model
-10. **AlwaysCheapestBaseline** - Always lowest cost model
-
-**Note:** Oracle only testable with 100% reference answers
-
-### Hybrid Algorithm (1) - Production optimized
-11. **HybridRouter** - UCB1 (0-2000 queries) → LinUCB (2000+)
-    - Warm-start strategy for cold-start problem
-    - Switching point to be validated empirically
+### Baselines (2) - Upper/lower bounds
+6. **RandomBaseline** - Uniform random selection (lower bound)
+7. **OracleBaseline** - Best model per query (upper bound, requires all models run)
 
 ## 📱 Model Arms (9 Models)
 
@@ -45,682 +115,157 @@
 - `chatgpt-5-mini` - Economical option
 
 ### Google Gemini 3
-- `gemini-3-pro` - New flagship (1501 Elo, first model >1500)
+- `gemini-3-pro` - New flagship (1501 Elo)
 - `gemini-3-flash` - Fast inference
 - `gemini-2.5-pro` - Previous generation baseline
 
-**Model Version Tracking:**
-- Document exact model versions/timestamps at experiment start
-- Track API changes during experiment period
-- Report model availability windows
-
-**Sources:**
-- [Gemini 3 Official Announcement](https://blog.google/products/gemini/gemini-3/)
-- [Google Gemini 3 Launch](https://www.cnbc.com/2025/11/18/google-announces-gemini-3-as-battle-with-openai-intensifies.html)
-
-## 📊 Sample Size Calculation
-
-### Formal Power Analysis
-
-**Target Effect Size:** Detect 10% difference in quality scores (δ = 0.10)
-**Significance Level:** α = 0.05 (two-tailed)
-**Desired Power:** 1 - β = 0.80
-**Expected Variance:** σ² (estimated from pilot study)
-
-**Power Calculation Formula:**
-```
-n = 2 * (Z_α/2 + Z_β)² * σ² / δ²
-```
-
-Where:
-- Z_α/2 = 1.96 (for α = 0.05)
-- Z_β = 0.84 (for power = 0.80)
-- δ = 0.10 (minimum detectable difference)
-- σ² = variance estimate from pilot (see Pilot Study section)
-
-### Convergence Requirements
-
-**Contextual Algorithms** (LinUCB, ContextualThompson, Dueling):
-- **WITH PCA (DEFAULT)**: `d = 67` (64 PCA + 3 metadata)
-  - Minimum samples: `20 * d = 20 * 67 = 1,340`
-  - Recommended: `30 * d = 30 * 67 = 2,010`
-  - **N=2,500 provides 124% of recommended** ✅
-- WITHOUT PCA (ablation study only): `d = 387` (384 embedding + 3 metadata)
-  - Minimum samples: `20 * d = 20 * 387 = 7,740`
-  - Recommended: `30 * d = 30 * 387 = 11,610`
-  - **Would require N ≥ 12,000 for convergence**
-
-**Non-Contextual Algorithms** (Thompson, UCB1, Epsilon):
-- Number of arms: `K = 9`
-- Minimum samples: `100 * K = 100 * 9 = 900`
-- Recommended: `150 * K = 150 * 9 = 1,350`
-- **Power-adjusted:** Based on pilot variance (see below)
-
-**Baselines:**
-- Random: Any N (establishes lower bound)
-- Oracle: N ≥ 500 (requires 100% references)
-- AlwaysBest/Cheapest: Any N (deterministic)
-
-### Pilot Study (Required Before Main Experiment)
-
-**Purpose:** Estimate variance for power analysis and validate assumptions
-
-**Design:**
-- Sample size: N = 200 queries
-- Algorithms: Random, UCB1, LinUCB (representative subset)
-- Metrics: Quality scores, costs, regret
-- Runs: 3 independent runs per algorithm
-
-**Deliverables:**
-1. **Variance Estimates:**
-   - σ²_quality: Variance of quality scores
-   - σ²_cost: Variance of cost per query
-   - σ²_regret: Variance of cumulative regret
-
-2. **Sample Size Recalculation:**
-   - Use pilot variance to compute required N
-   - Verify N=2,500 is sufficient (or adjust upward)
-
-3. **Distribution Validation:**
-   - Test normality assumptions (Shapiro-Wilk)
-   - Check for outliers
-   - Validate query distribution balance
-
-**Example Power Calculation (Post-Pilot):**
-```python
-from statsmodels.stats.power import TTestIndPower
-
-# After pilot: σ_quality = 0.15 (estimated)
-analysis = TTestIndPower()
-n_required = analysis.solve_power(
-    effect_size=0.10 / 0.15,  # Cohen's d = δ / σ
-    power=0.80,
-    alpha=0.05,
-    ratio=1.0
-)
-# Result: n_required ≈ 2,000 per algorithm
-# With 3 runs: N = 2,000 is sufficient
-```
-
-### **RECOMMENDATION: N = 2,500 samples with PCA ENABLED** (Post-Pilot Validation)
-
-**Why PCA is Mandatory:**
-- WITHOUT PCA: LinUCB needs 30 × 387 = 11,610 samples (N=2,500 only 22% of required)
-- WITH PCA: LinUCB needs 30 × 67 = 2,010 samples (N=2,500 provides 124% ✅)
-- PCA reduces required samples by **5.8x**
-- Quality degradation: <5% (documented in conduit docs/PCA_GUIDE.md)
-- Same cost and runtime (embedding compression negligible vs LLM calls)
-
-**Rationale:**
-- ✅ Enables contextual algorithm convergence at N=2,500 (requires PCA)
-- ✅ Ensures all 9 models explored sufficiently
-- ✅ Provides ≥80% statistical power (after pilot validation)
-- ✅ Reasonable runtime (~6-8 hours for 11 algorithms)
-- ✅ Cost-effective (~$25-30 for Arbiter evaluation)
-- ✅ Balances power vs. execution time
-
-**Note:** Final sample size subject to pilot study variance estimates. May adjust to N=3,000-5,000 if pilot shows higher variance. Ablation study without PCA requires N ≥ 12,000.
-
-**Convergence vs Power Analysis:**
-- N=2,500 is below theoretical convergence heuristic (30 * 387 = 11,610 for LinUCB)
-- **Power analysis is still valid** - based on observed quality variance (σ² = 0.046679), not feature dimensions
-- Quality variance comes from response differences, independent of embedding size
-- Pilot study (N=200) validated algorithms work with 387-dim features
-- N=2,500 provides 80% power to detect d=0.3 quality differences
-- Contextual algorithms may converge slower than with PCA, but comparisons remain statistically valid
-
-**Alternative Configurations:**
-- **Quick test**: N = 1,000 (2-3 hours, 60% power) - Not recommended
-- **Standard**: N = 2,500 (6-8 hours, 80% power) ⭐ **RECOMMENDED**
-- **High power**: N = 5,000 (12-16 hours, 90% power)
-- **Publication quality**: N = 10,000 (24-32 hours, 95% power)
-
-## 📐 Regret Function Definition
-
-### Mathematical Specification
-
-**Cumulative Regret (Primary Metric):**
-```
-R_T = Σ_{t=1}^T [r*_t - r_{a_t}]
-```
-
-Where:
-- `r*_t` = reward of optimal arm at time t (oracle reward)
-- `r_{a_t}` = reward of selected arm at time t
-- `T` = total number of queries
-
-### Reward Function
-
-**Option 1: Quality-Weighted Reward (Primary)**
-```
-r_t = quality_score_t
-```
-
-**Option 2: Quality-Cost Tradeoff (Secondary)**
-```
-r_t = quality_score_t - λ * (cost_t - cost_min)
-```
-
-Where:
-- `λ` = cost penalty coefficient (default: 0.01 per $0.001)
-- `cost_min` = minimum cost across all models
-- Normalized so quality dominates: `λ << 1`
-
-**Option 3: Normalized Regret (For Reporting)**
-```
-R_norm = R_T / (T * r*_max)
-```
-
-Where `r*_max` = maximum possible reward (oracle average)
-
-### Oracle Definition
-
-**Per-Query Oracle (Used for Regret):**
-- For each query, select the model with highest quality score
-- Requires quality scores for all 9 models (reference answers)
-- Only computable when reference_probability = 1.0
-
-**Single Best Oracle (Alternative Baseline):**
-- Select the single model with highest average quality
-- Computable with partial references (reference_probability < 1.0)
-- Used when full oracle unavailable
-
-**Implementation:**
-```python
-def compute_regret(selected_rewards, oracle_rewards):
-    """
-    Compute cumulative regret.
-
-    Args:
-        selected_rewards: List of rewards from selected arms
-        oracle_rewards: List of optimal rewards (per-query oracle)
-
-    Returns:
-        cumulative_regret: Sum of (oracle - selected) rewards
-        normalized_regret: Regret / (T * max_oracle_reward)
-    """
-    cumulative_regret = sum(o - s for o, s in zip(oracle_rewards, selected_rewards))
-    normalized_regret = cumulative_regret / (len(oracle_rewards) * max(oracle_rewards))
-    return cumulative_regret, normalized_regret
-```
-
-## 🔄 Convergence Definition
-
-### Stability Criterion
-
-**Convergence Definition:**
-An algorithm is considered converged when its performance metric (regret, quality, or cost) stabilizes within a specified threshold over a sliding window.
-
-**Mathematical Specification:**
-```python
-def is_converged(metric_history, window=200, threshold=0.05, min_samples=500):
-    """
-    Check if algorithm has converged.
-
-    Args:
-        metric_history: List of metric values over time
-        window: Sliding window size (default: 200 queries)
-        threshold: Coefficient of variation threshold (default: 5%)
-        min_samples: Minimum samples before checking convergence
-
-    Returns:
-        converged: Boolean indicating convergence
-        convergence_point: Query index where convergence occurred
-    """
-    if len(metric_history) < min_samples:
-        return False, None
-
-    # Use sliding window approach
-    recent_metric = metric_history[-window:]
-    mean_recent = np.mean(recent_metric)
-    std_recent = np.std(recent_metric)
-
-    # Coefficient of variation
-    cv = std_recent / mean_recent if mean_recent > 0 else float('inf')
-
-    converged = cv < threshold
-    convergence_point = len(metric_history) - window if converged else None
-
-    return converged, convergence_point
-```
-
-**Convergence Metrics:**
-1. **Regret Convergence:** CV(regret) < 5% over 200-query window
-2. **Quality Convergence:** CV(quality) < 3% over 200-query window
-3. **Cost Convergence:** CV(cost) < 5% over 200-query window
-
-**Convergence Time:**
-- Report query index where convergence first occurs
-- Report 95% confidence interval on convergence time
-- Compare convergence rates across algorithms
-
-## 🧪 Experimental Variables
-
-### Independent Variables
-1. **Algorithm Type** (11 levels)
-2. **Model Set** (9 models per algorithm)
-3. **PCA Enabled** (True/False for contextual algorithms)
-4. **Reference Probability** (0.25 fixed for main experiment, varied in ablation)
-5. **Query Domain Distribution** (10 categories from synthetic generator)
-
-### Dependent Variables
-1. **Cumulative Regret** - Total suboptimality vs oracle (see Regret Function Definition)
-2. **Average Quality** - Mean quality score across queries (with 95% CI)
-3. **Total Cost** - Cumulative spend in USD (with 95% CI)
-4. **Convergence Time** - Queries until stable performance (with 95% CI)
-5. **Model Selection Distribution** - Which models selected over time
-6. **Effect Sizes** - Cohen's d for algorithm comparisons
-
-### Control Variables
-1. **Random Seed** (42 for reproducibility, varied across runs: 42, 123, 456)
-2. **Arbiter Model** (gpt-4o-mini for consistent evaluation)
-3. **Query Distribution** (same synthetic dataset for all algorithms)
-4. **Feature Extraction** (same QueryAnalyzer for all runs)
-5. **Model Versions** (documented and fixed at experiment start)
-
-## 📋 Experimental Design Matrix
-
-### Primary Experiment
-```yaml
-algorithms: [thompson, ucb1, epsilon, linucb, contextual_thompson, dueling,
-             random, oracle, always_best, always_cheapest, hybrid]
-models: 9  # Claude 4 (3) + OpenAI (3) + Gemini 3 (3)
-samples: 2500
-reference_probability: 0.25  # Fixed for main experiment
-pca_enabled: true  # REQUIRED for convergence at N=2,500
-pca_dimensions: 67
-runs_per_algorithm: 3  # Independent runs with different seeds
-random_seeds: [42, 123, 456]  # For reproducibility
-total_queries: 2500 * 11 * 3 = 82,500
-```
-
-### Ablation Studies (Future Work - Budget Permitting)
-
-**Note:** Due to budget constraints, ablation studies are deferred to future work. The primary experiment uses PCA-enabled configuration as the default.
-
-**Potential Future Studies:**
-1. **PCA Impact** - Requires N=12,000 for non-PCA convergence (expensive)
-2. **Reference Probability Sensitivity** - Test 0.1, 0.2, 0.3, 0.5, 1.0
-3. **Model Set Size** - Test scalability with 3, 5, 7, 9 models
-4. **Hybrid Switching Point** - Optimize UCB1→LinUCB transition
-
-## 📊 Statistical Analysis Plan
-
-### Multiple Comparisons Correction
-
-**Problem:** Comparing 11 algorithms creates C(11,2) = 55 pairwise comparisons. Without correction, expect ~2.75 false positives at α=0.05.
-
-**Solution:** Hierarchical testing approach
-
-1. **Overall Test (Friedman Test):**
-   - H₀: All algorithms perform equally
-   - If p < 0.05, proceed to pairwise tests
-   - If p ≥ 0.05, no pairwise tests needed
-
-2. **Pairwise Comparisons (Post-Hoc):**
-   - **Nemenyi Test** (recommended for multiple algorithms)
-   - **Bonferroni Correction:** α_corrected = 0.05 / 55 ≈ 0.0009
-   - **Benjamini-Hochberg FDR Control:** Less conservative alternative
-
-**Implementation:**
-```python
-from scipy.stats import friedmanchisquare
-from scikit_posthocs import posthoc_nemenyi
-
-# Overall test
-stat, p_value = friedmanchisquare(*algorithm_results)
-if p_value < 0.05:
-    # Pairwise comparisons with Nemenyi
-    p_matrix = posthoc_nemenyi(algorithm_results)
-    # Apply FDR correction
-    from statsmodels.stats.multitest import multipletests
-    p_corrected = multipletests(p_matrix.flatten(), method='fdr_bh')[1]
-```
-
-### Primary Statistical Tests
-
-1. **Friedman Test** - Overall algorithm differences
-   - Non-parametric (no normality assumption)
-   - Tests: H₀: All algorithms equal vs H₁: At least one differs
-   - Report: χ² statistic, p-value, effect size (Kendall's W)
-
-2. **Nemenyi Post-Hoc Test** - Pairwise comparisons
-   - Designed for multiple algorithm comparison
-   - Controls family-wise error rate
-   - Report: Critical difference (CD) diagram
-
-3. **Effect Size Reporting:**
-   - **Cohen's d** for pairwise comparisons
-   - Interpretation: d < 0.2 (small), 0.2-0.5 (medium), >0.5 (large)
-   - **Kendall's W** for overall Friedman test
-   - Interpretation: W < 0.1 (small), 0.1-0.3 (medium), >0.3 (large)
-
-4. **Confidence Intervals:**
-   - 95% CI for all metrics (regret, quality, cost)
-   - Bootstrap method (10,000 resamples) for non-normal distributions
-   - Report: Mean ± CI for each algorithm
-
-### Secondary Analyses
-
-1. **ANOVA** - Factor effects (PCA, reference prob)
-   - Two-way ANOVA: Algorithm × PCA
-   - Report: F-statistics, p-values, effect sizes (η²)
-
-2. **Regression** - Convergence rate modeling
-   - Model: convergence_time ~ algorithm + pca + model_count
-   - Report: R², coefficients, p-values
-
-3. **Non-Stationarity Testing:**
-   - **CUSUM Test:** Detect mean shifts in reward distribution
-   - **Page-Hinkley Test:** Detect change points
-   - Report: Stationarity p-values, change point locations
-
-**Implementation:**
-```python
-def test_stationarity(reward_history, alpha=0.05):
-    """
-    Test for non-stationarity in reward distribution.
-
-    Returns:
-        is_stationary: Boolean
-        change_points: List of detected change points
-    """
-    from scipy.stats import kruskal
-
-    # Split into windows
-    window_size = len(reward_history) // 4
-    windows = [reward_history[i:i+window_size]
-               for i in range(0, len(reward_history), window_size)]
-
-    # Kruskal-Wallis test across windows
-    stat, p_value = kruskal(*windows)
-    is_stationary = p_value > alpha
-
-    return is_stationary, []
-```
-
-## 💰 Cost Estimation
-
-**Per Algorithm Run (2,500 queries):**
-- Model execution: ~$2-5 (depends on model mix)
-- Arbiter evaluation (25% with ref): 625 queries × $0.01 = $6.25
-- **Buffer (20%):** $1.25
-- **Total per run:** ~$9-13
-
-**Full Benchmark (11 algorithms, 3 runs each):**
-- Total queries: 82,500
-- Estimated cost: 11 * 3 * $11 = $363
-- **Buffer (30%):** $109
-- **Total budget:** ~$470 → **$363 actual** (ablation studies excluded)
-
-**Cost Tracking:**
-- Log actual costs per run
-- Report cost variance across runs
-- Document any API pricing changes during experiment
-
-**Parallelization Strategy:**
-- Run algorithms in parallel (11 concurrent)
-- Reduces wall time to: 3 runs * 7 hours = 21 hours (~1 day)
-- Requires parallel execution infrastructure
-
-## ⏱️ Runtime Estimation
-
-**Per Query:**
-- Feature extraction: ~0.5s
-- Model execution: ~2-4s (depends on model)
-- Quality evaluation: ~1-2s (when reference available)
-- Total: ~4-7s average
-
-**Per Algorithm (2,500 queries):**
-- Sequential: 2,500 * 5s = 12,500s ≈ 3.5 hours
-- With concurrency (5): ~45 minutes
-
-**Full Benchmark:**
-- Sequential: 11 algorithms * 3.5 hours * 3 runs = 115.5 hours
-- Parallel (11 algorithms): 3.5 hours * 3 runs = 10.5 hours ⭐
-
-## 📈 Success Criteria
-
-### Algorithm Performance
-- **Convergence:** Algorithms reach stable performance (CV < 5%) by N=2,000
-- **Regret:** Contextual algorithms achieve <30% normalized regret vs oracle
-- **Quality:** Top algorithms achieve >0.75 average quality (95% CI)
-- **Cost:** Smart algorithms use 20-40% less cost than random (with effect size d > 0.5)
-
-### Statistical Significance
-- **Power:** ≥80% for detecting 10% performance differences
-- **Confidence:** 95% confidence intervals on all metrics
-- **Reproducibility:** Results consistent across 3 runs (CV <10%)
-- **Effect Sizes:** Report Cohen's d for all pairwise comparisons
-
-### PCA Configuration (Default)
-- **Dimensionality:** 67 features (64 PCA + 3 metadata) - default for all contextual algorithms
-- **Quality Assumption:** <5% quality degradation vs full 387-dim embeddings (per conduit docs)
-- **Convergence Benefit:** 5.8x fewer samples required (N=2,010 vs N=11,610)
-- **Ablation Study:** Deferred to future work (budget constraints)
-
-## 🔄 Execution Plan
-
-### Phase 0: Pilot Study (N=200) ✅ COMPLETED
-
-**Goals:**
-- Estimate variance for power analysis
-- Validate query distribution
-- Test infrastructure end-to-end
-- Calibrate evaluation costs
-- Estimate actual runtimes
-
-**Algorithms:** thompson_sampling, ucb1 (2 algorithms tested)
-**Runs:** 1 run (seed=42)
-**Actual Time:** 4 hours 15 minutes
-**Actual Cost:** $1.01 ($0.5167 Thompson + $0.4947 UCB1)
-
-**Results:**
-
-| Algorithm | Avg Quality | Quality σ² | Avg Cost/Query | Cost σ² | Total Cost |
-|-----------|-------------|------------|----------------|---------|------------|
-| Thompson Sampling | 0.5506 ± 0.2199 | 0.048363 | $0.002584 ± $0.002645 | 0.00000699 | $0.5167 |
-| UCB1 | 0.5452 ± 0.2126 | 0.045214 | $0.002474 ± $0.002511 | 0.00000631 | $0.4947 |
-
-**Pooled Variance Estimates:**
-- Quality Variance (σ²): 0.046679
-- Quality Std Dev (σ): 0.2161
-- Cost Variance (σ²): 0.00000665
-
-**Sample Size Validation:**
-
-For **Standard Bandits** (Thompson, UCB1, ε-greedy, Random):
-- Required N for 80% power (d=0.3): **175 queries**
-- Proposed N=2,500: **14.3x oversampling** ✅
-
-For **Contextual Bandits** (LinUCB, ContextualThompson, Dueling):
-- **IMPORTANT NOTE**: Pilot tested only NON-contextual algorithms (Thompson, UCB1)
-- Context dimensionality: **387 features (384 embedding + 3 metadata)**
-- **WITH PCA**: 67 features (64 PCA + 3 metadata)
-  - Required N (30*d heuristic): 2,010 queries
-  - Proposed N=2,500: **1.24x oversampling** ✅
-- **WITHOUT PCA**: 387 features would require 11,610 queries (NOT FEASIBLE at N=2,500)
-
-**Conclusion:** ✅ **N=2,500 is VALIDATED** (requires PCA for contextual algorithms)
-- Adequate power for standard bandits (14x)
-- Adequate convergence for contextual bandits WITH PCA (1.24x)
-- Contextual algorithms WILL NOT converge without PCA at N=2,500
-
-**Infrastructure Validation:**
-- Database persistence: ✅ Working (UCB1 Infinity bug fixed)
-- Metrics module: ✅ Working (84% test coverage)
-- Visualization module: ✅ Working (81% test coverage)
-- CLI integration: ✅ Working (57 passing tests)
-
-**Runtime Calibration:**
-- Average time per query: ~76 seconds (Thompson), ~84 seconds (UCB1)
-- Main experiment (N=2,500): ~53 hours per algorithm
-- With 3 runs × 11 algorithms: ~1,749 hours sequential
-- **With parallelization (11 concurrent)**: ~159 hours (~7 days)
-
-### Phase 1: Core Algorithms (N=2,500)
-**Algorithms:** thompson, ucb1, epsilon, linucb, contextual_thompson, dueling, random (7 total)
-**Runs:** 3 per algorithm
-**Time:** ~21 hours (parallel)
-**Cost:** ~$231 (with buffer)
-
-### Phase 2: Baselines & Hybrid (N=2,500)
-**Algorithms:** oracle, always_best, always_cheapest, hybrid (4 total)
-**Runs:** 3 per algorithm
-**Time:** ~10.5 hours (parallel)
-**Cost:** ~$132 (with buffer)
-
-**Total:** 2 phases, ~32 hours, ~$363
-
-## 📊 Analysis Plan
-
-### Primary Analyses
-1. **Cumulative Regret Curves** - Plot regret vs query count (with 95% CI bands)
-2. **Quality-Cost Frontier** - Pareto optimal algorithms (with effect sizes)
-3. **Convergence Analysis** - Time to stable performance (with 95% CI)
-4. **Model Selection Heatmaps** - Which models selected when
-5. **Statistical Significance** - Friedman test + Nemenyi post-hoc (with corrections)
-
-### Secondary Analyses
-1. **Domain Analysis** - Performance by query domain (ANOVA)
-2. **Non-Stationarity** - CUSUM/Page-Hinkley tests for reward stability
-3. **Convergence Rate Modeling** - Time to convergence vs algorithm type
-
-### Effect Size Reporting
-- **Cohen's d** for all pairwise algorithm comparisons
-- **Kendall's W** for overall Friedman test
-- **η²** for ANOVA factor effects
-- Interpretation guidelines (small/medium/large)
-
-## 📝 Reporting
-
-### Visualizations
-1. Cumulative regret curves (line plot with 95% CI bands)
-2. Quality-cost scatter (pareto frontier with effect sizes)
-3. Model selection over time (stacked area)
-4. Algorithm comparison table (summary stats with 95% CI)
-5. Convergence rate comparison (bar chart with 95% CI)
-6. Critical difference (CD) diagram (Nemenyi test results)
-7. Effect size heatmap (Cohen's d matrix)
-8. Domain performance breakdown (faceted bar charts)
-
-### Metrics Tables
-- Per-algorithm summary statistics (mean ± 95% CI)
-- Statistical significance tests (Friedman, Nemenyi, ANOVA)
-- Effect sizes (Cohen's d, Kendall's W, η²)
-- Convergence metrics (time ± 95% CI)
-- Cost-efficiency analysis (with effect sizes)
-- Non-stationarity test results
-
-### Required Reporting Elements
-- **Pilot Study Results:** Variance estimates, sample size justification
-- **Model Versions:** Exact versions/timestamps used
-- **Cost Tracking:** Actual vs estimated costs
-- **Reproducibility:** Random seeds, environment details
-- **Limitations:** Non-stationarity, synthetic data, etc.
-
-## 🎓 Publication Readiness
-
-For academic publication, consider:
-- **N = 5,000-10,000** samples for 90-95% power
-- **5-10 runs** per algorithm for robust statistics
-- **Multiple datasets** (not just synthetic) - GSM8K for out-of-distribution validation
-- **Real-world validation** with production queries (if feasible)
-- **Full statistical reporting:** Effect sizes, confidence intervals, multiple comparison corrections
-- **Ablation studies** (if budget permits) - PCA impact, reference sensitivity, model set size
+## 🔧 Embedding Configuration
+
+**Provider**: OpenAI `text-embedding-3-small` (1536 dimensions)
+
+| Configuration | Embedding | Metadata | Total Features |
+|---------------|-----------|----------|----------------|
+| Without PCA | 1536 | 2 | **1538** |
+| With PCA (128 components) | 128 | 2 | **130** |
+
+**Metadata Features** (2 total):
+- `token_count` - Query length normalization
+- `complexity_score` - Estimated query complexity
+
+## 📈 Metrics
+
+### Primary Metrics
+- **Accuracy**: % of correct answers (exact match or pass rate)
+- **Cost**: Total USD spent on API calls
+- **Cost per correct answer**: cost / correct_answers (efficiency)
+- **Latency**: Average response time
+
+### Secondary Metrics
+- **Convergence time**: Queries until stable performance
+- **Model selection distribution**: Which models selected over time
+- **Pareto efficiency**: Accuracy vs cost tradeoff
+
+### Regret Calculation
+For each query:
+- If algorithm selects correctly: `regret = cost_selected - cost_cheapest_correct`
+- If algorithm selects incorrectly: `regret = quality_penalty + cost_selected`
 
 ## 🚀 Quick Start Commands
 
 ```bash
-# Phase 0: Pilot Study (REQUIRED FIRST)
-uv run conduit-bench generate --queries 200 --seed 42 --reference-probability 0.25 --output data/pilot_200.jsonl
-uv run conduit-bench run --dataset data/pilot_200.jsonl --algorithms thompson,ucb1,random --runs 3 --output results/pilot/
-
-# Analyze pilot results
-uv run conduit-bench analyze --results results/pilot/ --output analysis/pilot/
-# Review variance estimates and recalculate sample sizes
-
-# Phase 1: Generate main dataset
-uv run conduit-bench generate --queries 2500 --seed 42 --reference-probability 0.25 --output data/benchmark_2500.jsonl
-
-# Phase 2: Run core algorithms (parallel recommended)
-uv run conduit-bench run --dataset data/benchmark_2500.jsonl --algorithms thompson,ucb1,epsilon,linucb,contextual_thompson,dueling,random --runs 3 --seeds 42,123,456 --output results/core/
-
-# Phase 3: Run baselines
-uv run conduit-bench run --dataset data/benchmark_2500.jsonl --algorithms oracle,always_best,always_cheapest,hybrid --runs 3 --seeds 42,123,456 --output results/baselines/
-
-# Analyze results (with statistical tests)
-uv run conduit-bench analyze --results results/*.json --output analysis/ --statistical-tests friedman,nemenyi --effect-sizes cohens-d
-```
-
-## Out-of-Distribution Validation (GSM8K)
-
-After training and in-distribution validation on synthetic queries, test router generalization on GSM8K dataset.
-
-**Purpose**: Validate that router learned generalizable routing strategies rather than domain-specific patterns.
-
-**Dataset**: [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k) - Grade school math word problems with full step-by-step solutions
-
-**Transfer Distance**: Code-heavy synthetic queries → Math word problems (optimal transfer distance for generalization testing)
-
-**Sample Size**: N = 1,000 (GSM8K test split)
-
-**Hypothesis**: If router performs well on GSM8K after training on synthetic (code-heavy) queries, it learned:
-- ✅ **Routing strategy** (generalizable embedding-based selection)
-- ❌ **Query patterns** (domain-specific code memorization)
-
-**Evaluation**:
-```bash
-# Run trained router on GSM8K validation set
+# GSM8K Benchmark (Math Reasoning)
 uv run conduit-bench run \
-  --dataset data/gsm8k_1k.jsonl \
-  --algorithms linucb,thompson,ucb1,oracle \
-  --output results/gsm8k_validation.json
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --evaluator exact_match \
+  --output results/gsm8k.json
 
-# Compare performance degradation
-# Expected: <15% performance drop indicates good generalization
-# >30% drop suggests overfitting to synthetic distribution
+# MMLU Benchmark (Knowledge)
+uv run conduit-bench run \
+  --dataset mmlu \
+  --mmlu-limit 1000 \
+  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --evaluator exact_match \
+  --output results/mmlu.json
+
+# HumanEval Benchmark (Coding)
+uv run conduit-bench run \
+  --dataset humaneval \
+  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --evaluator code_execution \
+  --output results/humaneval.json
+
+# Generate combined analysis
+uv run conduit-bench analyze \
+  --results results/gsm8k.json results/mmlu.json results/humaneval.json \
+  --output analysis/
 ```
 
-**Interpretation**:
-- **Strong generalization** (<15% drop): Router learned embedding-based routing strategy
-- **Moderate generalization** (15-30% drop): Partial domain-specific adaptation
-- **Poor generalization** (>30% drop): Overfitting to synthetic query patterns
+## 💰 Cost Estimation
 
-## Future Generalization Testing (ELI5)
+### Per Benchmark
 
-**Future Work**: Test extreme generalization with ELI5 dataset
+| Benchmark | Queries | LLM Calls (bandits) | Oracle Calls | Total Calls | Est. Cost |
+|-----------|---------|---------------------|--------------|-------------|-----------|
+| GSM8K | 1,319 | ~9,200 | ~12,000 | ~21,000 | ~$100-150 |
+| MMLU | 1,000 | ~7,000 | ~9,000 | ~16,000 | ~$80-100 |
+| HumanEval | 164 | ~1,150 | ~1,500 | ~2,650 | ~$20-30 |
+| **Total** | **2,483** | **~17,000** | **~22,500** | **~40,000** | **~$200-300** |
 
-**Dataset**: [ELI5](https://huggingface.co/datasets/eli5) - Reddit-style explanations for complex questions
+### Cost Breakdown
+- Bandit algorithms: Each selects 1 model per query
+- Oracle: Runs all 9 models per query (expensive but needed for regret)
+- Embeddings: ~$1 total (negligible)
+- **No Arbiter costs** - exact match/code execution is free
 
-**Transfer Distance**: Code/Math → General explanations (maximum transfer distance)
+## ⏱️ Runtime Estimation
 
-**Purpose**: Stress-test router generalization across maximum distribution shift
+**Per Query:**
+- Embedding: ~0.3s
+- Model execution: ~2-4s
+- Evaluation: ~0s (exact match) or ~2s (code execution)
 
-**Rationale**:
-- GSM8K tests code → math generalization (moderate shift)
-- ELI5 tests code/math → general explanations (extreme shift)
-- Combined validation ensures router doesn't memorize domain patterns
+**Total Runtime (with concurrency=30):**
+- GSM8K: ~2-3 hours
+- MMLU: ~1.5-2 hours
+- HumanEval: ~30-45 minutes
+- **Total: ~4-6 hours**
 
-**Sample Size**: N = 1,000 (held-out ELI5 test split)
+## 📊 Success Criteria
 
-**Expected Challenge**: ELI5 queries have very different:
-- Linguistic patterns (casual vs technical)
-- Answer structures (explanations vs solutions)
-- Embedding distributions (broad topics vs narrow domains)
+### HybridRouter Validation (Primary Goal)
+- **Accuracy**: Matches or exceeds standalone LinUCB/UCB1
+- **Cost efficiency**: Achieves >85% of oracle accuracy at <50% oracle cost
+- **Convergence**: Shows clear learning curve improvement
 
-**Success Criteria**: <40% performance drop indicates exceptionally robust generalization
+### Headline Results (Target)
+1. **GSM8K**: "85% accuracy at 40% the cost of always using best model"
+2. **MMLU**: "Matches top-tier accuracy while cutting costs in half"
+3. **HumanEval**: "75% pass rate with intelligent model selection"
+
+### Statistical Requirements
+- Report mean ± 95% CI for all metrics
+- Friedman test for overall algorithm differences
+- Nemenyi post-hoc for pairwise comparisons
+
+## ⚠️ Known Limitations
+
+### Dataset Limitations
+- **GSM8K**: Math-only, may not generalize to other domains
+- **MMLU**: Multiple choice format may not reflect real usage
+- **HumanEval**: Python-only, limited to function completion
+
+### Evaluation Limitations
+- **Exact match**: Strict - partial credit not possible
+- **Code execution**: Sensitive to output format requirements
+- Binary reward signal (may slow bandit learning)
+
+### Experimental Limitations
+- **Single run**: For stronger claims, run multiple replications
+- **Point-in-time**: Model capabilities change over time
+- **Synthetic features**: Embeddings may not capture all query properties
+
+### What This Doesn't Prove
+- Performance on open-ended queries (no ground truth)
+- Production cost savings (requires real traffic)
+- Generalization to other model providers
+
+## 📝 Comparison to Other Routers
+
+### RouteLLM (Berkeley)
+- [GitHub](https://github.com/lm-sys/RouteLLM)
+- Also benchmarks on GSM8K, MMLU
+- Direct comparison possible using same methodology
+
+### Martian Router
+- Commercial solution
+- No public benchmark results for comparison
 
 ---
 
-**Last Updated:** 2025-11-26
-**PCA Dimensions:** 67 (default)
-**Validated Sample Size:** 2,500 ✅ (pilot completed, N validated)
-**Pilot Study Status:** ✅ COMPLETED (N=200, variance estimates obtained)
-**Estimated Cost:** $363 (with 30% buffer) - excludes ablation studies
-**Estimated Time:** 32 hours (~1.5 days with parallelization)
-**Statistical Power:**
-- Standard bandits: 14x oversampling
-- Contextual bandits with PCA: 1.24x oversampling
-**Statistical Rigor:** Publication-ready with formal power analysis
-**Ablation Studies:** Deferred to future work (budget constraints)
+**Last Updated:** 2025-11-27
+**Evaluation Strategy:** Exact match (GSM8K, MMLU) + Code execution (HumanEval)
+**Total Benchmark Size:** 2,483 queries across 3 datasets
+**Estimated Cost:** ~$200-300
+**Estimated Time:** ~4-6 hours
+**Primary Goal:** Validate HybridRouter with objective, reproducible benchmarks

@@ -5,170 +5,205 @@ Complete guide for running bandit algorithm benchmarks with conduit-benchmark.
 ## Quick Start
 
 ```bash
-# 1. Generate synthetic dataset (10k queries for training)
-uv run python -m conduit_bench.cli generate \
-  --queries 10000 \
-  --seed 42 \
-  --output data/synthetic_10k.jsonl \
-  --reference-probability 1.0
+# GSM8K Benchmark (Math Reasoning)
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --evaluator exact_match \
+  --output results/gsm8k.json
 
-# 2. Run benchmark with oracle caching
-# Step 2a: Generate oracle baseline
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms oracle \
-  --output results/oracle.json \
-  --max-concurrency 30
+# MMLU Benchmark (Knowledge)
+uv run conduit-bench run \
+  --dataset mmlu \
+  --mmlu-limit 1000 \
+  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --evaluator exact_match \
+  --output results/mmlu.json
 
-# Step 2b: Run bandit algorithms with oracle cache
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms linucb,thompson,ucb1,epsilon_greedy \
-  --oracle-reference results/oracle.json \
-  --output results/benchmark_results.json \
-  --parallel \
-  --max-concurrency 30
+# HumanEval Benchmark (Coding)
+uv run conduit-bench run \
+  --dataset humaneval \
+  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --evaluator code_execution \
+  --output results/humaneval.json
 
-# 3. Analyze results
-uv run python -m conduit_bench.cli analyze \
-  --results results/benchmark_results.json \
-  --output analysis/metrics.json
+# Generate combined analysis
+uv run conduit-bench analyze \
+  --results results/gsm8k.json results/mmlu.json results/humaneval.json \
+  --output analysis/
 ```
 
-## Datasets
+## Datasets (3 Benchmarks)
 
-### 1. Synthetic Dataset (Training)
+### Overview
 
-**Source**: Template-based generation with 10 categories
-**Size**: 10,000 queries recommended for training
-**Purpose**: Primary training dataset for bandit algorithm development
+| Dataset | Size | Domain | Evaluation | Est. Cost |
+|---------|------|--------|------------|-----------|
+| **GSM8K** | 1,319 | Math reasoning | Exact match | ~$100-150 |
+| **MMLU** | 1,000 | Knowledge (57 subjects) | Exact match | ~$80-100 |
+| **HumanEval** | 164 | Python coding | Code execution | ~$20-30 |
+| **Total** | **2,483** | | | **~$200-300** |
 
-**Advantages**:
-- Fast generation (no API calls, instant)
-- Controllable difficulty and diversity
-- Full text reference answers (Arbiter-compatible)
-- Cost-free dataset creation
-- 10 categories, 200+ templates
+### 1. GSM8K (Grade School Math)
 
-**Generate**:
-```bash
-uv run python -m conduit_bench.cli generate \
-  --queries 10000 \
-  --seed 42 \
-  --output data/synthetic_10k.jsonl \
-  --reference-probability 1.0
+**Source**: [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k)
+**Size**: 1,319 test problems
+**Evaluation**: Exact match on `#### N` answer format
+
+**Why GSM8K**:
+- Step-by-step reasoning with verifiable final answer
+- Answer format: `#### 72` - objectively correct/incorrect
+- No LLM-as-judge needed - eliminates circular dependency
+- Well-established benchmark for math reasoning
+
+**Example**:
+```
+Question: Natalia sold clips to 48 friends in April and half as many in May.
+          How many clips did she sell altogether?
+Answer: "Natalia sold 48/2 = <<48/2=24>>24 clips in May.
+        Natalia sold 48+24 = <<48+24=72>>72 clips altogether.
+        #### 72"
 ```
 
-**Parameters**:
-- `--queries`: Number of queries to generate
-- `--seed`: Random seed for reproducibility
-- `--reference-probability`: Fraction with reference answers (0.0-1.0)
-  - 1.0 = all queries have answers (recommended for oracle comparison)
-  - 0.5 = balanced (oracle + non-oracle evaluation)
-  - 0.0 = no reference answers (routing-only benchmarks)
-
-**Categories** (200+ templates):
-- Code generation, debugging, review, architecture
-- Technical writing, documentation
-- Data analysis, SQL queries
-- System design, API design
-- Testing, deployment, monitoring
-- Math, reasoning, general knowledge
-
-### 2. GSM8K Dataset (Validation)
-
-**Source**: [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k) - Grade school math word problems
-**Size**: 1,000 test queries recommended
-**Purpose**: Out-of-distribution validation to test router generalization
-
-**Advantages**:
-- Full step-by-step reasoning in reference answers (Arbiter-compatible)
-- Well-established benchmark (8.5K problems)
-- Different domain from synthetic (math vs code-heavy)
-- Tests router generalization beyond training distribution
-- Validates transfer learning capability
-
-**Example Reference Answer**:
-```
-"Natalia sold 48/2 = <<48/2=24>>24 clips in May.
-Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
-#### 72"
+**Extraction**:
+```python
+def extract_gsm8k_answer(text: str) -> str | None:
+    match = re.search(r'####\s*(-?\d+(?:,\d+)*(?:\.\d+)?)', text)
+    return match.group(1).replace(',', '') if match else None
 ```
 
-**Validation Strategy**:
-Train router on synthetic queries (code-heavy) → Validate on GSM8K (math) to test if router learned:
-- ✅ **Routing strategy** (generalizable pattern recognition)
-- ❌ **Query patterns** (domain-specific overfitting)
+### 2. MMLU (Massive Multitask Language Understanding)
 
-**Future**: ELI5 dataset for extreme generalization testing (Reddit-style explanations)
+**Source**: [cais/mmlu](https://huggingface.co/datasets/cais/mmlu)
+**Size**: 1,000 questions (subset of 14,042)
+**Evaluation**: Exact match on A/B/C/D answer
 
-### 3. Three-Phase Validation Strategy
+**Why MMLU**:
+- 57 subjects: STEM, humanities, social sciences
+- Multiple choice - unambiguous correct answer
+- Broad coverage tests generalization
+- Standard benchmark for knowledge evaluation
 
-**Phase 1 - Development (Synthetic)**:
-- Train/tune router on 10,000 synthetic queries
-- Fast iteration, controlled diversity
-- Validates router learns on known distribution
+**Example**:
+```
+Question: What is the capital of France?
+(A) London (B) Berlin (C) Paris (D) Madrid
+Answer: C
+```
 
-**Phase 2 - In-Distribution Validation (Held-out Synthetic)**:
-- Test on 1,000 held-out synthetic queries
-- Confirms router works on same distribution
+**Extraction**:
+```python
+def extract_mmlu_answer(text: str) -> str | None:
+    match = re.search(r'\b([ABCD])\b', text.upper())
+    return match.group(1) if match else None
+```
 
-**Phase 3 - Out-of-Distribution Validation (GSM8K)**:
-- Test on 1,000 GSM8K test queries
-- Confirms router generalizes beyond training distribution
-- Stronger signal of router quality
+### 3. HumanEval (Code Generation)
+
+**Source**: [openai/openai_humaneval](https://huggingface.co/datasets/openai/openai_humaneval)
+**Size**: 164 Python function problems
+**Evaluation**: Code execution with unit tests
+
+**Why HumanEval**:
+- Most credible to developers - executable tests > LLM judges
+- Pass/fail based on actual code execution
+- Sandboxed subprocess with timeout
+- Standard benchmark for code generation
+
+**Example**:
+```python
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """Check if any two numbers in list are closer than threshold."""
+    # Model generates implementation here
+
+# Test:
+assert has_close_elements([1.0, 2.0, 3.0], 0.5) == False
+assert has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0], 0.3) == True
+```
+
+**Evaluation**:
+```python
+full_code = f"{prompt}{response}\n\n{test_code}\ncheck({entry_point})"
+result = subprocess.run(['python', temp_file], timeout=10, capture_output=True)
+reward = 1.0 if result.returncode == 0 else 0.0
+```
 
 ## Running Benchmarks
 
 ### Basic Usage
 
 ```bash
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms linucb,thompson,ucb1,oracle \
-  --output results/benchmark.json
+# Run a single benchmark
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,ucb1 \
+  --evaluator exact_match \
+  --output results/gsm8k.json
+
+# Run with oracle baseline (for regret calculation)
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,ucb1,oracle \
+  --evaluator exact_match \
+  --output results/gsm8k_with_oracle.json
 ```
 
 ### Advanced Options
 
 ```bash
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms linucb,thompson,ucb1,epsilon_greedy,oracle \
-  --output results/full_benchmark.json \
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,thompson,ucb1,epsilon,random,oracle \
+  --evaluator exact_match \
+  --output results/gsm8k_full.json \
   --parallel \                      # Enable parallel LLM calls
-  --max-concurrency 30 \             # Max concurrent requests
+  --max-concurrency 30 \            # Max concurrent requests
   --oracle-reference results/oracle.json # Reuse oracle results
 ```
 
 ### Algorithm Options
 
+**Production Algorithm:**
+- `hybrid`: HybridRouter - UCB1 (0-2000 queries) → LinUCB (2000+) ⭐
+
+**Component Algorithms:**
 - `linucb`: Contextual bandit with linear upper confidence bound
+- `ucb1`: Upper Confidence Bound (non-contextual)
+
+**Alternative Algorithms:**
 - `thompson`: Thompson Sampling (Bayesian approach)
-- `ucb1`: Upper Confidence Bound (stateless)
-- `epsilon_greedy`: ε-greedy exploration
-- `oracle`: Always select best model (baseline)
-- `random`: Random selection (baseline)
+- `epsilon`: ε-greedy exploration
+
+**Baselines:**
+- `oracle`: Always select best model (upper bound)
+- `random`: Random selection (lower bound)
+
+### Evaluator Options
+
+- `exact_match`: For GSM8K and MMLU - extract and compare answers
+- `code_execution`: For HumanEval - run code and check tests pass
 
 ### Performance Optimization
 
-**Oracle Caching** (saves 50% of API calls):
+**Oracle Caching** (saves API calls on repeat runs):
 ```bash
 # Step 1: Generate oracle results once
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
+uv run conduit-bench run \
+  --dataset gsm8k \
   --algorithms oracle \
-  --output results/oracle_reference.json \
+  --evaluator exact_match \
+  --output results/gsm8k_oracle.json \
   --max-concurrency 30
 
 # Step 2: Reuse oracle results for bandit algorithms
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms linucb,thompson,ucb1,epsilon_greedy \
-  --oracle-reference results/oracle_reference.json \
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,thompson,ucb1,epsilon \
+  --evaluator exact_match \
+  --oracle-reference results/gsm8k_oracle.json \
   --parallel \
   --max-concurrency 30 \
-  --output results/bandits_with_oracle_cache.json
+  --output results/gsm8k_bandits.json
 ```
 
 **Parallelization**:
@@ -178,165 +213,133 @@ uv run python -m conduit_bench.cli run \
 
 ## Time and Cost Estimation
 
-### Synthetic Dataset (10k queries)
+### Per Benchmark
 
-**With Oracle Caching**:
-- Oracle run: 10,000 queries × 9 models = 90,000 LLM calls
-- Bandit algorithms: 10,000 queries × 1 model each = 10,000 LLM calls
-- **Total**: 100,000 LLM calls
+| Benchmark | Queries | LLM Calls (bandits) | Oracle Calls | Total Calls | Est. Cost |
+|-----------|---------|---------------------|--------------|-------------|-----------|
+| GSM8K | 1,319 | ~9,200 | ~12,000 | ~21,000 | ~$100-150 |
+| MMLU | 1,000 | ~7,000 | ~9,000 | ~16,000 | ~$80-100 |
+| HumanEval | 164 | ~1,150 | ~1,500 | ~2,650 | ~$20-30 |
+| **Total** | **2,483** | **~17,000** | **~22,500** | **~40,000** | **~$200-300** |
 
-**Without Oracle Caching**:
-- Each algorithm: 10,000 queries × 9 models = 90,000 LLM calls
-- 5 algorithms: 450,000 LLM calls
+### Cost Breakdown
+- Bandit algorithms: Each selects 1 model per query
+- Oracle: Runs all 9 models per query (expensive but needed for regret)
+- Embeddings: ~$1 total (negligible)
+- **No Arbiter costs** - exact match/code execution is free
 
-**Estimated Time** (with concurrency=30):
-- Oracle: ~2-3 hours
-- Each bandit: ~20-30 minutes
-- **Total with caching**: ~4 hours
-- **Total without caching**: ~15-20 hours
+### Runtime Estimation
 
-**Estimated Cost** (gpt-4o-mini at $0.15/$0.60 per 1M tokens):
-- Average query: ~500 input + 100 output tokens
-- 100,000 calls × 600 tokens = 60M tokens
-- **Cost with caching**: ~$15
-- **Cost without caching**: ~$60
+**Per Query:**
+- Embedding: ~0.3s
+- Model execution: ~2-4s
+- Evaluation: ~0s (exact match) or ~2s (code execution)
 
-### GSM8K Validation Dataset (1k queries)
-
-**With Oracle Caching**:
-- Oracle run: 1,000 queries × 9 models = 9,000 LLM calls
-- Bandit algorithms: 1,000 queries × 1 model each = 1,000 LLM calls
-- **Total**: 10,000 LLM calls
-
-**Estimated Time** (with concurrency=30):
-- Oracle: ~20-30 minutes
-- Each bandit: ~3-5 minutes
-- **Total with caching**: ~40 minutes
-
-**Estimated Cost**:
-- **Cost with caching**: ~$1.50
+**Total Runtime (with concurrency=30):**
+- GSM8K: ~2-3 hours
+- MMLU: ~1.5-2 hours
+- HumanEval: ~30-45 minutes
+- **Total: ~4-6 hours**
 
 ## Analysis
 
 ### Basic Analysis
 
 ```bash
-uv run python -m conduit_bench.cli analyze \
-  --results results/benchmark.json \
-  --output analysis/metrics.json
+uv run conduit-bench analyze \
+  --results results/gsm8k.json \
+  --output analysis/gsm8k_metrics.json
 ```
 
 **Output Metrics**:
-- Accuracy (vs oracle)
-- Average quality score
-- Total cost
-- Average latency
-- Regret (cumulative cost vs oracle)
-- Learning curves
+- Accuracy: % of correct answers (exact match or pass rate)
+- Cost: Total USD spent on API calls
+- Cost per correct answer: cost / correct_answers (efficiency)
+- Latency: Average response time
+- Regret: Cumulative cost vs oracle
+- Learning curves: Performance over time
 
-### Advanced Analysis
+### Combined Analysis
 
 ```bash
-# Compare multiple benchmark runs
-uv run python -m conduit_bench.cli compare \
-  --results results/run1.json results/run2.json results/run3.json \
-  --output analysis/comparison.json
+# Analyze all benchmarks together
+uv run conduit-bench analyze \
+  --results results/gsm8k.json results/mmlu.json results/humaneval.json \
+  --output analysis/combined_metrics.json
+```
 
+### Statistical Testing
+
+```bash
 # Statistical significance testing
-uv run python -m conduit_bench.cli significance \
-  --results results/benchmark.json \
+uv run conduit-bench significance \
+  --results results/gsm8k.json \
   --baseline oracle \
   --alpha 0.05 \
   --output analysis/significance.json
 ```
 
-## Experimental Design (Issue #141)
-
-For validating Scalable LinUCB implementation:
-
-```bash
-# 1. Generate synthetic dataset with sufficient convergence samples
-uv run python -m conduit_bench.cli generate \
-  --queries 10000 \
-  --seed 42 \
-  --output data/synthetic_10k.jsonl \
-  --reference-probability 1.0
-
-# 2. Benchmark standard LinUCB
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms linucb \
-  --output results/standard_linucb.json
-
-# 3. Benchmark Scalable LinUCB (after implementation)
-uv run python -m conduit_bench.cli run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms scalable_linucb \
-  --output results/scalable_linucb.json
-
-# 4. Compare convergence and performance
-uv run python -m conduit_bench.cli compare \
-  --results results/standard_linucb.json results/scalable_linucb.json \
-  --output analysis/scalable_comparison.json
-```
-
-**Expected Results** (from arXiv:2510.19349):
-- **Computation**: 59x faster matrix operations (387³ → 387×64²)
-- **Memory**: 3.1x less memory (387² → 387×64×2)
-- **Convergence**: Similar or faster learning (fewer samples needed)
-- **Quality**: Preserves original LinUCB algorithm quality
+**Statistical Methods**:
+- Friedman test for overall algorithm differences
+- Nemenyi post-hoc for pairwise comparisons
+- Report mean ± 95% CI for all metrics
 
 ## File Organization
 
 ```
 conduit-benchmark/
 ├── data/
-│   ├── synthetic_10k.jsonl              # Training dataset (synthetic)
-│   ├── synthetic_test_1k.jsonl          # Test dataset (held-out synthetic)
-│   ├── gsm8k_1k.jsonl                   # Validation dataset (GSM8K)
-│   └── pilot_200.jsonl                  # Small test dataset
+│   └── (datasets auto-downloaded from HuggingFace)
 ├── results/
-│   ├── oracle_reference.json            # Oracle baseline
-│   ├── linucb_results.json              # LinUCB results
-│   ├── thompson_results.json            # Thompson Sampling results
-│   └── ucb1_results.json                # UCB1 results
+│   ├── gsm8k.json                       # GSM8K benchmark results
+│   ├── mmlu.json                        # MMLU benchmark results
+│   └── humaneval.json                   # HumanEval benchmark results
 ├── analysis/
-│   ├── metrics.json                     # Performance metrics
-│   ├── comparison.json                  # Algorithm comparison
-│   └── learning_curves.png              # Visualization
-└── archive/
-    └── routerbench/                     # Archived RouterBench code
-        └── routerbench_loader.py        # RouterBench adapter (archived)
+│   ├── combined_metrics.json            # Cross-benchmark analysis
+│   ├── learning_curves.png              # Visualization
+│   └── significance.json                # Statistical tests
+└── conduit_bench/
+    ├── evaluators/                      # Pluggable evaluators
+    │   ├── base.py                      # Abstract evaluator interface
+    │   ├── exact_match.py               # GSM8K/MMLU evaluator
+    │   └── code_execution.py            # HumanEval evaluator
+    └── datasets/                        # Dataset loaders
+        ├── gsm8k.py                     # GSM8K loader
+        ├── mmlu.py                      # MMLU loader
+        └── humaneval.py                 # HumanEval loader
 ```
 
 ## Best Practices
 
-### 1. Start with Small Test Run
+### 1. Start with HumanEval
 
+HumanEval has only 164 problems - cheapest way to validate setup:
 ```bash
-# Generate small test dataset (10 queries)
-uv run python -m conduit_bench.cli generate \
-  --queries 10 \
-  --seed 99 \
-  --output data/test_10.jsonl \
-  --reference-probability 1.0
-
-# Test with small dataset
-uv run python -m conduit_bench.cli run \
-  --dataset data/test_10.jsonl \
-  --algorithms ucb1,oracle \
-  --output results/test_10.json
+uv run conduit-bench run \
+  --dataset humaneval \
+  --algorithms hybrid,ucb1,random \
+  --evaluator code_execution \
+  --output results/humaneval_test.json
 ```
 
 ### 2. Use Oracle Caching
 
-Always generate oracle results separately and reuse:
+Generate oracle results separately and reuse:
 ```bash
-# Generate oracle once
-uv run python -m conduit_bench.cli run --dataset DATA --algorithms oracle --output oracle.json
+# Generate oracle once per dataset
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms oracle \
+  --evaluator exact_match \
+  --output results/gsm8k_oracle.json
 
 # Reuse for all bandit runs
-uv run python -m conduit_bench.cli run --dataset DATA --oracle-reference oracle.json ...
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,ucb1 \
+  --evaluator exact_match \
+  --oracle-reference results/gsm8k_oracle.json \
+  --output results/gsm8k_bandits.json
 ```
 
 ### 3. Monitor Costs
@@ -344,15 +347,16 @@ uv run python -m conduit_bench.cli run --dataset DATA --oracle-reference oracle.
 Check estimated costs before running:
 ```bash
 # Preview run cost (dry run mode)
-uv run python -m conduit_bench.cli run \
-  --dataset data/hybrid_10k.jsonl \
-  --algorithms linucb,thompson,ucb1,oracle \
+uv run conduit-bench run \
+  --dataset gsm8k \
+  --algorithms hybrid,linucb,thompson,ucb1,oracle \
+  --evaluator exact_match \
   --dry-run
 ```
 
 ### 4. Save Intermediate Results
 
-Benchmark runs can be interrupted. Save results periodically:
+Benchmark runs can be interrupted:
 ```bash
 # Results auto-save every 100 queries to output file
 # Resume from checkpoint on interruption
@@ -362,19 +366,20 @@ Benchmark runs can be interrupted. Save results periodically:
 
 Run multiple replications with different seeds:
 ```bash
-for seed in {1..10}; do
-  uv run python -m conduit_bench.cli run \
-    --dataset data/synthetic_10k.jsonl \
-    --algorithms linucb,thompson,ucb1 \
-    --oracle-reference results/oracle.json \
+for seed in {1..5}; do
+  uv run conduit-bench run \
+    --dataset gsm8k \
+    --algorithms hybrid,linucb,thompson,ucb1 \
+    --evaluator exact_match \
+    --oracle-reference results/gsm8k_oracle.json \
     --seed $seed \
-    --output results/replication_${seed}.json
+    --output results/gsm8k_seed_${seed}.json
 done
 
 # Analyze statistical significance
-uv run python -m conduit_bench.cli significance \
-  --results results/replication_*.json \
-  --output analysis/significance.json
+uv run conduit-bench significance \
+  --results results/gsm8k_seed_*.json \
+  --output analysis/gsm8k_significance.json
 ```
 
 ## Troubleshooting
@@ -386,49 +391,38 @@ If hitting rate limits:
 # Reduce concurrency
 --max-concurrency 5
 
-# Add delays between requests (if supported)
+# Add delays between requests
 --request-delay 0.1
 ```
 
-### Out of Memory
+### Code Execution Timeout
 
-For large datasets:
+For HumanEval problems taking too long:
 ```bash
-# Process in batches
---batch-size 1000
-
-# Reduce feature dimensions
---use-pca \
---pca-dimensions 67
+# Increase timeout (default 10s)
+--code-timeout 30
 ```
 
-### Slow Convergence
+### Missing Dependencies
 
-If algorithms aren't converging:
+For HumanEval execution:
 ```bash
-# Increase dataset size to 10k queries
-uv run python -m conduit_bench.cli generate \
-  --queries 10000 \
-  --seed 42 \
-  --output data/synthetic_10k.jsonl \
-  --reference-probability 1.0
+# Ensure numpy, typing_extensions available in sandbox
+uv add numpy typing_extensions
 ```
 
 ## Next Steps
 
-1. **Generate synthetic dataset**: Create 10k queries for training
-2. **Run quick test**: Use 10-query test dataset to validate setup
-3. **Generate oracle**: Create oracle baseline with caching enabled
-4. **Benchmark algorithms**: Compare all bandit algorithms on synthetic data
-5. **In-distribution validation**: Test on held-out synthetic queries
-6. **Out-of-distribution validation**: Test on GSM8K to evaluate generalization
-7. **Analyze results**: Generate learning curves and statistical comparison
-8. **Future validation**: Test on ELI5 dataset for extreme generalization
+1. **Start with HumanEval**: 164 problems, lowest cost (~$20-30)
+2. **Then GSM8K**: 1,319 problems, math reasoning
+3. **Then MMLU**: 1,000 problems, knowledge breadth
+4. **Analyze combined results**: Generate headline numbers
+5. **Prepare HN post**: Use results for launch
 
 ## References
 
 - **GSM8K Dataset**: https://huggingface.co/datasets/openai/gsm8k
-- **ELI5 Dataset**: https://huggingface.co/datasets/eli5
-- **Issue #141**: Scalable LinUCB implementation (arXiv:2510.19349)
-- **Design Decisions**: DESIGN_DECISIONS.md
+- **MMLU Dataset**: https://huggingface.co/datasets/cais/mmlu
+- **HumanEval Dataset**: https://huggingface.co/datasets/openai/openai_humaneval
+- **RouteLLM (Berkeley)**: https://github.com/lm-sys/RouteLLM
 - **Experimental Design**: EXPERIMENTAL_DESIGN.md

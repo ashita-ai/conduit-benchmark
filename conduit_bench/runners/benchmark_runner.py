@@ -2,15 +2,20 @@
 
 Executes queries across multiple bandit algorithms, collects feedback,
 and generates comprehensive benchmark results.
+
+Supports pluggable evaluation:
+- Arbiter (legacy): LLM-as-judge for production routing
+- ExactMatch: For GSM8K/MMLU (objective, no LLM judge)
+- CodeExecution: For HumanEval (pass/fail based on test execution)
 """
 
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from arbiter_ai import evaluate
 from rich.console import Console
 from tqdm.asyncio import tqdm_asyncio
 
-from conduit.core.models import QueryFeatures
 from conduit.engines.analyzer import QueryAnalyzer
 from conduit.engines.bandits import BanditAlgorithm, BanditFeedback
 
@@ -22,6 +27,9 @@ from conduit_bench.benchmark_models import (
 )
 from conduit_bench.database import BenchmarkDatabase
 from conduit_bench.runners.model_executor import ModelExecutor
+
+if TYPE_CHECKING:
+    from conduit_bench.evaluators.base import BaseEvaluator
 
 
 console = Console()
@@ -57,17 +65,20 @@ class BenchmarkRunner:
         database: BenchmarkDatabase | None = None,
         enable_db_write: bool = True,
         analyzer: QueryAnalyzer | None = None,
+        evaluator: "BaseEvaluator | None" = None,
     ) -> None:
         """Initialize BenchmarkRunner.
 
         Args:
             algorithms: List of bandit algorithms to benchmark
             executor: ModelExecutor for LLM execution (creates default if None)
-            arbiter_model: Model to use for quality evaluation
+            arbiter_model: Model to use for quality evaluation (legacy Arbiter mode)
             max_concurrency: Maximum number of parallel query executions
             database: BenchmarkDatabase instance (creates default if None)
             enable_db_write: Whether to enable streaming database writes
             analyzer: QueryAnalyzer for feature extraction (creates default if None)
+            evaluator: Pluggable evaluator (ExactMatch, CodeExecution). If None,
+                       uses legacy Arbiter LLM-as-judge evaluation.
         """
         self.algorithms = algorithms
         self.executor = executor or ModelExecutor()
@@ -76,6 +87,7 @@ class BenchmarkRunner:
         self.database = database
         self.enable_db_write = enable_db_write
         self.analyzer = analyzer or QueryAnalyzer()
+        self.evaluator = evaluator  # None means use Arbiter (legacy)
 
     async def run(
         self,
@@ -238,17 +250,25 @@ class BenchmarkRunner:
                 system_prompt="You are a helpful assistant.",
             )
 
-            # Evaluate quality using Arbiter (always evaluate, strategy depends on reference)
+            # Evaluate quality using pluggable evaluator or Arbiter (legacy)
             has_reference = bool(query.reference_answer)
 
             if execution_result.success:
-                if has_reference:
+                if self.evaluator is not None:
+                    # Use pluggable evaluator (ExactMatch, CodeExecution)
+                    quality_score = await self._evaluate_with_evaluator(
+                        response=execution_result.response_text,
+                        query=query,
+                    )
+                elif has_reference:
+                    # Legacy: Arbiter with reference
                     quality_score = await self._evaluate_with_reference(
                         output=execution_result.response_text,
                         query=query.query_text,
                         reference=query.reference_answer,
                     )
                 else:
+                    # Legacy: Arbiter without reference
                     quality_score = await self._evaluate_without_reference(
                         output=execution_result.response_text,
                         query=query.query_text,
@@ -401,3 +421,44 @@ class BenchmarkRunner:
         except Exception as e:
             console.print(f"[red]Warning: Query-based evaluation failed: {e}[/red]")
             return 0.5  # Neutral score on evaluation failure
+
+    async def _evaluate_with_evaluator(
+        self,
+        response: str,
+        query: BenchmarkQuery,
+    ) -> float:
+        """Evaluate using pluggable evaluator (ExactMatch, CodeExecution).
+
+        This method uses objective evaluation without LLM-as-judge:
+        - ExactMatch: Extract answer from response, compare to ground truth
+        - CodeExecution: Run code, check if tests pass
+
+        Args:
+            response: Model's response text
+            query: BenchmarkQuery with ground truth in reference_answer
+
+        Returns:
+            Quality score (1.0 if correct, 0.0 if incorrect)
+        """
+        if self.evaluator is None:
+            console.print("[red]Warning: No evaluator configured[/red]")
+            return 0.5
+
+        try:
+            # Get additional kwargs from query metadata for code execution
+            kwargs = {}
+            if "prompt" in query.metadata:
+                kwargs["prompt"] = query.metadata["prompt"]
+            if "entry_point" in query.metadata:
+                kwargs["entry_point"] = query.metadata["entry_point"]
+
+            result = self.evaluator.evaluate(
+                response=response,
+                ground_truth=query.reference_answer or "",
+                query=query.query_text,
+                **kwargs,
+            )
+            return result.score
+        except Exception as e:
+            console.print(f"[red]Warning: Evaluator failed: {e}[/red]")
+            return 0.0  # Evaluation failure = incorrect

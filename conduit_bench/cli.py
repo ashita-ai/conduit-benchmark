@@ -1,6 +1,11 @@
 """Command-line interface for conduit-bench.
 
 Provides commands for generating datasets, running benchmarks, and analyzing results.
+
+Supports three benchmark datasets with objective evaluation:
+- GSM8K: Math reasoning (exact match on #### N)
+- MMLU: Knowledge (exact match on A/B/C/D)
+- HumanEval: Code generation (pass/fail via execution)
 """
 
 import asyncio
@@ -26,10 +31,17 @@ from conduit.engines.bandits.baselines import (
     OracleBaseline,
     RandomBaseline,
 )
+from conduit.engines.hybrid_router import HybridRouter
 
 from conduit_bench.benchmark_models import BenchmarkQuery, BenchmarkResult
 from conduit_bench.generators.synthetic import SyntheticQueryGenerator
 from conduit_bench.runners.benchmark_runner import BenchmarkRunner
+
+# Dataset loaders
+from conduit_bench.datasets import GSM8KLoader, MMLULoader, HumanEvalLoader
+
+# Evaluators
+from conduit_bench.evaluators import ExactMatchEvaluator, CodeExecutionEvaluator
 
 console = Console()
 
@@ -241,17 +253,24 @@ def generate(
 @click.option(
     "--dataset",
     "-d",
-    type=click.Path(exists=True, path_type=Path),
+    type=str,
     required=True,
-    help="Path to JSONL dataset file",
+    help="Dataset: 'gsm8k', 'mmlu', 'humaneval', or path to JSONL file",
 )
 @click.option(
     "--algorithms",
     "-a",
     type=str,
-    default="thompson,ucb1,epsilon",
+    default="hybrid,ucb1,random",
     help="Comma-separated list of algorithms to run",
     show_default=True,
+)
+@click.option(
+    "--evaluator",
+    "-e",
+    type=click.Choice(["exact_match", "code_execution", "arbiter"]),
+    default=None,
+    help="Evaluator type (auto-detected from dataset if not specified)",
 )
 @click.option(
     "--output",
@@ -283,39 +302,119 @@ def generate(
     type=click.Path(exists=True, path_type=Path),
     help="Path to pre-computed Oracle results (skip Oracle run, use cached results)",
 )
+@click.option(
+    "--mmlu-limit",
+    type=int,
+    default=1000,
+    help="Number of MMLU questions to use (default: 1000 of 14k)",
+    show_default=True,
+)
+@click.option(
+    "--code-timeout",
+    type=int,
+    default=10,
+    help="Timeout in seconds for HumanEval code execution",
+    show_default=True,
+)
 def run(
-    dataset: Path,
+    dataset: str,
     algorithms: str,
+    evaluator: str | None,
     output: Path,
     max_queries: int | None,
     parallel: bool,
     max_concurrency: int,
     oracle_reference: Path | None,
+    mmlu_limit: int,
+    code_timeout: int,
 ) -> None:
     """Run benchmark experiments.
 
-    Executes multiple bandit algorithms on the same dataset and compares
-    their performance in terms of cost, quality, and regret.
+    Executes multiple bandit algorithms on established benchmarks and compares
+    their performance in terms of accuracy, cost, and regret.
+
+    Datasets:
+      - gsm8k: Grade school math (1,319 problems, exact match)
+      - mmlu: Multi-subject knowledge (1k of 14k, exact match)
+      - humaneval: Python coding (164 problems, code execution)
+      - /path/to/file.jsonl: Custom JSONL dataset (Arbiter evaluation)
 
     Example:
-        conduit-bench run --dataset data/queries.jsonl --algorithms thompson,ucb1
+        conduit-bench run --dataset gsm8k --algorithms hybrid,ucb1,random
+        conduit-bench run --dataset mmlu --mmlu-limit 500
+        conduit-bench run --dataset humaneval --code-timeout 15
     """
 
     async def _run() -> None:
         console.print("\n[bold cyan]Loading dataset...[/bold cyan]")
 
-        # Load queries from JSONL
+        # Determine dataset type and load accordingly
         queries: list[BenchmarkQuery] = []
-        with open(dataset) as f:
-            for line in f:
-                if line.strip():
-                    queries.append(BenchmarkQuery.model_validate_json(line))
+        selected_evaluator = None
+        dataset_name = dataset.lower()
 
-        if max_queries:
-            queries = queries[:max_queries]
-            console.print(f"[yellow]Limited to first {max_queries} queries[/yellow]")
+        if dataset_name == "gsm8k":
+            # Load GSM8K from HuggingFace
+            console.print("[cyan]Loading GSM8K from HuggingFace...[/cyan]")
+            loader = GSM8KLoader()
+            queries = loader.load(split="test", limit=max_queries)
+            selected_evaluator = ExactMatchEvaluator(dataset_type="gsm8k")
+            console.print(f"[green]Loaded {len(queries)} GSM8K test problems[/green]")
 
-        console.print(f"Loaded {len(queries)} queries from {dataset}")
+        elif dataset_name == "mmlu":
+            # Load MMLU from HuggingFace
+            console.print("[cyan]Loading MMLU from HuggingFace...[/cyan]")
+            loader = MMLULoader()
+            limit = max_queries or mmlu_limit
+            queries = loader.load(split="test", limit=limit)
+            selected_evaluator = ExactMatchEvaluator(dataset_type="mmlu")
+            console.print(f"[green]Loaded {len(queries)} MMLU questions[/green]")
+
+        elif dataset_name == "humaneval":
+            # Load HumanEval from HuggingFace
+            console.print("[cyan]Loading HumanEval from HuggingFace...[/cyan]")
+            loader = HumanEvalLoader()
+            queries = loader.load(limit=max_queries)
+            selected_evaluator = CodeExecutionEvaluator(timeout=code_timeout)
+            console.print(f"[green]Loaded {len(queries)} HumanEval problems[/green]")
+
+        else:
+            # Custom JSONL file (legacy behavior)
+            dataset_path = Path(dataset)
+            if not dataset_path.exists():
+                console.print(f"[red]Error: Dataset '{dataset}' not found[/red]")
+                console.print("Available datasets: gsm8k, mmlu, humaneval, or path to JSONL file")
+                return
+
+            console.print(f"[cyan]Loading custom dataset from {dataset_path}...[/cyan]")
+            with open(dataset_path) as f:
+                for line in f:
+                    if line.strip():
+                        queries.append(BenchmarkQuery.model_validate_json(line))
+
+            if max_queries:
+                queries = queries[:max_queries]
+
+            # Use Arbiter for custom datasets (legacy behavior)
+            selected_evaluator = None  # Triggers Arbiter fallback
+            console.print(f"[green]Loaded {len(queries)} queries from {dataset_path}[/green]")
+            console.print("[yellow]Using Arbiter LLM-as-judge evaluation[/yellow]")
+
+        # Override evaluator if explicitly specified
+        if evaluator:
+            if evaluator == "exact_match":
+                # Determine type from dataset
+                if dataset_name == "mmlu":
+                    selected_evaluator = ExactMatchEvaluator(dataset_type="mmlu")
+                else:
+                    selected_evaluator = ExactMatchEvaluator(dataset_type="gsm8k")
+            elif evaluator == "code_execution":
+                selected_evaluator = CodeExecutionEvaluator(timeout=code_timeout)
+            elif evaluator == "arbiter":
+                selected_evaluator = None  # Arbiter fallback
+
+        if selected_evaluator:
+            console.print(f"[cyan]Evaluator: {selected_evaluator.name}[/cyan]")
 
         # Parse algorithm list
         algo_names = [a.strip().lower() for a in algorithms.split(",")]
@@ -330,11 +429,13 @@ def run(
 
         # Create algorithm instances
         algorithm_map = {
+            # Production algorithm (what conduit ships) ⭐
+            "hybrid": HybridRouter(DEFAULT_ARMS, transition_point=2000),
             # Standard (non-contextual) bandits
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
             "epsilon": EpsilonGreedyBandit(DEFAULT_ARMS, epsilon=0.1),
-            # Contextual bandits (feature_dim auto-detected from QueryAnalyzer = 387)
+            # Contextual bandits (feature_dim auto-detected from QueryAnalyzer)
             "linucb": LinUCBBandit(DEFAULT_ARMS, alpha=1.0),
             "contextual_thompson": ContextualThompsonSamplingBandit(
                 DEFAULT_ARMS, lambda_reg=1.0
@@ -365,6 +466,7 @@ def run(
             algorithms=selected_algorithms,
             arbiter_model="gpt-4o-mini",
             max_concurrency=max_concurrency,
+            evaluator=selected_evaluator,  # Pluggable evaluator (None = Arbiter)
         )
 
         # Store oracle reference path if provided
