@@ -4,7 +4,8 @@
 1. Compare 11 bandit algorithms for LLM routing
 2. Test across 9 modern frontier models (Claude, OpenAI, Google)
 3. Measure convergence, quality, cost, and regret with statistical rigor
-4. (Optional) Compare PCA dimensionality reduction (387 → 67 dims) in follow-up study
+4. **Enable PCA by default** (387 → 67 dims) to ensure contextual algorithm convergence at N=2,500
+5. (Optional) Compare PCA vs full embeddings in ablation study at higher N
 
 ## 🤖 Algorithms Under Test (11 Total)
 
@@ -80,11 +81,14 @@ Where:
 ### Convergence Requirements
 
 **Contextual Algorithms** (LinUCB, ContextualThompson, Dueling):
-- Default dimensions: `d = 387` (384 embedding + 3 metadata)
-- With PCA (optional): `d = 67` (64 PCA + 3 metadata)
-- Minimum samples: `20 * d = 20 * 387 = 7,740` (default) or `20 * 67 = 1,340` (PCA)
-- Recommended: `30 * d = 30 * 387 = 11,610` (default) or `30 * 67 = 2,010` (PCA)
-- **Power-adjusted N=2,500:** Adequate for statistical power (see below)
+- **WITH PCA (DEFAULT)**: `d = 67` (64 PCA + 3 metadata)
+  - Minimum samples: `20 * d = 20 * 67 = 1,340`
+  - Recommended: `30 * d = 30 * 67 = 2,010`
+  - **N=2,500 provides 124% of recommended** ✅
+- WITHOUT PCA (ablation study only): `d = 387` (384 embedding + 3 metadata)
+  - Minimum samples: `20 * d = 20 * 387 = 7,740`
+  - Recommended: `30 * d = 30 * 387 = 11,610`
+  - **Would require N ≥ 12,000 for convergence**
 
 **Non-Contextual Algorithms** (Thompson, UCB1, Epsilon):
 - Number of arms: `K = 9`
@@ -138,17 +142,24 @@ n_required = analysis.solve_power(
 # With 3 runs: N = 2,000 is sufficient
 ```
 
-### **RECOMMENDATION: N = 2,500 samples** (Post-Pilot Validation)
+### **RECOMMENDATION: N = 2,500 samples with PCA ENABLED** (Post-Pilot Validation)
+
+**Why PCA is Mandatory:**
+- WITHOUT PCA: LinUCB needs 30 × 387 = 11,610 samples (N=2,500 only 22% of required)
+- WITH PCA: LinUCB needs 30 × 67 = 2,010 samples (N=2,500 provides 124% ✅)
+- PCA reduces required samples by **5.8x**
+- Quality degradation: <5% (documented in conduit docs/PCA_GUIDE.md)
+- Same cost and runtime (embedding compression negligible vs LLM calls)
 
 **Rationale:**
-- ✅ Allows contextual algorithms to converge (67 dimensions)
+- ✅ Enables contextual algorithm convergence at N=2,500 (requires PCA)
 - ✅ Ensures all 9 models explored sufficiently
 - ✅ Provides ≥80% statistical power (after pilot validation)
 - ✅ Reasonable runtime (~6-8 hours for 11 algorithms)
 - ✅ Cost-effective (~$25-30 for Arbiter evaluation)
 - ✅ Balances power vs. execution time
 
-**Note:** Final sample size subject to pilot study variance estimates. May adjust to N=3,000-5,000 if pilot shows higher variance.
+**Note:** Final sample size subject to pilot study variance estimates. May adjust to N=3,000-5,000 if pilot shows higher variance. Ablation study without PCA requires N ≥ 12,000.
 
 **Convergence vs Power Analysis:**
 - N=2,500 is below theoretical convergence heuristic (30 * 387 = 11,610 for LinUCB)
@@ -316,47 +327,22 @@ algorithms: [thompson, ucb1, epsilon, linucb, contextual_thompson, dueling,
 models: 9  # Claude 4 (3) + OpenAI (3) + Gemini 3 (3)
 samples: 2500
 reference_probability: 0.25  # Fixed for main experiment
+pca_enabled: true  # REQUIRED for convergence at N=2,500
 pca_dimensions: 67
 runs_per_algorithm: 3  # Independent runs with different seeds
 random_seeds: [42, 123, 456]  # For reproducibility
 total_queries: 2500 * 11 * 3 = 82,500
 ```
 
-### Ablation Studies
+### Ablation Studies (Future Work - Budget Permitting)
 
-**1. PCA Impact (Contextual algorithms only)**
-```yaml
-algorithms: [linucb, contextual_thompson, dueling]
-conditions:
-  - pca_enabled: true, pca_dimensions: 67
-  - pca_enabled: false  # Full embedding dimensions
-samples: 2500
-runs: 3
-```
+**Note:** Due to budget constraints, ablation studies are deferred to future work. The primary experiment uses PCA-enabled configuration as the default.
 
-**2. Reference Probability Sensitivity**
-```yaml
-algorithms: [thompson, ucb1, linucb]  # Representative subset
-reference_probability: [0.1, 0.2, 0.3, 0.5, 1.0]
-samples: 2500
-runs: 3
-```
-
-**3. Model Set Size**
-```yaml
-algorithms: [thompson, ucb1, linucb]
-model_counts: [3, 5, 7, 9]  # Test scalability
-samples: 2500
-runs: 3
-```
-
-**4. Hybrid Switching Point**
-```yaml
-algorithm: hybrid
-switching_points: [1000, 1500, 2000, 2500, 3000]
-samples: 2500
-runs: 3
-```
+**Potential Future Studies:**
+1. **PCA Impact** - Requires N=12,000 for non-PCA convergence (expensive)
+2. **Reference Probability Sensitivity** - Test 0.1, 0.2, 0.3, 0.5, 1.0
+3. **Model Set Size** - Test scalability with 3, 5, 7, 9 models
+4. **Hybrid Switching Point** - Optimize UCB1→LinUCB transition
 
 ## 📊 Statistical Analysis Plan
 
@@ -465,7 +451,7 @@ def test_stationarity(reward_history, alpha=0.05):
 - Total queries: 82,500
 - Estimated cost: 11 * 3 * $11 = $363
 - **Buffer (30%):** $109
-- **Total budget:** ~$470
+- **Total budget:** ~$470 → **$363 actual** (ablation studies excluded)
 
 **Cost Tracking:**
 - Log actual costs per run
@@ -507,10 +493,11 @@ def test_stationarity(reward_history, alpha=0.05):
 - **Reproducibility:** Results consistent across 3 runs (CV <10%)
 - **Effect Sizes:** Report Cohen's d for all pairwise comparisons
 
-### PCA Impact
-- **Speed:** 2-3x faster feature processing (measured)
-- **Quality:** <5% quality degradation vs full embeddings (with CI)
-- **Convergence:** Similar convergence rate (within 10%, non-inferiority test)
+### PCA Configuration (Default)
+- **Dimensionality:** 67 features (64 PCA + 3 metadata) - default for all contextual algorithms
+- **Quality Assumption:** <5% quality degradation vs full 387-dim embeddings (per conduit docs)
+- **Convergence Benefit:** 5.8x fewer samples required (N=2,010 vs N=11,610)
+- **Ablation Study:** Deferred to future work (budget constraints)
 
 ## 🔄 Execution Plan
 
@@ -547,15 +534,17 @@ For **Standard Bandits** (Thompson, UCB1, ε-greedy, Random):
 - Proposed N=2,500: **14.3x oversampling** ✅
 
 For **Contextual Bandits** (LinUCB, ContextualThompson, Dueling):
-- Context dimensionality: 5-7 features (complexity, category, length, etc.)
-- Required N (d=5): 872 queries
-- Required N (d=7): 1,220 queries
-- Proposed N=2,500: **2.0-2.9x oversampling** ✅
+- **IMPORTANT NOTE**: Pilot tested only NON-contextual algorithms (Thompson, UCB1)
+- Context dimensionality: **387 features (384 embedding + 3 metadata)**
+- **WITH PCA**: 67 features (64 PCA + 3 metadata)
+  - Required N (30*d heuristic): 2,010 queries
+  - Proposed N=2,500: **1.24x oversampling** ✅
+- **WITHOUT PCA**: 387 features would require 11,610 queries (NOT FEASIBLE at N=2,500)
 
-**Conclusion:** ✅ **N=2,500 is VALIDATED**
+**Conclusion:** ✅ **N=2,500 is VALIDATED** (requires PCA for contextual algorithms)
 - Adequate power for standard bandits (14x)
-- Adequate power for contextual bandits (2x)
-- No adjustment needed
+- Adequate convergence for contextual bandits WITH PCA (1.24x)
+- Contextual algorithms WILL NOT converge without PCA at N=2,500
 
 **Infrastructure Validation:**
 - Database persistence: ✅ Working (UCB1 Infinity bug fixed)
@@ -581,12 +570,7 @@ For **Contextual Bandits** (LinUCB, ContextualThompson, Dueling):
 **Time:** ~10.5 hours (parallel)
 **Cost:** ~$132 (with buffer)
 
-### Phase 3: Ablation Studies
-**Studies:** PCA impact, reference sensitivity, model set size, hybrid switching
-**Time:** ~15 hours (parallel)
-**Cost:** ~$100 (with buffer)
-
-**Total:** 4 phases, ~47 hours, ~$478
+**Total:** 2 phases, ~32 hours, ~$363
 
 ## 📊 Analysis Plan
 
@@ -598,11 +582,9 @@ For **Contextual Bandits** (LinUCB, ContextualThompson, Dueling):
 5. **Statistical Significance** - Friedman test + Nemenyi post-hoc (with corrections)
 
 ### Secondary Analyses
-1. **PCA Impact** - Quality/speed tradeoff analysis (non-inferiority test)
-2. **Reference Sensitivity** - Performance vs reference probability (regression)
-3. **Domain Analysis** - Performance by query domain (ANOVA)
-4. **Scalability** - Performance vs number of models (regression)
-5. **Non-Stationarity** - CUSUM/Page-Hinkley tests for reward stability
+1. **Domain Analysis** - Performance by query domain (ANOVA)
+2. **Non-Stationarity** - CUSUM/Page-Hinkley tests for reward stability
+3. **Convergence Rate Modeling** - Time to convergence vs algorithm type
 
 ### Effect Size Reporting
 - **Cohen's d** for all pairwise algorithm comparisons
@@ -618,9 +600,9 @@ For **Contextual Bandits** (LinUCB, ContextualThompson, Dueling):
 3. Model selection over time (stacked area)
 4. Algorithm comparison table (summary stats with 95% CI)
 5. Convergence rate comparison (bar chart with 95% CI)
-6. PCA impact analysis (before/after with non-inferiority)
-7. Critical difference (CD) diagram (Nemenyi test results)
-8. Effect size heatmap (Cohen's d matrix)
+6. Critical difference (CD) diagram (Nemenyi test results)
+7. Effect size heatmap (Cohen's d matrix)
+8. Domain performance breakdown (faceted bar charts)
 
 ### Metrics Tables
 - Per-algorithm summary statistics (mean ± 95% CI)
@@ -642,10 +624,10 @@ For **Contextual Bandits** (LinUCB, ContextualThompson, Dueling):
 For academic publication, consider:
 - **N = 5,000-10,000** samples for 90-95% power
 - **5-10 runs** per algorithm for robust statistics
-- **Multiple datasets** (not just synthetic)
-- **Real-world validation** with production queries
-- **Ablation studies** for all major design choices
+- **Multiple datasets** (not just synthetic) - GSM8K for out-of-distribution validation
+- **Real-world validation** with production queries (if feasible)
 - **Full statistical reporting:** Effect sizes, confidence intervals, multiple comparison corrections
+- **Ablation studies** (if budget permits) - PCA impact, reference sensitivity, model set size
 
 ## 🚀 Quick Start Commands
 
@@ -732,12 +714,13 @@ uv run conduit-bench run \
 ---
 
 **Last Updated:** 2025-11-26
-**PCA Dimensions:** 67
+**PCA Dimensions:** 67 (default)
 **Validated Sample Size:** 2,500 ✅ (pilot completed, N validated)
 **Pilot Study Status:** ✅ COMPLETED (N=200, variance estimates obtained)
-**Estimated Cost:** $478 (with 30% buffer)
-**Estimated Time:** 159 hours (~7 days with parallelization)
+**Estimated Cost:** $363 (with 30% buffer) - excludes ablation studies
+**Estimated Time:** 32 hours (~1.5 days with parallelization)
 **Statistical Power:**
 - Standard bandits: 14x oversampling
-- Contextual bandits: 2-3x oversampling
+- Contextual bandits with PCA: 1.24x oversampling
 **Statistical Rigor:** Publication-ready with formal power analysis
+**Ablation Studies:** Deferred to future work (budget constraints)
