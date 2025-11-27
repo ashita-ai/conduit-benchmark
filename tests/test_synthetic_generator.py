@@ -21,7 +21,7 @@ def test_generator_initialization() -> None:
 
 def test_generate_query_text(generator: SyntheticQueryGenerator) -> None:
     """Test query text generation."""
-    query_text = generator._generate_query_text("technical")
+    query_text = generator._generate_query_text("technical_specific")
 
     assert isinstance(query_text, str)
     assert len(query_text) > 0
@@ -46,8 +46,8 @@ async def test_generate_simple(generator: SyntheticQueryGenerator) -> None:
 
     assert len(queries) == 10
     assert all(q.query_text for q in queries)
-    assert all(q.category in QUERY_TEMPLATES.keys() for q in queries)
-    assert all(q.complexity in [0.3, 0.5, 0.8] for q in queries)
+    assert all(q.metadata.get("category") in QUERY_TEMPLATES.keys() for q in queries)
+    assert all(q.metadata.get("complexity") in [0.3, 0.5, 0.8] for q in queries)
     assert all(q.reference_answer is None for q in queries)
 
 
@@ -56,21 +56,22 @@ async def test_generate_simple_specific_categories(
     generator: SyntheticQueryGenerator,
 ) -> None:
     """Test simple generation with specific categories."""
-    categories = ["technical", "math"]
+    categories = ["technical_specific", "system_design"]
     queries = await generator.generate_simple(n_queries=6, categories=categories)
 
     assert len(queries) == 6
-    assert all(q.category in categories for q in queries)
+    assert all(q.metadata.get("category") in categories for q in queries)
 
 
 @pytest.mark.asyncio
-async def test_generate_with_reference_answers(
-    generator: SyntheticQueryGenerator,
-) -> None:
+async def test_generate_with_reference_answers() -> None:
     """Test generation with reference answers (mocked)."""
-    # Mock PydanticAI Agent
+    # Create generator with 100% reference probability to ensure all queries get answers
+    generator = SyntheticQueryGenerator(seed=42, reference_probability=1.0)
+
+    # Mock PydanticAI Agent - use .output attribute (not .data)
     mock_result = MagicMock()
-    mock_result.data = "Mocked reference answer"
+    mock_result.output = "Mocked reference answer"
 
     with patch("conduit_bench.generators.synthetic.Agent") as MockAgent:
         mock_agent = MagicMock()
@@ -88,12 +89,12 @@ async def test_generate_distributes_categories(
     generator: SyntheticQueryGenerator,
 ) -> None:
     """Test that queries are distributed across categories."""
-    categories = ["technical", "math", "creative"]
+    categories = ["technical_specific", "system_design", "creative_writing"]
 
     with patch("conduit_bench.generators.synthetic.Agent") as MockAgent:
         mock_agent = MagicMock()
         mock_result = MagicMock()
-        mock_result.data = "Answer"
+        mock_result.output = "Answer"
         mock_agent.run = AsyncMock(return_value=mock_result)
         MockAgent.return_value = mock_agent
 
@@ -104,7 +105,7 @@ async def test_generate_distributes_categories(
     # Should have 3 queries per category (evenly distributed)
     category_counts = {cat: 0 for cat in categories}
     for query in queries:
-        category_counts[query.category] += 1
+        category_counts[query.metadata.get("category")] += 1
 
     assert all(count == 3 for count in category_counts.values())
 
@@ -122,9 +123,9 @@ async def test_generate_handles_reference_failure(
         queries = await generator.generate(n_queries=3, show_progress=False)
 
     assert len(queries) == 3
-    # Should have fallback reference answers
-    assert all(q.reference_answer is not None for q in queries)
-    assert all("failed" in q.reference_answer.lower() for q in queries)
+    # When reference generation fails, reference_answer is set to None (not a fallback string)
+    # This is by design - see synthetic.py line 503
+    assert all(q.reference_answer is None for q in queries)
 
 
 def test_reproducibility_with_seed() -> None:
@@ -141,5 +142,5 @@ def test_reproducibility_with_seed() -> None:
     # Should generate identical queries
     for q1, q2 in zip(queries1, queries2):
         assert q1.query_text == q2.query_text
-        assert q1.category == q2.category
-        assert q1.complexity == q2.complexity
+        assert q1.metadata.get("category") == q2.metadata.get("category")
+        assert q1.metadata.get("complexity") == q2.metadata.get("complexity")

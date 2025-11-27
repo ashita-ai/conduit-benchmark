@@ -85,9 +85,10 @@ Arbiter (LLM-as-judge) is still available for:
 ## 🤖 Algorithms Under Test (7 Total)
 
 ### Production Algorithm (1) - What conduit ships ⭐
-1. **HybridRouter** - UCB1 (0-2000 queries) → LinUCB (2000+)
-   - Cold-start: UCB1 explores efficiently without needing context
-   - Warm: LinUCB exploits query features after sufficient data
+1. **HybridRouter** - Phase1 (0-50 queries) → Phase2 (50+)
+   - Phase1: UCB1 or Thompson Sampling (explores without needing context)
+   - Phase2: LinUCB or Contextual Thompson (exploits query features)
+   - switch_threshold=50 for testing (production may use higher)
    - **This is the algorithm we're validating**
 
 ### Component Algorithms (2) - HybridRouter building blocks
@@ -102,22 +103,26 @@ Arbiter (LLM-as-judge) is still available for:
 6. **RandomBaseline** - Uniform random selection (lower bound)
 7. **OracleBaseline** - Best model per query (upper bound, requires all models run)
 
-## 📱 Model Arms (9 Models)
+## 📱 Model Arms (6 Models)
 
-### Anthropic Claude 4
-- `claude-opus-4` - Premium quality, highest cost
-- `claude-sonnet-4` - Balanced quality/cost
-- `claude-haiku-4` - Fast, lowest cost
+🚨 **CANONICAL MODEL LIST - DO NOT MODIFY** 🚨
 
-### OpenAI
-- `gpt-5.1` - Latest flagship
-- `chatgpt-5` - Standard quality
-- `chatgpt-5-mini` - Economical option
+These exact API model IDs are frozen for research reproducibility.
+Changing models invalidates all benchmark results.
 
-### Google Gemini 3
-- `gemini-3-pro` - New flagship (1501 Elo)
-- `gemini-3-flash` - Fast inference
-- `gemini-2.5-pro` - Previous generation baseline
+| API Model ID | Provider | Tier | Notes |
+|--------------|----------|------|-------|
+| `gpt-4o-mini` | OpenAI | Budget | Fast, cheap |
+| `gpt-4-turbo` | OpenAI | Flagship | High quality |
+| `claude-sonnet-4-5-20250929` | Anthropic | Balanced | Best for code |
+| `claude-opus-4-5-20251101` | Anthropic | Premium | Highest quality |
+| `gemini-2.5-pro` | Google | Flagship | Stable |
+| `gemini-3-pro-preview` | Google | Cutting Edge | Preview (may change) |
+
+Sources:
+- OpenAI: https://platform.openai.com/docs/models
+- Anthropic: https://platform.claude.com/docs/en/about-claude/models/all-models
+- Google: https://ai.google.dev/gemini-api/docs/models
 
 ## 🔧 Embedding Configuration
 

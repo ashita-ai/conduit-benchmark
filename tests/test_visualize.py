@@ -1,10 +1,7 @@
 """Tests for visualization module."""
 
 import pytest
-import tempfile
-import shutil
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 import matplotlib
 import matplotlib.pyplot as plt
 

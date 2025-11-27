@@ -498,7 +498,7 @@ class SyntheticQueryGenerator:
                     try:
                         result = await agent.run(query_text)
                         reference_answer = str(result.output)  # Use .output, not .data
-                    except Exception as e:
+                    except Exception:
                         # Fallback if reference generation fails - set to None instead of error message
                         reference_answer = None
 
@@ -574,9 +574,11 @@ class SyntheticQueryGenerator:
 
                 query = BenchmarkQuery(
                     query_text=query_text,
-                    category=category,
-                    complexity=complexity,
                     reference_answer=None,  # No reference for quick generation
+                    metadata={
+                        "category": category,  # For analysis only
+                        "complexity": complexity,  # For analysis only
+                    },
                 )
                 queries.append(query)
 

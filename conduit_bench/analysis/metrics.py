@@ -437,9 +437,16 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
         # BenchmarkResult format
         normalized_algos = []
         for algo in algorithms_data:
+            # Try multiple sources for quality scores
             quality_scores = [
                 eval_data["quality_score"] for eval_data in algo.get("feedback", [])
             ]
+            if not quality_scores:
+                # Try 'queries' field (test fixture format)
+                quality_scores = [
+                    q.get("quality_score", 0.0) for q in algo.get("queries", [])
+                    if "quality_score" in q
+                ]
             if not quality_scores:
                 # Fall back to quality_history if feedback not available
                 quality_scores = algo.get("quality_history", [])

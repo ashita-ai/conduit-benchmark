@@ -33,6 +33,7 @@ from conduit.engines.bandits.baselines import (
 )
 from conduit.engines.hybrid_router import HybridRouter
 
+from conduit_bench.adapters import HybridRouterBanditAdapter
 from conduit_bench.benchmark_models import BenchmarkQuery, BenchmarkResult
 from conduit_bench.generators.synthetic import SyntheticQueryGenerator
 from conduit_bench.runners.benchmark_runner import BenchmarkRunner
@@ -49,21 +50,37 @@ console = Console()
 from conduit.core.config import settings as conduit_settings
 
 
-# Reverse mapping: conduit internal name → API model name
-# This is the inverse of conduit.yaml's litellm.model_mappings
-# NOTE: Uses models available via API keys (not Vertex AI)
+# ============================================================================
+# 🚨 CANONICAL MODEL LIST - DO NOT MODIFY WITHOUT EXPLICIT USER APPROVAL 🚨
+# ============================================================================
+# These are the ACTUAL API model names used for benchmarking.
+# Conduit's config now uses these directly (no confusing internal mapping).
+#
+# Sources:
+#   - Anthropic: https://platform.claude.com/docs/en/about-claude/models/all-models
+#   - Google: https://ai.google.dev/gemini-api/docs/models
+#   - OpenAI: https://platform.openai.com/docs/models
+#
+# The mapping below is for backwards compatibility with old conduit configs.
+# New conduit configs use API names directly, so mapping is identity.
+# ============================================================================
 CONDUIT_TO_API_MODEL = {
-    # OpenAI (conduit uses future names, API uses current)
+    # Identity mappings (conduit now uses API names directly)
+    "gpt-4o-mini": "gpt-4o-mini",
+    "gpt-4-turbo": "gpt-4-turbo",
+    "claude-sonnet-4-5-20250929": "claude-sonnet-4-5-20250929",
+    "claude-opus-4-5-20251101": "claude-opus-4-5-20251101",
+    "claude-haiku-4-5-20251001": "claude-haiku-4-5-20251001",
+    "gemini-2.5-pro": "gemini-2.5-pro",
+    "gemini-2.5-flash": "gemini-2.5-flash",
+    "gemini-3-pro-preview": "gemini-3-pro-preview",  # Cutting edge (preview)
+    # Legacy mappings (backwards compat with old conduit internal names)
     "o4-mini": "gpt-4o-mini",
     "gpt-5": "gpt-4o",
     "gpt-5.1": "gpt-4-turbo",
-    # Anthropic
-    "claude-sonnet-4.5": "claude-3-5-sonnet-latest",
-    "claude-opus-4.5": "claude-3-opus-latest",
-    "claude-haiku-4.5": "claude-3-haiku-latest",
-    # Google (gemini-2.0-flash-exp available via API key, 1.5 requires Vertex)
-    "gemini-2.5-pro": "gemini-2.0-flash-exp",
-    "gemini-2.0-flash": "gemini-2.0-flash-exp",
+    "claude-sonnet-4.5": "claude-sonnet-4-5-20250929",
+    "claude-opus-4.5": "claude-opus-4-5-20251101",
+    "claude-haiku-4.5": "claude-haiku-4-5-20251001",
 }
 
 
@@ -421,11 +438,51 @@ def run(
         console.print(f"Algorithms: {', '.join(algo_names)}\n")
 
         # Create algorithm instances
-        # HybridRouter takes model IDs (strings), not ModelArm objects
-        model_ids = [arm.model_id for arm in DEFAULT_ARMS]
+        # HybridRouter takes model names (API names like "gpt-4o-mini", not conduit IDs like "o4-mini")
+        # This is needed because HybridRouter._infer_provider() pattern-matches on the model name
+        model_names = [arm.model_name for arm in DEFAULT_ARMS]
         algorithm_map = {
             # Production algorithm (what conduit ships) ⭐
-            "hybrid": HybridRouter(model_ids, switch_threshold=2000),
+            "hybrid": HybridRouterBanditAdapter(
+                HybridRouter(model_names, switch_threshold=50)
+            ),
+            # 4 Hybrid Router Configurations (all combinations)
+            # Default: Thompson → LinUCB (quality-first cold start)
+            "hybrid_thompson_linucb": HybridRouterBanditAdapter(
+                HybridRouter(
+                    model_names,
+                    switch_threshold=50,
+                    phase1_algorithm="thompson_sampling",
+                    phase2_algorithm="linucb",
+                )
+            ),
+            # Fast convergence: UCB1 → LinUCB
+            "hybrid_ucb1_linucb": HybridRouterBanditAdapter(
+                HybridRouter(
+                    model_names,
+                    switch_threshold=50,
+                    phase1_algorithm="ucb1",
+                    phase2_algorithm="linucb",
+                )
+            ),
+            # Bayesian warm routing: UCB1 → Contextual Thompson
+            "hybrid_ucb1_c_thompson": HybridRouterBanditAdapter(
+                HybridRouter(
+                    model_names,
+                    switch_threshold=50,
+                    phase1_algorithm="ucb1",
+                    phase2_algorithm="contextual_thompson_sampling",
+                )
+            ),
+            # Full Bayesian: Thompson → Contextual Thompson
+            "hybrid_thompson_c_thompson": HybridRouterBanditAdapter(
+                HybridRouter(
+                    model_names,
+                    switch_threshold=50,
+                    phase1_algorithm="thompson_sampling",
+                    phase2_algorithm="contextual_thompson_sampling",
+                )
+            ),
             # Standard (non-contextual) bandits
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
@@ -570,6 +627,11 @@ def _display_analysis_summary(analysis: dict) -> None:
     """Display analysis summary table."""
     console.print("[bold]Algorithm Performance Summary[/bold]\n")
 
+    # Handle empty algorithms
+    if not analysis.get("algorithms"):
+        console.print("[yellow]No algorithms to display[/yellow]")
+        return
+
     # Quality ranking table
     table = Table(show_header=True, header_style="bold cyan", title="Quality Ranking")
     table.add_column("Rank", style="yellow", width=6)
@@ -578,41 +640,65 @@ def _display_analysis_summary(analysis: dict) -> None:
     table.add_column("95% CI", justify="right")
     table.add_column("Converged", justify="center")
 
-    comp = analysis["comparative_analysis"]
-    for rank, (algo_name, quality) in enumerate(comp["quality_ranking"], 1):
-        algo_metrics = analysis["algorithms"][algo_name]
-        ci_lower = algo_metrics["quality_ci_lower"]
-        ci_upper = algo_metrics["quality_ci_upper"]
-        converged = "✓" if algo_metrics["converged"] else "✗"
+    # Use summary for rankings
+    quality_rankings = analysis.get("summary", {}).get("quality_rankings", [])
+    for rank, algo_name in enumerate(quality_rankings, 1):
+        algo_metrics = analysis["algorithms"].get(algo_name, {})
+        avg_quality = algo_metrics.get("average_quality", 0.0)
+
+        # Handle both tuple and separate ci fields
+        quality_ci = algo_metrics.get("quality_ci")
+        if quality_ci:
+            ci_lower, ci_upper = quality_ci
+        else:
+            ci_lower = algo_metrics.get("quality_ci_lower", 0.0)
+            ci_upper = algo_metrics.get("quality_ci_upper", 0.0)
+
+        # Handle both nested and flat convergence
+        convergence = algo_metrics.get("convergence", {})
+        if isinstance(convergence, dict):
+            converged = convergence.get("converged", False)
+        else:
+            converged = algo_metrics.get("converged", False)
+        converged_str = "✓" if converged else "✗"
 
         table.add_row(
             str(rank),
             algo_name,
-            f"{quality:.3f}",
+            f"{avg_quality:.3f}",
             f"[{ci_lower:.3f}, {ci_upper:.3f}]",
-            converged,
+            converged_str,
         )
 
     console.print(table)
 
     # Cost ranking
-    console.print("\n[bold]Cost Ranking[/bold]")
-    for rank, (algo_name, cost) in enumerate(comp["cost_ranking"], 1):
-        console.print(f"  {rank}. {algo_name}: ${cost:.4f}")
+    cost_rankings = analysis.get("summary", {}).get("cost_rankings", [])
+    if cost_rankings:
+        console.print("\n[bold]Cost Ranking[/bold]")
+        for rank, algo_name in enumerate(cost_rankings, 1):
+            algo_metrics = analysis["algorithms"].get(algo_name, {})
+            cost = algo_metrics.get("total_cost", 0.0)
+            console.print(f"  {rank}. {algo_name}: ${cost:.4f}")
 
     # Pareto frontier
-    console.print(f"\n[bold]Pareto Optimal Algorithms:[/bold] {', '.join(comp['pareto_optimal'])}")
+    pareto = analysis.get("pareto_frontier", [])
+    if pareto:
+        console.print(f"\n[bold]Pareto Optimal Algorithms:[/bold] {', '.join(pareto)}")
 
     # Statistical significance
-    friedman = comp["friedman_test"]
-    if friedman["significant"]:
-        console.print(
-            f"\n[bold green]✓ Friedman test: Significant differences detected (p={friedman['p_value']:.4f})[/bold green]"
-        )
-    else:
-        console.print(
-            f"\n[yellow]Friedman test: No significant differences (p={friedman['p_value']:.4f})[/yellow]"
-        )
+    stats = analysis.get("statistical_tests", {})
+    friedman = stats.get("friedman", {})
+    if friedman:
+        p_value = friedman.get("p_value", 1.0)
+        if friedman.get("significant", False):
+            console.print(
+                f"\n[bold green]✓ Friedman test: Significant differences detected (p={p_value:.4f})[/bold green]"
+            )
+        else:
+            console.print(
+                f"\n[yellow]Friedman test: No significant differences (p={p_value:.4f})[/yellow]"
+            )
 
 
 @main.command()
