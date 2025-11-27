@@ -16,6 +16,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
+from conduit.core.config import settings as conduit_settings
 from conduit.engines.bandits import (
     ContextualThompsonSamplingBandit,
     DuelingBandit,
@@ -45,9 +46,6 @@ from conduit_bench.datasets import GSM8KLoader, MMLULoader, HumanEvalLoader
 from conduit_bench.evaluators import ExactMatchEvaluator, CodeExecutionEvaluator
 
 console = Console()
-
-# Import conduit's model configuration - single source of truth
-from conduit.core.config import settings as conduit_settings
 
 
 # ============================================================================

@@ -269,12 +269,9 @@ class RouterBenchLoader:
             "mmlu-virology",
         }
 
-        # Exclude these creative/subjective benchmarks
-        creative_benchmarks = {
-            "mt-bench",  # Subjective quality judgments
-            "alpaca-eval",  # Open-ended generation
-            # Add more as identified
-        }
+        # Note: These creative/subjective benchmarks are excluded:
+        # - mt-bench (subjective quality judgments)
+        # - alpaca-eval (open-ended generation)
 
         return factual_benchmarks
 
