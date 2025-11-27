@@ -428,9 +428,11 @@ def run(
         console.print(f"Algorithms: {', '.join(algo_names)}\n")
 
         # Create algorithm instances
+        # HybridRouter takes model IDs (strings), not ModelArm objects
+        model_ids = [arm.model_id for arm in DEFAULT_ARMS]
         algorithm_map = {
             # Production algorithm (what conduit ships) ⭐
-            "hybrid": HybridRouter(DEFAULT_ARMS, transition_point=2000),
+            "hybrid": HybridRouter(model_ids, switch_threshold=2000),
             # Standard (non-contextual) bandits
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
