@@ -1,0 +1,519 @@
+{
+  "benchmark_id": "e104b593-7b0d-4443-ae7f-340259cf5793",
+  "dataset_size": 10,
+  "algorithms": [
+    {
+      "algorithm_name": "thompson_sampling",
+      "run_id": "cc4f677e-775b-42e4-802f-f1d49d2d67de",
+      "total_queries": 10,
+      "total_cost": 0.005103750000000001,
+      "average_quality": 0.6,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "gpt-5-mini"
+        ],
+        [
+          "mmlu_test_1",
+          "gpt-5-mini"
+        ],
+        [
+          "mmlu_test_2",
+          "gpt-5-mini"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-opus-4-5"
+        ],
+        [
+          "mmlu_test_4",
+          "gemini-2.0-flash"
+        ],
+        [
+          "mmlu_test_5",
+          "claude-sonnet-4-5"
+        ],
+        [
+          "mmlu_test_6",
+          "gemini-3-pro"
+        ],
+        [
+          "mmlu_test_7",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_8",
+          "claude-opus-4-5"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5-nano"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "gpt-5-mini",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0005685,
+          "latency": 7.609944105148315,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "gpt-5-mini",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0009404999999999999,
+          "latency": 6.387700319290161,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gpt-5-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00045325,
+          "latency": 3.6111040115356445,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-opus-4-5",
+          "response_text": "(C)",
+          "quality_score": 1.0,
+          "cost": 0.00055,
+          "latency": 4.1818859577178955,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "gemini-2.0-flash",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 24.126946926116943,
+          "success": false,
+          "error": "ModelHTTPError: status_code: 401, model_name: gemini-2.0-flash, body: {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'CREDENTIALS_MISSING', 'domain': 'googleapis.com', 'metadata': {'method': 'google.cloud.aiplatform.v1beta1.PredictionService.GenerateContent', 'service': 'aiplatform.googleapis.com'}}]}}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "claude-sonnet-4-5",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 24.530763864517212,
+          "success": false,
+          "error": "UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "gemini-3-pro",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 3.6354918479919434,
+          "success": false,
+          "error": "ModelHTTPError: status_code: 401, model_name: gemini-3-pro, body: {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'CREDENTIALS_MISSING', 'domain': 'googleapis.com', 'metadata': {'method': 'google.cloud.aiplatform.v1beta1.PredictionService.GenerateContent', 'service': 'aiplatform.googleapis.com'}}]}}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "gpt-5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0008275000000000001,
+          "latency": 2.729452133178711,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "claude-opus-4-5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0013200000000000002,
+          "latency": 2.4143013954162598,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5-nano",
+          "response_text": "D",
+          "quality_score": 0.0,
+          "cost": 0.000444,
+          "latency": 9.322210788726807,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_regret": [
+        0.0005685,
+        0.001509,
+        0.00196225,
+        0.00251225,
+        0.00251225,
+        0.00251225,
+        0.00251225,
+        0.0033397500000000003,
+        0.004659750000000001,
+        0.005103750000000001
+      ],
+      "started_at": "2025-11-27T18:01:57.764067Z",
+      "completed_at": "2025-11-27T18:03:44.673421Z",
+      "metadata": {
+        "name": "thompson_sampling",
+        "total_queries": 10,
+        "n_arms": 9,
+        "prior_alpha": 1.0,
+        "prior_beta": 1.0,
+        "arm_pulls": {
+          "gpt-5-nano": 1,
+          "claude-haiku-4-5": 0,
+          "gemini-2.0-flash": 1,
+          "gpt-5-mini": 3,
+          "claude-sonnet-4-5": 1,
+          "gemini-2.5-pro": 0,
+          "gpt-5": 1,
+          "claude-opus-4-5": 2,
+          "gemini-3-pro": 1
+        },
+        "arm_successes": {
+          "gpt-5-nano": 0,
+          "claude-haiku-4-5": 0,
+          "gemini-2.0-flash": 0,
+          "gpt-5-mini": 3,
+          "claude-sonnet-4-5": 0,
+          "gemini-2.5-pro": 0,
+          "gpt-5": 1,
+          "claude-opus-4-5": 2,
+          "gemini-3-pro": 0
+        },
+        "arm_success_rates": {
+          "gpt-5-nano": 0.0,
+          "claude-haiku-4-5": 0.0,
+          "gemini-2.0-flash": 0.0,
+          "gpt-5-mini": 1.0,
+          "claude-sonnet-4-5": 0.0,
+          "gemini-2.5-pro": 0.0,
+          "gpt-5": 1.0,
+          "claude-opus-4-5": 1.0,
+          "gemini-3-pro": 0.0
+        },
+        "arm_distributions": {
+          "gpt-5-nano": {
+            "alpha": 1.2095990865237343,
+            "beta": 1.7904009134762657,
+            "mean": 0.4031996955079114
+          },
+          "claude-haiku-4-5": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gemini-2.0-flash": {
+            "alpha": 1.2039797911100796,
+            "beta": 1.7960202088899204,
+            "mean": 0.4013265970366932
+          },
+          "gpt-5-mini": {
+            "alpha": 3.7464451020246017,
+            "beta": 1.253554897975398,
+            "mean": 0.7492890204049203
+          },
+          "claude-sonnet-4-5": {
+            "alpha": 1.2039168432456884,
+            "beta": 1.7960831567543116,
+            "mean": 0.40130561441522944
+          },
+          "gemini-2.5-pro": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gpt-5": {
+            "alpha": 1.926648226724413,
+            "beta": 1.073351773275587,
+            "mean": 0.6422160755748043
+          },
+          "claude-opus-4-5": {
+            "alpha": 2.8482129701044796,
+            "beta": 1.1517870298955202,
+            "mean": 0.7120532425261199
+          },
+          "gemini-3-pro": {
+            "alpha": 1.2215726838228222,
+            "beta": 1.7784273161771778,
+            "mean": 0.40719089460760743
+          }
+        }
+      }
+    },
+    {
+      "algorithm_name": "ucb1",
+      "run_id": "59feeefa-b9c5-4750-8546-ce99ca469f64",
+      "total_queries": 10,
+      "total_cost": 0.01025425,
+      "average_quality": 0.6,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "gpt-5-nano"
+        ],
+        [
+          "mmlu_test_1",
+          "claude-haiku-4-5"
+        ],
+        [
+          "mmlu_test_2",
+          "gemini-2.0-flash"
+        ],
+        [
+          "mmlu_test_3",
+          "gpt-5-mini"
+        ],
+        [
+          "mmlu_test_4",
+          "claude-sonnet-4-5"
+        ],
+        [
+          "mmlu_test_5",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_6",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_7",
+          "claude-opus-4-5"
+        ],
+        [
+          "mmlu_test_8",
+          "gemini-3-pro"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5-mini"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "gpt-5-nano",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0003185,
+          "latency": 6.745393991470337,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "claude-haiku-4-5",
+          "response_text": "To answer this question, I need to consider the lymphatic drainage patterns of the tongue, particularly the tip.\n\nKey anatomical points:\n\n1. **Tip of the tongue drainage**: The tip of the tongue has a unique drainage pattern because it crosses the midline anatomically and functionally.\n\n2. **Submental lymph nodes**: Located in the submental region (between the two anterior bellies of the digastric muscle). These nodes receive lymph from the tip and anterior part of the tongue.\n\n3. **Important characteristic**: The tip of the tongue, being in the midline region, typically drains to **bilateral submental lymph nodes** (both left and right), not just the ipsilateral side. This is because the lymphatic vessels from the tip cross the midline.\n\n4. **Submandibular nodes**: These receive drainage from the posterior and lateral parts of the tongue, and drainage is usually more ipsilateral.\n\nSince the question specifically asks about the **tip of the tongue** (which is midline), the drainage pattern is to the **submental lymph nodes bilaterally** because lymphatic vessels from the midline cross to both sides.\n\nThe answer is **(B) left and right submental lymph nodes.**\n\n**B**",
+          "quality_score": 0.0,
+          "cost": 0.0014780000000000001,
+          "latency": 3.7242157459259033,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gemini-2.0-flash",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 14.74666690826416,
+          "success": false,
+          "error": "ModelHTTPError: status_code: 401, model_name: gemini-2.0-flash, body: {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'CREDENTIALS_MISSING', 'domain': 'googleapis.com', 'metadata': {'method': 'google.cloud.aiplatform.v1beta1.PredictionService.GenerateContent', 'service': 'aiplatform.googleapis.com'}}]}}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "gpt-5-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00016675,
+          "latency": 1.9862029552459717,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "claude-sonnet-4-5",
+          "response_text": "To answer this question, I need to consider what factors actually contributed to the development of Mesopotamian civilization.\n\nMesopotamian civilization developed in the fertile region between the Tigris and Euphrates rivers. Let me evaluate each option:\n\n(A) \"the need to concentrate population away from arable lands near rivers\" - This is contradictory to what actually happened. Mesopotamian civilizations concentrated populations NEAR rivers and arable lands, not away from them. Rivers provided water for irrigation and fertile soil.\n\n(B) \"the need to construct monumental works, such as step-pyramids and temples\" - Ziggurats (step-pyramids) and temples were indeed important in Mesopotamian civilization and required organized labor and social structures.\n\n(C) \"the need to develop a complex social system that would allow the construction of canals\" - Irrigation canals were crucial in Mesopotamia, and their construction required organized labor and social hierarchy.\n\n(D) \"the use of irrigation to produce enough food\" - Irrigation was fundamental to Mesopotamian agriculture and civilization, allowing them to produce surplus food.\n\nOption (A) is clearly incorrect as a factor - populations concentrated TOWARD arable lands near rivers, not away from them.\n\n**A**",
+          "quality_score": 1.0,
+          "cost": 0.004412999999999999,
+          "latency": 6.872019290924072,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 14.329055070877075,
+          "success": false,
+          "error": "ModelHTTPError: status_code: 401, model_name: gemini-2.5-pro, body: {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'CREDENTIALS_MISSING', 'domain': 'googleapis.com', 'metadata': {'method': 'google.cloud.aiplatform.v1beta1.PredictionService.GenerateContent', 'service': 'aiplatform.googleapis.com'}}]}}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "gpt-5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0008300000000000001,
+          "latency": 2.3865931034088135,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "claude-opus-4-5",
+          "response_text": "The external marketing environment consists of factors outside the organization that affect its marketing activities, including Political, Legal, Economic, Socio-cultural, and Technological factors (often called PEST or PESTLE analysis).\n\n**Product** is part of the internal marketing mix (the 4 Ps: Product, Price, Place, Promotion), which the company controls internally.\n\nThe answer is **(C)**",
+          "quality_score": 1.0,
+          "cost": 0.00262,
+          "latency": 3.404539108276367,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "gemini-3-pro",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 3.9856250286102295,
+          "success": false,
+          "error": "ModelHTTPError: status_code: 401, model_name: gemini-3-pro, body: {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'CREDENTIALS_MISSING', 'domain': 'googleapis.com', 'metadata': {'service': 'aiplatform.googleapis.com', 'method': 'google.cloud.aiplatform.v1beta1.PredictionService.GenerateContent'}}]}}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5-mini",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.000428,
+          "latency": 3.0210671424865723,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_regret": [
+        0.0003185,
+        0.0017965000000000001,
+        0.0017965000000000001,
+        0.00196325,
+        0.00637625,
+        0.00637625,
+        0.00720625,
+        0.00982625,
+        0.00982625,
+        0.01025425
+      ],
+      "started_at": "2025-11-27T18:03:44.981088Z",
+      "completed_at": "2025-11-27T18:04:52.855299Z",
+      "metadata": {
+        "name": "ucb1",
+        "total_queries": 10,
+        "n_arms": 9,
+        "c": 1.5,
+        "arm_pulls": {
+          "gpt-5-nano": 1,
+          "claude-haiku-4-5": 1,
+          "gemini-2.0-flash": 1,
+          "gpt-5-mini": 2,
+          "claude-sonnet-4-5": 1,
+          "gemini-2.5-pro": 1,
+          "gpt-5": 1,
+          "claude-opus-4-5": 1,
+          "gemini-3-pro": 1
+        },
+        "arm_mean_reward": {
+          "gpt-5-nano": 0.9128472193414989,
+          "claude-haiku-4-5": 0.22087237079703656,
+          "gemini-2.0-flash": 0.206350550283598,
+          "gpt-5-mini": 0.929118727251296,
+          "claude-sonnet-4-5": 0.9118244987033924,
+          "gemini-2.5-pro": 0.2065235593151456,
+          "gpt-5": 0.9293623381157247,
+          "claude-opus-4-5": 0.9221812203746463,
+          "gemini-3-pro": 0.220057665674042
+        },
+        "arm_sum_reward": {
+          "gpt-5-nano": 0.9128472193414989,
+          "claude-haiku-4-5": 0.22087237079703656,
+          "gemini-2.0-flash": 0.206350550283598,
+          "gpt-5-mini": 1.858237454502592,
+          "claude-sonnet-4-5": 0.9118244987033924,
+          "gemini-2.5-pro": 0.2065235593151456,
+          "gpt-5": 0.9293623381157247,
+          "claude-opus-4-5": 0.9221812203746463,
+          "gemini-3-pro": 0.220057665674042
+        },
+        "arm_ucb_values": {
+          "gpt-5-nano": 3.1889879134192185,
+          "claude-haiku-4-5": 2.497013064874756,
+          "gemini-2.0-flash": 2.4824912443613174,
+          "gpt-5-mini": 2.5385932469683063,
+          "claude-sonnet-4-5": 3.187965192781112,
+          "gemini-2.5-pro": 2.482664253392865,
+          "gpt-5": 3.205503032193444,
+          "claude-opus-4-5": 3.198321914452366,
+          "gemini-3-pro": 2.4961983597517614
+        },
+        "arm_successes": {
+          "gpt-5-nano": 1,
+          "claude-haiku-4-5": 0,
+          "gemini-2.0-flash": 0,
+          "gpt-5-mini": 2,
+          "claude-sonnet-4-5": 1,
+          "gemini-2.5-pro": 0,
+          "gpt-5": 1,
+          "claude-opus-4-5": 1,
+          "gemini-3-pro": 0
+        },
+        "arm_success_rates": {
+          "gpt-5-nano": 1.0,
+          "claude-haiku-4-5": 0.0,
+          "gemini-2.0-flash": 0.0,
+          "gpt-5-mini": 1.0,
+          "claude-sonnet-4-5": 1.0,
+          "gemini-2.5-pro": 0.0,
+          "gpt-5": 1.0,
+          "claude-opus-4-5": 1.0,
+          "gemini-3-pro": 0.0
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-11-27T18:04:53.155168Z",
+  "metadata": {}
+}

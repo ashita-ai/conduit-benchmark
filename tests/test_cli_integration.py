@@ -70,7 +70,7 @@ def sample_results_file(temp_test_dir: Path) -> Path:
                 "algorithm_name": "thompson",
                 "avg_quality": 0.85,
                 "total_cost": 0.05,
-                "cumulative_regret": 0.12,
+                "cumulative_cost": [0.01, 0.03, 0.05],
                 "quality_history": [0.7, 0.8, 0.85],
                 "cost_history": [0.01, 0.02, 0.02],
                 "queries": [
@@ -101,7 +101,7 @@ def sample_results_file(temp_test_dir: Path) -> Path:
                 "algorithm_name": "ucb1",
                 "avg_quality": 0.78,
                 "total_cost": 0.04,
-                "cumulative_regret": 0.18,
+                "cumulative_cost": [0.01, 0.025, 0.04],
                 "quality_history": [0.65, 0.75, 0.78],
                 "cost_history": [0.01, 0.015, 0.015],
                 "queries": [
@@ -499,7 +499,7 @@ class TestCLIIntegration:
                     "algorithm_name": "thompson",
                     "avg_quality": 0.85,
                     "total_cost": 0.05,
-                    "cumulative_regret": 0.12,
+                    "cumulative_cost": [0.02, 0.05],
                     "quality_history": [0.8, 0.85],
                     "queries": [],
                 }

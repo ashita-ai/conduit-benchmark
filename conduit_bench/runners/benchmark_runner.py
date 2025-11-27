@@ -215,7 +215,7 @@ class BenchmarkRunner:
         run_id = str(uuid4())
         selections: list[tuple[str, str]] = []
         feedback_list: list[QueryEvaluation] = []
-        cumulative_regret: list[float] = []
+        cumulative_cost: list[float] = []
         total_cost = 0.0
         total_quality = 0.0
 
@@ -321,7 +321,7 @@ class BenchmarkRunner:
             # Track cumulative metrics
             total_quality += quality_score
             total_cost += execution_result.cost
-            cumulative_regret.append(total_cost)  # Simplified regret (actual cumulative cost)
+            cumulative_cost.append(total_cost)
 
         completed_at = datetime.now(timezone.utc)
 
@@ -349,7 +349,7 @@ class BenchmarkRunner:
             average_quality=average_quality,
             selections=selections,
             feedback=feedback_list,
-            cumulative_regret=cumulative_regret,
+            cumulative_cost=cumulative_cost,
             started_at=started_at,
             completed_at=completed_at,
             metadata=algorithm.get_stats(),

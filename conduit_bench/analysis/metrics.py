@@ -64,10 +64,10 @@ class AlgorithmMetrics:
     average_quality: float
     total_queries: int
 
-    # Regret analysis
-    cumulative_regret: float
-    normalized_regret: float
-    regret_per_query: float
+    # Cost analysis (note: true regret requires oracle comparison)
+    cumulative_cost: float
+    normalized_cost: float
+    cost_per_query: float
 
     # Convergence
     convergence: ConvergenceMetrics
@@ -75,7 +75,6 @@ class AlgorithmMetrics:
     # Confidence intervals (95%)
     quality_ci: tuple[float, float]
     cost_ci: tuple[float, float]
-    regret_ci: tuple[float, float]
 
     # Per-category breakdown (if available)
     category_metrics: dict[str, dict[str, float]] | None = None
@@ -92,7 +91,7 @@ class ComparativeMetrics:
     # Rankings
     quality_ranking: list[tuple[str, float]]  # (algorithm, avg_quality)
     cost_ranking: list[tuple[str, float]]  # (algorithm, total_cost)
-    regret_ranking: list[tuple[str, float]]  # (algorithm, cumulative_regret)
+    cost_history_ranking: list[tuple[str, float]]  # (algorithm, cumulative_cost)
 
     # Pareto frontier (cost vs quality)
     pareto_optimal: list[str]  # Algorithm names on Pareto frontier
@@ -302,8 +301,7 @@ def calculate_algorithm_metrics(
     total_cost: float,
     total_queries: int,
     quality_scores: list[float],
-    regret_history: list[float],
-    oracle_regret: float,
+    cost_history: list[float],
 ) -> AlgorithmMetrics:
     """Calculate comprehensive metrics for a single algorithm run.
 
@@ -313,30 +311,24 @@ def calculate_algorithm_metrics(
         total_cost: Total cost incurred
         total_queries: Number of queries processed
         quality_scores: List of quality scores over time
-        regret_history: Cumulative regret history
-        oracle_regret: Oracle baseline regret (should be ~0)
+        cost_history: Cumulative cost history over time
 
     Returns:
         AlgorithmMetrics with all calculated metrics
     """
     avg_quality = np.mean(quality_scores) if quality_scores else 0.0
-    cumulative_regret = regret_history[-1] if regret_history else 0.0
+    cumulative_cost = cost_history[-1] if cost_history else total_cost
 
-    # Normalized regret (vs Oracle)
-    max_oracle_reward = total_queries  # Assuming max reward = 1.0 per query
-    normalized_regret = (
-        cumulative_regret / max_oracle_reward if max_oracle_reward > 0 else 0.0
-    )
-    regret_per_query = cumulative_regret / total_queries if total_queries > 0 else 0.0
+    # Normalized cost (per query)
+    normalized_cost = cumulative_cost / total_queries if total_queries > 0 else 0.0
+    cost_per_query = total_cost / total_queries if total_queries > 0 else 0.0
 
     # Convergence detection
     convergence = calculate_convergence(quality_scores)
 
     # Confidence intervals
     quality_ci = bootstrap_ci(quality_scores)
-    cost_per_query = [total_cost / total_queries] * len(quality_scores)
     cost_ci = (total_cost * 0.95, total_cost * 1.05)  # Simplified for cost
-    regret_ci = bootstrap_ci([regret_per_query] * len(quality_scores))
 
     return AlgorithmMetrics(
         algorithm_name=algorithm_name,
@@ -344,13 +336,12 @@ def calculate_algorithm_metrics(
         total_cost=total_cost,
         average_quality=avg_quality,
         total_queries=total_queries,
-        cumulative_regret=cumulative_regret,
-        normalized_regret=normalized_regret,
-        regret_per_query=regret_per_query,
+        cumulative_cost=cumulative_cost,
+        normalized_cost=normalized_cost,
+        cost_per_query=cost_per_query,
         convergence=convergence,
         quality_ci=quality_ci,
         cost_ci=cost_ci,
-        regret_ci=regret_ci,
     )
 
 
@@ -393,8 +384,8 @@ def calculate_comparative_metrics(
         [(m.algorithm_name, m.total_cost) for m in algorithm_metrics],
         key=lambda x: x[1],
     )
-    regret_ranking = sorted(
-        [(m.algorithm_name, m.cumulative_regret) for m in algorithm_metrics],
+    cost_history_ranking = sorted(
+        [(m.algorithm_name, m.cumulative_cost) for m in algorithm_metrics],
         key=lambda x: x[1],
     )
 
@@ -414,7 +405,7 @@ def calculate_comparative_metrics(
         pairwise_comparisons=pairwise_comparisons,
         quality_ranking=quality_ranking,
         cost_ranking=cost_ranking,
-        regret_ranking=regret_ranking,
+        cost_history_ranking=cost_history_ranking,
         pareto_optimal=pareto_optimal,
         convergence_speeds=convergence_speeds,
     )
@@ -423,70 +414,140 @@ def calculate_comparative_metrics(
 def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any]:
     """Analyze complete benchmark results and generate comprehensive metrics.
 
+    Accepts two input formats:
+    1. BenchmarkResult format: {"algorithms": [{"algorithm_name": ..., ...}]}
+    2. Dict-of-algorithms format: {"algo_name": {"avg_quality": ..., ...}}
+
     Args:
-        benchmark_result: BenchmarkResult as dictionary
+        benchmark_result: BenchmarkResult as dictionary or dict of algorithm results
 
     Returns:
         Dictionary with comprehensive analysis including:
-        - Individual algorithm metrics
-        - Comparative analysis
-        - Statistical tests
-        - Effect sizes
-        - Rankings
+        - summary: Overview with rankings and best performers
+        - algorithms: Per-algorithm metrics with CIs and convergence
+        - statistical_tests: Friedman test and pairwise comparisons
+        - pareto_frontier: List of Pareto-optimal algorithms
     """
+    # Detect input format and normalize to list of algorithm dicts
     algorithms_data = benchmark_result.get("algorithms", [])
+
+    # If "algorithms" key exists and is a list, use BenchmarkResult format
+    # Otherwise, treat the entire dict as algorithm_name -> algorithm_data
+    if isinstance(algorithms_data, list) and len(algorithms_data) > 0:
+        # BenchmarkResult format
+        normalized_algos = []
+        for algo in algorithms_data:
+            quality_scores = [
+                eval_data["quality_score"] for eval_data in algo.get("feedback", [])
+            ]
+            if not quality_scores:
+                # Fall back to quality_history if feedback not available
+                quality_scores = algo.get("quality_history", [])
+            if not quality_scores:
+                # Use avg_quality as single score
+                quality_scores = [algo.get("avg_quality", 0.0)]
+
+            normalized_algos.append({
+                "name": algo["algorithm_name"],
+                "quality_scores": quality_scores,
+                "total_cost": algo["total_cost"],
+                "total_queries": algo.get("total_queries", len(quality_scores)),
+                "cumulative_cost": algo.get("cumulative_cost", []),
+            })
+    else:
+        # Dict-of-algorithms format (algorithm_name -> metrics dict)
+        normalized_algos = []
+        for algo_name, algo_data in benchmark_result.items():
+            if algo_name in ("benchmark_id", "dataset_size", "algorithms"):
+                continue
+            quality_scores = algo_data.get("quality_scores", [])
+            if not quality_scores:
+                quality_scores = [algo_data.get("avg_quality", 0.0)]
+
+            cost_history = algo_data.get("cumulative_cost", [])
+            if isinstance(cost_history, (int, float)):
+                cost_history = [cost_history]
+
+            normalized_algos.append({
+                "name": algo_name,
+                "quality_scores": quality_scores,
+                "total_cost": algo_data.get("total_cost", 0.0),
+                "total_queries": len(quality_scores),
+                "cumulative_cost": cost_history,
+            })
 
     # Calculate individual algorithm metrics
     individual_metrics = []
-    for algo in algorithms_data:
-        quality_scores = [
-            eval_data["quality_score"] for eval_data in algo.get("feedback", [])
-        ]
-
+    for algo in normalized_algos:
         metrics = calculate_algorithm_metrics(
-            algorithm_name=algo["algorithm_name"],
-            run_id=algo["run_id"],
+            algorithm_name=algo["name"],
+            run_id="unknown",
             total_cost=algo["total_cost"],
             total_queries=algo["total_queries"],
-            quality_scores=quality_scores,
-            regret_history=algo.get("cumulative_regret", []),
-            oracle_regret=0.0,
+            quality_scores=algo["quality_scores"],
+            cost_history=algo["cumulative_cost"],
         )
         individual_metrics.append(metrics)
+
+    # Handle empty input
+    if not individual_metrics:
+        return {
+            "summary": {
+                "num_algorithms": 0,
+                "best_quality_algorithm": None,
+                "best_cost_algorithm": None,
+                "quality_rankings": [],
+                "cost_rankings": [],
+            },
+            "algorithms": {},
+            "statistical_tests": {
+                "friedman": {
+                    "statistic": 0.0,
+                    "p_value": 1.0,
+                    "significant": False,
+                }
+            },
+            "pareto_frontier": [],
+        }
 
     # Comparative analysis
     comparative = calculate_comparative_metrics(individual_metrics)
 
-    # Build analysis dictionary
+    # Extract rankings as simple lists of algorithm names
+    quality_rankings = [name for name, _ in comparative.quality_ranking]
+    cost_rankings = [name for name, _ in comparative.cost_ranking]
+
+    # Build analysis dictionary with expected structure
     analysis = {
-        "benchmark_id": benchmark_result.get("benchmark_id"),
-        "dataset_size": benchmark_result.get("dataset_size"),
+        "summary": {
+            "num_algorithms": len(individual_metrics),
+            "best_quality_algorithm": quality_rankings[0] if quality_rankings else None,
+            "best_cost_algorithm": cost_rankings[0] if cost_rankings else None,
+            "quality_rankings": quality_rankings,
+            "cost_rankings": cost_rankings,
+        },
         "algorithms": {
             m.algorithm_name: {
                 "total_cost": m.total_cost,
                 "average_quality": m.average_quality,
-                "quality_ci_lower": m.quality_ci[0],
-                "quality_ci_upper": m.quality_ci[1],
-                "cumulative_regret": m.cumulative_regret,
-                "normalized_regret": m.normalized_regret,
-                "regret_per_query": m.regret_per_query,
-                "converged": m.convergence.converged,
-                "convergence_point": m.convergence.convergence_point,
-                "coefficient_of_variation": m.convergence.coefficient_of_variation,
+                "quality_ci": (m.quality_ci[0], m.quality_ci[1]),
+                "cumulative_cost": m.cumulative_cost,
+                "normalized_cost": m.normalized_cost,
+                "cost_per_query": m.cost_per_query,
+                "convergence": {
+                    "converged": m.convergence.converged,
+                    "convergence_point": m.convergence.convergence_point,
+                    "coefficient_of_variation": m.convergence.coefficient_of_variation,
+                },
             }
             for m in individual_metrics
         },
-        "comparative_analysis": {
-            "friedman_test": {
+        "statistical_tests": {
+            "friedman": {
                 "statistic": comparative.friedman_test.statistic,
                 "p_value": comparative.friedman_test.p_value,
                 "significant": comparative.friedman_test.significant,
             },
-            "quality_ranking": comparative.quality_ranking,
-            "cost_ranking": comparative.cost_ranking,
-            "regret_ranking": comparative.regret_ranking,
-            "pareto_optimal": comparative.pareto_optimal,
-            "convergence_speeds": comparative.convergence_speeds,
             "pairwise_effect_sizes": {
                 f"{k[0]}_vs_{k[1]}": {
                     "cohens_d": v.cohens_d,
@@ -495,6 +556,7 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
                 for k, v in comparative.pairwise_comparisons.items()
             },
         },
+        "pareto_frontier": comparative.pareto_optimal,
     }
 
     return analysis

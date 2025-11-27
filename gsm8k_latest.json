@@ -1,0 +1,128 @@
+{
+  "benchmark_id": "1ffc7631-15ef-4650-817d-e6e3377aa1f3",
+  "dataset_size": 3,
+  "algorithms": [
+    {
+      "algorithm_name": "thompson_sampling",
+      "run_id": "38ea2db5-db5f-40a2-9c66-8e7c2143bafc",
+      "total_queries": 3,
+      "total_cost": 0.007276250000000001,
+      "average_quality": 0.3333333333333333,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "gpt-5.1"
+        ],
+        [
+          "gsm8k_test_1",
+          "gpt-5.1"
+        ],
+        [
+          "gsm8k_test_2",
+          "claude-sonnet-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "gpt-5.1",
+          "response_text": "Let Darrell’s age be \\(7x\\) and Allen’s age be \\(11x\\), since their ages are in the ratio \\(7:11\\).\n\n1. **Set up the equation with the total age:**\n   \\[\n   7x + 11x = 162\n   \\]\n\n2. **Combine like terms:**\n   \\[\n   18x = 162\n   \\]\n\n3. **Solve for \\(x\\):**\n   \\[\n   x = \\frac{162}{18} = 9\n   \\]\n\n4. **Find Allen’s current age:**\n   \\[\n   11x = 11 \\times 9 = 99\n   \\]\n\n5. **Find Allen’s age 10 years from now:**\n   \\[\n   99 + 10 = 109\n   \\]\n\n#### 109",
+          "quality_score": 1.0,
+          "cost": 0.0019925000000000003,
+          "latency": 7.098116874694824,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "gpt-5.1",
+          "response_text": "Start by translating each trade rule:\n\n- 1 large sticker (L) = 1 large button (LB) **or** 3 small buttons (SB)  \n- 1 small sticker (SS) = 1 small button (SB)  \n- 1 large button (LB) = 3 small stickers (SS)\n\nLorraine starts with:\n- 30 small stickers (SS)\n- 40 large stickers (L)\n\n---\n\n### 1. Trade 90% of small stickers for large buttons\n\nShe has 30 small stickers:\n- 90% of 30 = 0.9 × 30 = 27 small stickers to trade\n\nWe need to see how many **large buttons** she gets from 27 small stickers.\n\nSince:\n- 1 LB = 3 SS  \nSo:\n- Number of large buttons = 27 ÷ 3 = 9 LB\n\nThese 9 large buttons use up 27 small stickers.\n\nRemaining small stickers after this trade:\n- 30 − 27 = 3 SS\n\nSo far:\n- Large buttons: 9 LB  \n- Small stickers left: 3 SS  \n\n---\n\n### 2. Trade 50% of large stickers for large buttons\n\nShe has 40 large stickers:\n- 50% of 40 = 0.5 × 40 = 20 large stickers\n\nEach large sticker traded this way gives 1 large button:\n- From 20 L → 20 LB\n\nNow:\n- Large buttons so far: 9 + 20 = 29 LB  \n- Large stickers left: 40 − 20 = 20 L  \n\n---\n\n### 3. Trade the remaining large stickers for small buttons\n\nShe has 20 large stickers remaining.\n\nEach large sticker can also be traded for 3 small buttons:\n- From 20 L → 20 × 3 = 60 small buttons (SB)\n\nSo now:\n- Small buttons so far: 60 SB  \n\n---\n\n### 4. Convert any remaining small stickers to small buttons\n\nShe still has 3 small stickers left (from step 1).\n\nEach small sticker = 1 small button:\n- From 3 SS → 3 SB\n\nTotal small buttons:\n- 60 + 3 = 63 SB  \n\n---\n\n### 5. Final total buttons\n\nLorraine ends with:\n- 29 large buttons  \n- 63 small buttons  \n\nTotal buttons = 29 + 63 = 92 buttons\n\n#### 92",
+          "quality_score": 0.0,
+          "cost": 0.00528375,
+          "latency": 8.136129140853882,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "",
+          "quality_score": 0.0,
+          "cost": 0.0,
+          "latency": 5.991426944732666,
+          "success": false,
+          "error": "ModelHTTPError: status_code: 404, model_name: claude-sonnet-4.5, body: {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4.5'}, 'request_id': 'req_011CVYrtSuQ5YxksSab3R2o3'}",
+          "metadata": {}
+        }
+      ],
+      "cumulative_regret": [
+        0.0019925000000000003,
+        0.007276250000000001,
+        0.007276250000000001
+      ],
+      "started_at": "2025-11-27T18:23:01.963281Z",
+      "completed_at": "2025-11-27T18:23:26.571599Z",
+      "metadata": {
+        "name": "thompson_sampling",
+        "total_queries": 3,
+        "n_arms": 5,
+        "prior_alpha": 1.0,
+        "prior_beta": 1.0,
+        "arm_pulls": {
+          "o4-mini": 0,
+          "gpt-5.1": 2,
+          "claude-sonnet-4.5": 1,
+          "claude-opus-4.5": 0,
+          "gemini-2.5-pro": 0
+        },
+        "arm_successes": {
+          "o4-mini": 0,
+          "gpt-5.1": 1,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 0,
+          "gemini-2.5-pro": 0
+        },
+        "arm_success_rates": {
+          "o4-mini": 0.0,
+          "gpt-5.1": 0.5,
+          "claude-sonnet-4.5": 0.0,
+          "claude-opus-4.5": 0.0,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_distributions": {
+          "o4-mini": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gpt-5.1": {
+            "alpha": 2.1218452011102946,
+            "beta": 1.8781547988897054,
+            "mean": 0.5304613002775737
+          },
+          "claude-sonnet-4.5": {
+            "alpha": 1.2143032317709248,
+            "beta": 1.7856967682290752,
+            "mean": 0.4047677439236416
+          },
+          "claude-opus-4.5": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gemini-2.5-pro": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          }
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-11-27T18:23:26.833690Z",
+  "metadata": {}
+}

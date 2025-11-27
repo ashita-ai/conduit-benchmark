@@ -1,0 +1,160 @@
+{
+  "benchmark_id": "bf986ed2-fe45-4af1-9def-9a2d90d7f269",
+  "dataset_size": 5,
+  "algorithms": [
+    {
+      "algorithm_name": "thompson_sampling",
+      "run_id": "4190874f-97ac-43fe-ad16-3b058f886a25",
+      "total_queries": 5,
+      "total_cost": 0.01730775,
+      "average_quality": 0.8,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_1",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_2",
+          "gemini-2.5-pro"
+        ],
+        [
+          "gsm8k_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_4",
+          "gemini-2.5-pro"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "o4-mini",
+          "response_text": "Let Darrell's age be \\( 7x \\) and Allen's age be \\( 11x \\), where \\( x \\) is a common factor.\n\nThe total age of Darrell and Allen is given as 162 years. Therefore, we can set up the following equation based on their ages:\n\n\\[\n7x + 11x = 162\n\\]\n\nCombining like terms gives us:\n\n\\[\n18x = 162\n\\]\n\nNext, we solve for \\( x \\) by dividing both sides by 18:\n\n\\[\nx = \\frac{162}{18} = 9\n\\]\n\nNow that we have \\( x \\), we can find Darrell's and Allen's ages:\n\n\\[\n\\text{Darrell's age} = 7x = 7 \\times 9 = 63\n\\]\n\\[\n\\text{Allen's age} = 11x = 11 \\times 9 = 99\n\\]\n\nTo find Allen's age 10 years from now, we simply add 10 to his current age:\n\n\\[\n\\text{Allen's age in 10 years} = 99 + 10 = 109\n\\]\n\nTherefore, the final answer is:\n\n\\[\n#### 109\n\\]",
+          "quality_score": 1.0,
+          "cost": 0.0012265000000000002,
+          "latency": 7.636557102203369,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "o4-mini",
+          "response_text": "Let's break down Lorraine's sticker and button trades step by step.\n\n### Initial Values\n- Small stickers: 30\n- Large stickers: 40\n\n### Step 1: Trading small stickers for large buttons\nLorraine trades 90% of her small stickers for large buttons.\n- 90% of 30 small stickers = 0.9 × 30 = 27 small stickers are traded.\n\nSince each small sticker is worth 1 small button:\n- The 27 small stickers will be traded for 27 small buttons.\n\nNow we need to determine how many large buttons she can get. Recall from the problem statement:\n- Each large sticker is worth a large button or 3 small buttons.\n- Thus, 27 small stickers are equal to \\( \\frac{27}{3} = 9 \\) large buttons.\n\n### Remaining Stickers After First Trade\n- Small stickers: \\( 30 - 27 = 3 \\) small stickers left.\n- Large stickers: 40 (no change yet).\n\n### Step 2: Trading large stickers\nNext, Lorraine trades 50% of her large stickers for large buttons.\n- 50% of 40 large stickers = 0.5 × 40 = 20 large stickers are traded.\n\nEach large sticker is worth either 1 large button or 3 small buttons. In this case, she trades the 20 large stickers for large buttons.\n- Lorraine receives 20 large buttons from the trade.\n\n### Remaining Stickers After Second Trade\n- Small stickers: 3 small stickers (no change).\n- Large stickers: \\( 40 - 20 = 20 \\) large stickers left.\n\n### Step 3: Trading remaining large stickers\nLorraine now trades the remaining 20 large stickers. She trades these for small buttons.\nSince each large sticker is worth 3 small buttons, trading 20 large stickers would yield:\n- 20 large stickers × 3 small buttons per large sticker = 60 small buttons.\n\n### Summary of All Trades\n1. Small buttons from small stickers: 9 large buttons (from trading small stickers).\n2. Large buttons from large stickers (first 50% traded): 20 large buttons.\n3. Small buttons from remaining large stickers: 60 small buttons.\n\n### Total Buttons Calculation\n- Total buttons = large buttons + small buttons.\n- Total buttons = 9 (large) + 20 (from large stickers) + 60 (small) = 89 buttons.\n\nThus, the answer is:\n#### 0089 [89]",
+          "quality_score": 0.0,
+          "cost": 0.0024200000000000003,
+          "latency": 8.797730922698975,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "Here's how to solve the problem step-by-step:\n\n1. **Find half the number of letters in Indras' name:** 6 letters / 2 = 3 letters\n2. **Calculate the number of letters in the sister's name:** 3 letters + 4 letters = 7 letters\n3. **Calculate the total number of letters in both names:** 6 letters + 7 letters = 13 letters\n\n#### 13\n",
+          "quality_score": 1.0,
+          "cost": 0.00108375,
+          "latency": 10.129925727844238,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "Okay, let's organize the information and solve this problem step by step:\n\n* Bethany can run 10 laps in one hour.\n* Trey can run 4 more laps than Bethany.\n* Shaelyn can run half as many laps as Trey.\n* Quinn can run 2 fewer laps than Shaelyn.\n\nStep 1: Calculate the number of laps Trey can run.\nTrey's laps = Bethany's laps + 4\nTrey's laps = 10 + 4 = 14 laps\n\nStep 2: Calculate the number of laps Shaelyn can run.\nShaelyn's laps = Trey's laps ÷ 2\nShaelyn's laps = 14 ÷ 2 = 7 laps\n\nStep 3: Calculate the number of laps Quinn can run.\nQuinn's laps = Shaelyn's laps - 2\nQuinn's laps = 7 - 2 = 5 laps\n\nStep 4: Calculate the difference between Bethany's and Quinn's laps.\nDifference = Bethany's laps - Quinn's laps\nDifference = 10 - 5 = 5 laps\n\nTherefore, Bethany can run 5 more laps compared to Quinn.\n\n#### 5 [answer]",
+          "quality_score": 1.0,
+          "cost": 0.01102,
+          "latency": 13.402594804763794,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "Here's how to solve the problem step-by-step:\n\n*   **Start:** 5 children\n*   **Second street:** Each child is joined by 1 more child. So, each child becomes a group of 2. Number of children: 5 * 2 = 10\n*   **Third street:** Each child is joined by 2 more children. So, each child becomes a group of 3. Number of children: 10 * 3 = 30\n*   **Original children leave:** The original 5 children leave. Number of children: 30 - 5 = 25\n\n#### 25",
+          "quality_score": 1.0,
+          "cost": 0.0015574999999999999,
+          "latency": 2.1096529960632324,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_regret": [
+        0.0012265000000000002,
+        0.0036465000000000004,
+        0.00473025,
+        0.01575025,
+        0.01730775
+      ],
+      "started_at": "2025-11-27T18:33:42.647515Z",
+      "completed_at": "2025-11-27T18:34:29.725282Z",
+      "metadata": {
+        "name": "thompson_sampling",
+        "total_queries": 5,
+        "n_arms": 5,
+        "prior_alpha": 1.0,
+        "prior_beta": 1.0,
+        "arm_pulls": {
+          "o4-mini": 2,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 1,
+          "gemini-2.5-pro": 2
+        },
+        "arm_successes": {
+          "o4-mini": 1,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 1,
+          "gemini-2.5-pro": 2
+        },
+        "arm_success_rates": {
+          "o4-mini": 0.5,
+          "gpt-5.1": 0.0,
+          "claude-sonnet-4.5": 0.0,
+          "claude-opus-4.5": 1.0,
+          "gemini-2.5-pro": 1.0
+        },
+        "arm_distributions": {
+          "o4-mini": {
+            "alpha": 2.1210573017524874,
+            "beta": 1.8789426982475126,
+            "mean": 0.5302643254381219
+          },
+          "gpt-5.1": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "claude-sonnet-4.5": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "claude-opus-4.5": {
+            "alpha": 1.9047632166600477,
+            "beta": 1.0952367833399523,
+            "mean": 0.6349210722200159
+          },
+          "gemini-2.5-pro": {
+            "alpha": 2.8406151838937115,
+            "beta": 1.1593848161062885,
+            "mean": 0.7101537959734279
+          }
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-11-27T18:34:30.068992Z",
+  "metadata": {}
+}

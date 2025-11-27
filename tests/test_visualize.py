@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 matplotlib.use("Agg")  # Non-interactive backend for testing
 
 from conduit_bench.analysis.visualize import (
-    plot_regret_curves,
+    plot_cost_curves,
     plot_cost_quality_scatter,
     plot_convergence_comparison,
     plot_quality_ranking,
@@ -36,7 +36,7 @@ def sample_algorithms_data() -> dict[str, dict[str, any]]:
             "avg_quality": 0.85,
             "quality_ci": (0.80, 0.90),
             "total_cost": 0.050,
-            "cumulative_regret": 0.12,
+            "cumulative_cost": 0.050,
             "converged": True,
             "convergence_step": 450,
             "convergence": {"converged": True, "convergence_step": 450},
@@ -45,7 +45,7 @@ def sample_algorithms_data() -> dict[str, dict[str, any]]:
             "avg_quality": 0.78,
             "quality_ci": (0.73, 0.83),
             "total_cost": 0.040,
-            "cumulative_regret": 0.18,
+            "cumulative_cost": 0.040,
             "converged": True,
             "convergence_step": 520,
             "convergence": {"converged": True, "convergence_step": 520},
@@ -54,7 +54,7 @@ def sample_algorithms_data() -> dict[str, dict[str, any]]:
             "avg_quality": 0.65,
             "quality_ci": (0.60, 0.70),
             "total_cost": 0.045,
-            "cumulative_regret": 0.35,
+            "cumulative_cost": 0.045,
             "converged": False,
             "convergence_step": None,
             "convergence": {"converged": False, "convergence_step": None},
@@ -73,14 +73,14 @@ def sample_benchmark_data() -> dict[str, any]:
                 "algorithm_name": "thompson",
                 "avg_quality": 0.85,
                 "total_cost": 0.05,
-                "cumulative_regret": [0.01 * i for i in range(100)],
+                "cumulative_cost": [0.0005 * i for i in range(100)],
                 "quality_history": [0.5 + 0.005 * i for i in range(100)],
             },
             {
                 "algorithm_name": "ucb1",
                 "avg_quality": 0.78,
                 "total_cost": 0.04,
-                "cumulative_regret": [0.015 * i for i in range(100)],
+                "cumulative_cost": [0.0004 * i for i in range(100)],
                 "quality_history": [0.4 + 0.004 * i for i in range(100)],
             },
         ],
@@ -103,7 +103,7 @@ def sample_analysis() -> dict[str, any]:
                 "avg_quality": 0.85,
                 "quality_ci": (0.80, 0.90),
                 "total_cost": 0.050,
-                "cumulative_regret": 0.12,
+                "cumulative_cost": 0.050,
                 "converged": True,
                 "convergence_step": 450,
             },
@@ -111,7 +111,7 @@ def sample_analysis() -> dict[str, any]:
                 "avg_quality": 0.78,
                 "quality_ci": (0.73, 0.83),
                 "total_cost": 0.040,
-                "cumulative_regret": 0.18,
+                "cumulative_cost": 0.040,
                 "converged": True,
                 "convergence_step": 520,
             },
@@ -127,18 +127,18 @@ def sample_analysis() -> dict[str, any]:
     }
 
 
-class TestPlotRegretCurves:
-    """Tests for regret curve plotting."""
+class TestPlotCostCurves:
+    """Tests for cost curve plotting."""
 
-    def test_plot_regret_curves_basic(
+    def test_plot_cost_curves_basic(
         self,
         sample_algorithms_data: dict[str, dict[str, any]],
         temp_output_dir: Path,
     ) -> None:
-        """Test basic regret curve plotting."""
-        output_path = temp_output_dir / "regret.png"
+        """Test basic cost curve plotting."""
+        output_path = temp_output_dir / "cost.png"
 
-        fig = plot_regret_curves(
+        fig = plot_cost_curves(
             sample_algorithms_data, output_path=str(output_path), show_ci=False
         )
 
@@ -146,16 +146,16 @@ class TestPlotRegretCurves:
         assert output_path.exists()
         plt.close(fig)
 
-    def test_plot_regret_curves_with_ci(
+    def test_plot_cost_curves_with_ci(
         self,
         sample_algorithms_data: dict[str, dict[str, any]],
         sample_benchmark_data: dict[str, any],
         temp_output_dir: Path,
     ) -> None:
-        """Test regret curves with confidence intervals."""
-        output_path = temp_output_dir / "regret_ci.png"
+        """Test cost curves with confidence intervals."""
+        output_path = temp_output_dir / "cost_ci.png"
 
-        fig = plot_regret_curves(
+        fig = plot_cost_curves(
             sample_algorithms_data,
             benchmark_data=sample_benchmark_data,
             output_path=str(output_path),
@@ -166,29 +166,29 @@ class TestPlotRegretCurves:
         assert output_path.exists()
         plt.close(fig)
 
-    def test_plot_regret_curves_no_output_path(
+    def test_plot_cost_curves_no_output_path(
         self, sample_algorithms_data: dict[str, dict[str, any]]
     ) -> None:
-        """Test regret curves without saving to file."""
-        fig = plot_regret_curves(sample_algorithms_data, show_ci=False)
+        """Test cost curves without saving to file."""
+        fig = plot_cost_curves(sample_algorithms_data, show_ci=False)
 
         assert fig is not None
         plt.close(fig)
 
-    def test_plot_regret_curves_single_algorithm(
+    def test_plot_cost_curves_single_algorithm(
         self, temp_output_dir: Path
     ) -> None:
-        """Test regret curves with single algorithm."""
+        """Test cost curves with single algorithm."""
         data = {
             "only_one": {
                 "avg_quality": 0.75,
                 "quality_ci": (0.70, 0.80),
                 "total_cost": 0.05,
-                "cumulative_regret": 0.15,
+                "cumulative_cost": 0.05,
             }
         }
 
-        fig = plot_regret_curves(data, show_ci=False)
+        fig = plot_cost_curves(data, show_ci=False)
         assert fig is not None
         plt.close(fig)
 
