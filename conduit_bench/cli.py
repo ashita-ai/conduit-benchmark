@@ -45,85 +45,78 @@ from conduit_bench.evaluators import ExactMatchEvaluator, CodeExecutionEvaluator
 
 console = Console()
 
-# Default model arms for benchmarking (Latest models as of November 2025)
-# 9 arms across 3 providers at 3 price tiers
-DEFAULT_ARMS = [
-    # BUDGET TIER
-    ModelArm(
-        model_id="gpt-5-nano",
-        model_name="gpt-5-nano",
-        provider="openai",
-        cost_per_input_token=0.00000005,  # $0.05/1M tokens
-        cost_per_output_token=0.0000004,  # $0.40/1M tokens
-        expected_quality=0.78,
-    ),
-    ModelArm(
-        model_id="claude-haiku-4-5",
-        model_name="claude-haiku-4-5",
-        provider="anthropic",
-        cost_per_input_token=0.000001,  # $1.00/1M tokens
-        cost_per_output_token=0.000005,  # $5.00/1M tokens
-        expected_quality=0.82,
-    ),
-    ModelArm(
-        model_id="gemini-2.0-flash",
-        model_name="gemini-2.0-flash",
-        provider="google-vertex",
-        cost_per_input_token=0.0000001,  # $0.10/1M tokens
-        cost_per_output_token=0.0000004,  # $0.40/1M tokens
-        expected_quality=0.80,
-    ),
-    # MID TIER
-    ModelArm(
-        model_id="gpt-5-mini",
-        model_name="gpt-5-mini",
-        provider="openai",
-        cost_per_input_token=0.00000025,  # $0.25/1M tokens
-        cost_per_output_token=0.000002,  # $2.00/1M tokens
-        expected_quality=0.86,
-    ),
-    ModelArm(
-        model_id="claude-sonnet-4-5",
-        model_name="claude-sonnet-4-5",
-        provider="anthropic",
-        cost_per_input_token=0.000003,  # $3.00/1M tokens
-        cost_per_output_token=0.000015,  # $15.00/1M tokens
-        expected_quality=0.92,
-    ),
-    ModelArm(
-        model_id="gemini-2.5-pro",
-        model_name="gemini-2.5-pro",
-        provider="google-vertex",
-        cost_per_input_token=0.00000125,  # $1.25/1M tokens
-        cost_per_output_token=0.000005,  # $5.00/1M tokens
-        expected_quality=0.88,
-    ),
-    # PREMIUM TIER
-    ModelArm(
-        model_id="gpt-5",
-        model_name="gpt-5",
-        provider="openai",
-        cost_per_input_token=0.00000125,  # $1.25/1M tokens
-        cost_per_output_token=0.00001,  # $10.00/1M tokens
-        expected_quality=0.95,
-    ),
-    ModelArm(
-        model_id="claude-opus-4-5",
-        model_name="claude-opus-4-5",
-        provider="anthropic",
-        cost_per_input_token=0.000005,  # $5.00/1M tokens
-        cost_per_output_token=0.000025,  # $25.00/1M tokens
-        expected_quality=0.97,
-    ),
-    ModelArm(
-        model_id="gemini-3-pro",
-        model_name="gemini-3-pro",
-        provider="google-vertex",
-        cost_per_input_token=0.000002,  # $2.00/1M tokens
-        cost_per_output_token=0.000012,  # $12.00/1M tokens
-        expected_quality=0.94,
-    ),
-]
+# Import conduit's model configuration - single source of truth
+from conduit.core.config import settings as conduit_settings
+
+
+# Reverse mapping: conduit internal name → API model name
+# This is the inverse of conduit.yaml's litellm.model_mappings
+# NOTE: Uses models available via API keys (not Vertex AI)
+CONDUIT_TO_API_MODEL = {
+    # OpenAI (conduit uses future names, API uses current)
+    "o4-mini": "gpt-4o-mini",
+    "gpt-5": "gpt-4o",
+    "gpt-5.1": "gpt-4-turbo",
+    # Anthropic
+    "claude-sonnet-4.5": "claude-3-5-sonnet-latest",
+    "claude-opus-4.5": "claude-3-opus-latest",
+    "claude-haiku-4.5": "claude-3-haiku-latest",
+    # Google (gemini-2.0-flash-exp available via API key, 1.5 requires Vertex)
+    "gemini-2.5-pro": "gemini-2.0-flash-exp",
+    "gemini-2.0-flash": "gemini-2.0-flash-exp",
+}
+
+
+def _detect_provider(model_id: str) -> str:
+    """Detect provider from model ID.
+
+    Maps model IDs to PydanticAI provider format.
+    """
+    model_lower = model_id.lower()
+    if any(x in model_lower for x in ["gpt", "o1", "o3", "o4", "davinci", "turbo"]):
+        return "openai"
+    elif any(x in model_lower for x in ["claude", "opus", "sonnet", "haiku"]):
+        return "anthropic"
+    elif "gemini" in model_lower:
+        return "google-gla"  # Google AI Studio (uses API keys)
+    elif "mistral" in model_lower or "mixtral" in model_lower:
+        return "mistral"
+    elif "grok" in model_lower:
+        return "xai"
+    elif "deepseek" in model_lower:
+        return "deepseek"
+    else:
+        return "openai"  # Default fallback
+
+
+def get_default_arms() -> list[ModelArm]:
+    """Build ModelArm list from conduit's configuration.
+
+    Uses conduit.core.config.settings.default_models as the single source of truth.
+    Maps conduit's internal model names to actual API model names.
+    Costs are calculated dynamically by Arbiter at execution time.
+
+    Returns:
+        List of ModelArm objects for benchmarking.
+    """
+    arms = []
+    for conduit_model_id in conduit_settings.default_models:
+        # Map conduit name to API name (fallback to same name if not mapped)
+        api_model_name = CONDUIT_TO_API_MODEL.get(conduit_model_id, conduit_model_id)
+        provider = _detect_provider(api_model_name)
+        arms.append(ModelArm(
+            model_id=conduit_model_id,  # Keep conduit ID for tracking
+            model_name=api_model_name,  # Use API name for execution
+            provider=provider,
+            cost_per_input_token=0.0,  # Dynamic via Arbiter
+            cost_per_output_token=0.0,
+            expected_quality=0.85,  # Default prior, overridden by bandit learning
+        ))
+    return arms
+
+
+# Default arms from conduit's configuration
+DEFAULT_ARMS = get_default_arms()
 
 
 @click.group()

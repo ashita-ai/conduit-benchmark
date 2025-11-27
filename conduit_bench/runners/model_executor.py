@@ -2,6 +2,8 @@
 
 Handles direct PydanticAI calls to LLM models with cost tracking,
 latency measurement, and error handling.
+
+Uses Arbiter's CostCalculator for dynamic pricing from llm-prices.com.
 """
 
 import asyncio
@@ -10,6 +12,7 @@ import time
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.models import KnownModelName
+from arbiter_ai import get_cost_calculator
 
 from conduit.engines.bandits import ModelArm
 
@@ -74,6 +77,8 @@ class ModelExecutor:
         """
         self.timeout = timeout
         self.max_retries = max_retries
+        self._cost_calculator = get_cost_calculator()
+        self._pricing_loaded = False
 
     async def execute(
         self,
@@ -119,19 +124,22 @@ class ModelExecutor:
                 # Get token usage from result
                 usage = result.usage()
 
-                # Extract tokens (handle both naming conventions)
-                if hasattr(usage, "request_tokens"):
-                    input_tokens = usage.request_tokens or 0
-                    output_tokens = usage.response_tokens or 0
-                else:
-                    # Fallback to alternative naming
-                    input_tokens = getattr(usage, "input_tokens", 0)
-                    output_tokens = getattr(usage, "output_tokens", 0)
+                # Extract tokens (use new naming, fallback to deprecated)
+                input_tokens = getattr(usage, "input_tokens", None)
+                output_tokens = getattr(usage, "output_tokens", None)
+                if input_tokens is None:
+                    input_tokens = getattr(usage, "request_tokens", 0) or 0
+                    output_tokens = getattr(usage, "response_tokens", 0) or 0
 
-                # Calculate cost in USD
-                cost_usd = (
-                    input_tokens * arm.cost_per_input_token
-                    + output_tokens * arm.cost_per_output_token
+                # Calculate cost using Arbiter's dynamic pricing
+                if not self._pricing_loaded:
+                    await self._cost_calculator.ensure_loaded()
+                    self._pricing_loaded = True
+
+                cost_usd = self._cost_calculator.calculate_cost(
+                    arm.model_id,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens
                 )
 
                 latency = time.time() - start_time
