@@ -3,13 +3,13 @@
 ## 🎯 Objectives
 1. Compare 11 bandit algorithms for LLM routing
 2. Test across 9 modern frontier models (Claude, OpenAI, Google)
-3. Evaluate with/without PCA dimensionality reduction (67 dimensions)
-4. Measure convergence, quality, cost, and regret with statistical rigor
+3. Measure convergence, quality, cost, and regret with statistical rigor
+4. (Optional) Compare PCA dimensionality reduction (387 → 67 dims) in follow-up study
 
 ## 🤖 Algorithms Under Test (11 Total)
 
 ### Contextual Algorithms (3) - Use query features
-1. **LinUCBBandit** - Linear UCB with contextual features (uses PCA)
+1. **LinUCBBandit** - Linear UCB with contextual features (387 dims default)
 2. **ContextualThompsonSamplingBandit** - Bayesian linear regression
 3. **DuelingBandit** - Pairwise preference learning
 
@@ -80,10 +80,11 @@ Where:
 ### Convergence Requirements
 
 **Contextual Algorithms** (LinUCB, ContextualThompson, Dueling):
-- PCA dimensions: `d = 67`
-- Minimum samples: `20 * d = 20 * 67 = 1,340`
-- Recommended: `30 * d = 30 * 67 = 2,010`
-- **Power-adjusted:** Based on pilot variance (see below)
+- Default dimensions: `d = 387` (384 embedding + 3 metadata)
+- With PCA (optional): `d = 67` (64 PCA + 3 metadata)
+- Minimum samples: `20 * d = 20 * 387 = 7,740` (default) or `20 * 67 = 1,340` (PCA)
+- Recommended: `30 * d = 30 * 387 = 11,610` (default) or `30 * 67 = 2,010` (PCA)
+- **Power-adjusted N=2,500:** Adequate for statistical power (see below)
 
 **Non-Contextual Algorithms** (Thompson, UCB1, Epsilon):
 - Number of arms: `K = 9`
@@ -148,6 +149,14 @@ n_required = analysis.solve_power(
 - ✅ Balances power vs. execution time
 
 **Note:** Final sample size subject to pilot study variance estimates. May adjust to N=3,000-5,000 if pilot shows higher variance.
+
+**Convergence vs Power Analysis:**
+- N=2,500 is below theoretical convergence heuristic (30 * 387 = 11,610 for LinUCB)
+- **Power analysis is still valid** - based on observed quality variance (σ² = 0.046679), not feature dimensions
+- Quality variance comes from response differences, independent of embedding size
+- Pilot study (N=200) validated algorithms work with 387-dim features
+- N=2,500 provides 80% power to detect d=0.3 quality differences
+- Contextual algorithms may converge slower than with PCA, but comparisons remain statistically valid
 
 **Alternative Configurations:**
 - **Quick test**: N = 1,000 (2-3 hours, 60% power) - Not recommended
@@ -661,6 +670,64 @@ uv run conduit-bench run --dataset data/benchmark_2500.jsonl --algorithms oracle
 # Analyze results (with statistical tests)
 uv run conduit-bench analyze --results results/*.json --output analysis/ --statistical-tests friedman,nemenyi --effect-sizes cohens-d
 ```
+
+## Out-of-Distribution Validation (GSM8K)
+
+After training and in-distribution validation on synthetic queries, test router generalization on GSM8K dataset.
+
+**Purpose**: Validate that router learned generalizable routing strategies rather than domain-specific patterns.
+
+**Dataset**: [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k) - Grade school math word problems with full step-by-step solutions
+
+**Transfer Distance**: Code-heavy synthetic queries → Math word problems (optimal transfer distance for generalization testing)
+
+**Sample Size**: N = 1,000 (GSM8K test split)
+
+**Hypothesis**: If router performs well on GSM8K after training on synthetic (code-heavy) queries, it learned:
+- ✅ **Routing strategy** (generalizable embedding-based selection)
+- ❌ **Query patterns** (domain-specific code memorization)
+
+**Evaluation**:
+```bash
+# Run trained router on GSM8K validation set
+uv run conduit-bench run \
+  --dataset data/gsm8k_1k.jsonl \
+  --algorithms linucb,thompson,ucb1,oracle \
+  --output results/gsm8k_validation.json
+
+# Compare performance degradation
+# Expected: <15% performance drop indicates good generalization
+# >30% drop suggests overfitting to synthetic distribution
+```
+
+**Interpretation**:
+- **Strong generalization** (<15% drop): Router learned embedding-based routing strategy
+- **Moderate generalization** (15-30% drop): Partial domain-specific adaptation
+- **Poor generalization** (>30% drop): Overfitting to synthetic query patterns
+
+## Future Generalization Testing (ELI5)
+
+**Future Work**: Test extreme generalization with ELI5 dataset
+
+**Dataset**: [ELI5](https://huggingface.co/datasets/eli5) - Reddit-style explanations for complex questions
+
+**Transfer Distance**: Code/Math → General explanations (maximum transfer distance)
+
+**Purpose**: Stress-test router generalization across maximum distribution shift
+
+**Rationale**:
+- GSM8K tests code → math generalization (moderate shift)
+- ELI5 tests code/math → general explanations (extreme shift)
+- Combined validation ensures router doesn't memorize domain patterns
+
+**Sample Size**: N = 1,000 (held-out ELI5 test split)
+
+**Expected Challenge**: ELI5 queries have very different:
+- Linguistic patterns (casual vs technical)
+- Answer structures (explanations vs solutions)
+- Embedding distributions (broad topics vs narrow domains)
+
+**Success Criteria**: <40% performance drop indicates exceptionally robust generalization
 
 ---
 
