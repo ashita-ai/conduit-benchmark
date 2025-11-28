@@ -4,314 +4,450 @@ Critical architectural and dataset decisions for conduit-benchmark.
 
 ---
 
+## 🔄 MAJOR REDESIGN (2025-11-27)
+
+### Decision: Real Benchmarks + Objective Evaluation (Thompson Sampling Validation)
+
+**Date**: 2025-11-27
+
+**Context**: Redesigned experiment based on two critical findings:
+1. **Data constraint**: Total 2,483 queries < 3,000-4,000 needed for hybrid algorithm convergence
+2. **Research evidence**: BayesianRouter (arXiv 2510.02850) shows Thompson Sampling > LinUCB/hybrids for LLM routing
+
+**Previous approach** (DEPRECATED):
+- Synthetic data generation + Arbiter evaluation
+- 11 algorithms including 5 hybrid variants
+- 10,000 synthetic queries + GSM8K validation
+
+**Current approach**:
+- Real benchmark datasets with objective evaluation
+- 4 core algorithms (Thompson validation focus)
+- 2,483 queries across 3 established benchmarks
+
+---
+
 ## Dataset Strategy
 
-### Decision: Synthetic Generation + GSM8K Validation
+### Decision: Established Benchmarks (GSM8K, MMLU, HumanEval)
 
-**Date**: 2024-11-26
+**Date**: 2025-11-27
 
-**Context**: Need benchmark dataset to evaluate bandit routing algorithms with semantic evaluation (Arbiter).
+**Context**: Need credible, reproducible benchmarks with objective evaluation methods.
 
-**Options Considered**:
-1. **RouterBench** (withmartian/routerbench)
-2. **Synthetic generation** (template-based)
-3. **GSM8K** (openai/gsm8k)
-4. **Hybrid** (RouterBench + Synthetic)
+**Decision**: Use **established benchmarks** with **objective evaluation**
 
-**Decision**: Use **synthetic generation for development**, **GSM8K for validation**
+**Datasets selected**:
+
+| Dataset | Size | Domain | Evaluation Method | Rationale |
+|---------|------|--------|-------------------|-----------|
+| **GSM8K** | 1,319 | Math reasoning | Exact match (`#### N`) | Objective, no LLM-as-judge needed |
+| **MMLU** | 1,000 | Knowledge (57 subjects) | Exact match (A/B/C/D) | Broad domain coverage |
+| **HumanEval** | 164 | Python coding | Code execution | Most credible to developers |
+| **Total** | **2,483** | Multi-domain | Objective only | Reproducible, unbiased |
 
 **Rationale**:
 
-#### Why NOT RouterBench
-
-| Aspect | RouterBench | Required for Arbiter |
-|--------|-------------|---------------------|
-| Reference answers | "A", "B", "C", "D" | Full text responses |
-| Evaluation method | Binary correctness (0.0/1.0) | Semantic similarity |
-| Query type | Multiple choice | Open-ended |
-| Arbiter compatibility | ❌ Meaningless | ✅ Required |
-
-**Core problem**: Semantic similarity between a model's explanation ("Based on the context, B is correct because...") and reference answer ("B") is essentially random. Arbiter cannot extract quality signals from letter-only answers.
-
-**Example incompatibility**:
-```
-Query: "Which option continues the sentence correctly?"
-Model response: "Based on the context, option B makes the most sense because it maintains narrative consistency and logical flow."
-Reference answer: "B"
-Semantic similarity: ~0.15 (meaningless)
-```
-
-RouterBench is fundamentally incompatible with semantic evaluation.
-
-#### Why Synthetic Generation
+#### Why Established Benchmarks
 
 **Advantages**:
-- Full text reference answers compatible with Arbiter
-- Open-ended queries matching production use cases
-- Controllable diversity (code, debugging, docs, etc.)
-- Fast generation (no API calls, instant)
-- Cost-free dataset creation
-- 10 categories, 200+ templates
+- **Credibility**: Well-known, peer-reviewed datasets
+- **Reproducibility**: Other researchers can replicate results
+- **Objective evaluation**: No LLM-as-judge circular dependency
+- **Domain diversity**: Math, knowledge, code
+- **No overfitting risk**: Real-world problems, not synthetic templates
 
-**Production alignment**:
-- Code generation and debugging
-- Technical explanations
-- Documentation writing
-- System design
-- Data analysis
+**Key constraint**: 2,483 total queries limits algorithm testing (see "Algorithm Selection" below)
 
-**Disadvantages**:
-- Template-based (less natural than real queries)
-- Potential pattern overfitting
-- Limited domain coverage (only what we template)
+#### Why GSM8K (Grade School Math)
 
-#### Why GSM8K for Validation
+**Source**: [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k)
 
 **Advantages**:
-- Full step-by-step reasoning in reference answers
-- Semantic evaluation compatible (2-8 solution steps)
-- Well-established benchmark (8.5K problems)
-- Out-of-distribution test (math vs code-heavy synthetic)
-- Validates router generalization
+- 1,319 test problems with step-by-step solutions
+- Answer format: `#### 72` - objectively correct/incorrect
+- No LLM-as-judge needed - eliminates circular dependency
+- Tests reasoning capability across models
 
-**Example GSM8K answer**:
-```
-"Natalia sold 48/2 = <<48/2=24>>24 clips in May.
-Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
-#### 72"
-```
+**Evaluation**: Extract `#### N` from response, exact match against ground truth
 
-**Disadvantages**:
-- Math-only domain (narrow)
-- Different distribution from production (transfer learning question)
+#### Why MMLU (Massive Multitask Language Understanding)
 
-#### Transfer Learning Strategy
+**Source**: [cais/mmlu](https://huggingface.co/datasets/cais/mmlu)
 
-**Question**: If router trains on synthetic (code-heavy), will it generalize to GSM8K (math)?
+**Advantages**:
+- 14,042 questions across 57 subjects (using 1k subset)
+- Multiple choice (A/B/C/D) - exact match on answer
+- Broad coverage: STEM, humanities, social sciences
+- Tests knowledge breadth across models
 
-**Answer**: This is a **feature, not a bug**. We want to test generalization.
+**Evaluation**: Extract A/B/C/D from response, exact match against ground truth
 
-**Three-phase validation strategy**:
+#### Why HumanEval (OpenAI Code Benchmark)
 
-1. **Development (Synthetic)**:
-   - Train/tune router on synthetic queries
-   - Fast iteration, controlled diversity
-   - Validates router learns on known distribution
+**Source**: [openai/openai_humaneval](https://huggingface.co/datasets/openai/openai_humaneval)
 
-2. **In-distribution validation (Held-out Synthetic)**:
-   - Test on held-out synthetic test set
-   - Confirms router works on same distribution
+**Advantages**:
+- 164 Python function completion problems
+- Execute code + run unit tests - pass/fail evaluation
+- Most credible to developers - executable tests > LLM judges
+- Tests practical coding ability
 
-3. **Out-of-distribution validation (GSM8K)**:
-   - Test on GSM8K (different domain)
-   - Confirms router generalizes beyond training distribution
-   - Stronger signal of router quality
+**Evaluation**: Execute generated code with test cases, pass (1.0) or fail (0.0)
 
-**Why this works**:
-- Router learns from **embeddings**, not query content
-- Math queries and code queries have different embedding patterns
-- If router learns to route code queries well, GSM8K tests if it learned **routing strategy** (generalizable) vs **code patterns** (overfitting)
+#### Why NOT Synthetic Data (for benchmarking)
 
-**Final dataset mix**:
-- **Training**: 10,000 synthetic queries (all 10 categories)
-- **In-distribution validation**: 1,000 held-out synthetic queries
-- **Out-of-distribution validation**: 1,000 GSM8K test queries
+**Rejected approach**: Template-based synthetic generation
+
+**Reasons**:
+- Pattern overfitting risk on templates
+- Less credible than established benchmarks
+- Not reproducible by other researchers
+- Required Arbiter (LLM-as-judge) - circular dependency
+
+**Note**: Synthetic data may still be useful for production usage where no ground truth exists
 
 ---
 
 ## Evaluation Architecture
 
-### Decision: Arbiter-based Semantic Evaluation
+### Decision: Objective Evaluation (Exact Match + Code Execution)
 
-**Date**: 2024-11-25
+**Date**: 2025-11-27
 
-**Context**: Need to evaluate response quality for routing decisions.
+**Context**: Need unbiased, reproducible evaluation methods without circular dependency.
 
 **Options Considered**:
-1. Binary correctness (0.0/1.0)
-2. Exact match
-3. Semantic similarity (Arbiter)
-4. LLM-as-judge
+1. **Arbiter** (LLM-as-judge via semantic similarity)
+2. **Exact match** (string comparison)
+3. **Code execution** (run tests)
+4. **Human evaluation** (manual grading)
 
-**Decision**: Semantic similarity via **Arbiter** (embedding-based)
+**Decision**: **Objective evaluation only** - Exact match for GSM8K/MMLU, Code execution for HumanEval
 
 **Rationale**:
-- Arbiter provides continuous quality scores (0.0-1.0)
-- Semantic similarity captures meaning, not just string matching
-- Faster and cheaper than LLM-as-judge
-- Compatible with bandit algorithms (need continuous rewards)
+
+#### Why NOT Arbiter (LLM-as-judge)
+
+**Problem**: Circular dependency - using LLM to judge LLM routing creates bias
+
+**Issues**:
+- LLM-as-judge may favor certain model styles over others
+- Not reproducible (evaluation model versions change)
+- Adds cost and latency to benchmarking
+- Introduces evaluation noise and bias
+
+**Conclusion**: Arbiter is valuable for **production use** (no ground truth), but inappropriate for **benchmarking**
+
+#### Why Exact Match (GSM8K, MMLU)
 
 **Implementation**:
 ```python
-from arbiter_ai import Arbiter
+# GSM8K: Extract "#### N" from response
+def extract_gsm8k_answer(text: str) -> str | None:
+    match = re.search(r'####\s*(-?\d+(?:,\d+)*(?:\.\d+)?)', text)
+    return match.group(1).replace(',', '') if match else None
 
-arbiter = Arbiter()
-quality_score = arbiter.evaluate(
-    query=query.query_text,
-    response=model_response,
-    reference=query.reference_answer,
-)
+# MMLU: Extract A/B/C/D from response
+def extract_mmlu_answer(text: str) -> str | None:
+    match = re.search(r'\b([ABCD])\b', text.upper())
+    return match.group(1) if match else None
+
+# Evaluation: Binary reward
+reward = 1.0 if predicted == expected else 0.0
 ```
+
+**Advantages**:
+- Completely objective - no bias
+- Reproducible - same results every run
+- Fast - no additional API calls
+- Free - no evaluation costs
+
+**Limitation**: Binary reward signal (may slow bandit learning vs continuous rewards)
+
+#### Why Code Execution (HumanEval)
+
+**Implementation**:
+```python
+# Combine prompt + model response + test cases
+full_code = f"{prompt}{response}\n\n{test_code}\ncheck({entry_point})"
+
+# Execute in sandboxed subprocess with timeout
+result = subprocess.run(['python', temp_file], timeout=10, capture_output=True)
+reward = 1.0 if result.returncode == 0 else 0.0
+```
+
+**Advantages**:
+- Objective - code either works or doesn't
+- Credible - developers trust executable tests
+- Realistic - matches production code evaluation
+- Comprehensive - tests functionality, not just style
+
+**Safety**: Executed in subprocess with timeout to prevent infinite loops or system harm
 
 ---
 
 ## Bandit Algorithm Selection
 
-### Decision: Support LinUCB, Thompson Sampling, UCB1, Epsilon-Greedy
+### Decision: Focus on Thompson Sampling Validation (4 Core Algorithms)
 
-**Date**: 2024-11-23
+**Date**: 2025-11-27
 
-**Context**: Need to benchmark multiple bandit algorithms for routing.
+**Context**: Two critical constraints emerged:
+1. **Data limitation**: 2,483 total queries < 3,000-4,000 needed for hybrid/contextual algorithms
+2. **Research evidence**: BayesianRouter (arXiv 2510.02850) shows Thompson Sampling > LinUCB/hybrids for LLM routing
 
-**Algorithms included**:
-1. **LinUCB**: Contextual bandit (uses query embeddings)
-2. **Thompson Sampling**: Bayesian approach
-3. **UCB1**: Upper confidence bound (stateless)
-4. **Epsilon-Greedy**: Simple baseline
-5. **Oracle**: Always select best model (upper bound)
-6. **Random**: Random selection (lower bound)
+**Previous plan** (DEPRECATED):
+- 11 algorithms (5 hybrids + 4 standalone + 2 baselines)
+- Intended to validate HybridRouter (Thompson → LinUCB)
+- Required 3,000-4,000 queries for proper hybrid convergence
+
+**Current plan**:
+- **4 core algorithms** focused on Thompson Sampling validation
+- Align with conduit default change (GitHub conduit#169)
+
+**Algorithms selected**:
+
+| Algorithm | Type | Convergence Queries | Role |
+|-----------|------|-------------------|------|
+| **Thompson Sampling** | Non-contextual Bayesian | 100-500 | **PRIMARY** - Proposed default |
+| **UCB1** | Non-contextual UCB | 100-500 | Comparison baseline |
+| **Epsilon-Greedy** | Non-contextual ε-greedy | 100-500 | Comparison baseline |
+| **Random** | Uniform selection | 0 (no learning) | Lower bound |
 
 **Rationale**:
-- LinUCB: Best for contextual routing (uses embeddings)
-- Thompson Sampling: Alternative Bayesian approach
-- UCB1: Simple baseline, fast convergence
-- Epsilon-Greedy: Industry standard baseline
-- Oracle: Upper bound for comparison
-- Random: Lower bound for sanity check
 
-**Convergence requirements** (from experimental design):
-- LinUCB: ~5,000 queries (high-dimensional context)
-- Thompson Sampling: ~3,000 queries
-- UCB1: ~2,000 queries (stateless)
+#### Why Thompson Sampling as Primary
 
-**Dataset size target**: 10,000 queries (sufficient for all algorithms)
+**Research backing** (BayesianRouter, arXiv 2510.02850):
+- Thompson Sampling SUPERIOR to LinUCB for LLM routing
+- LinUCB problems with LLM domains:
+  - Premature exploitation with delayed feedback
+  - Over-exploitation leads to collapse to single arm
+  - Requires significantly more data to converge
+- Thompson advantages:
+  - Robust to delayed feedback
+  - Maintains exploration-exploitation balance
+  - Works effectively from query 1
+  - No high-dimensional context needed
+
+**Convergence**: 100-500 queries (well within 2,483 available)
+
+**Goal**: Validate Thompson as optimal default for conduit (supports GitHub conduit#169)
+
+#### Why NOT Test Hybrids/LinUCB
+
+**Data constraint**:
+- Hybrid algorithms (e.g., Thompson → LinUCB) need 3,000-4,000 queries
+- LinUCB alone needs 650-1,300 queries (5-10× feature dimensionality with PCA)
+- We have 2,483 queries (insufficient for proper evaluation)
+
+**Research evidence**:
+- BayesianRouter already shows Thompson > LinUCB/hybrids
+- No need to re-validate what research has established
+- Focus on empirical Thompson validation instead
+
+**Conclusion**: Not worth testing algorithms we can't properly evaluate
+
+#### Future Work: MATH Dataset
+
+**If comprehensive hybrid validation needed**:
+- Dataset: MATH (12,500 test queries)
+- Sufficient data: 12,500 >> 4,000 needed for hybrid convergence
+- Scope: All 11 algorithms with proper convergence
+- Cost: $1,265-1,771 (full suite)
+- Timeline: Post-Thompson validation (if needed)
+
+**Expected outcome**: Thompson likely matches or exceeds hybrids even with ample data (research-backed)
 
 ---
+
+## Model Canonicalization
+
+### Decision: Use Current-Generation Models with Actual API Names
+
+**Date**: 2025-11-27
+
+**Context**: Need to benchmark against current production models, not outdated versions.
+
+**Models selected** (6 current-generation):
+
+| API Model ID | Provider | Tier | Notes |
+|--------------|----------|------|-------|
+| `gpt-4o-mini` | OpenAI | Budget | Fast, cheap |
+| `gpt-4-turbo` | OpenAI | Flagship | High quality |
+| `claude-sonnet-4-5-20250929` | Anthropic | Balanced | Best for code |
+| `claude-opus-4-5-20251101` | Anthropic | Premium | Highest quality |
+| `gemini-2.5-pro` | Google | Flagship | Stable |
+| `gemini-3-pro-preview` | Google | Cutting Edge | Preview (may change) |
+
+**Documentation sources**:
+- OpenAI: https://platform.openai.com/docs/models
+- Anthropic: https://platform.claude.com/docs/en/about-claude/models/all-models
+- Google: https://ai.google.dev/gemini-api/docs/models
+
+**Rationale**:
+
+#### Why These Models
+
+**Tier distribution**:
+- Budget: 1 model (gpt-4o-mini)
+- Balanced: 2 models (gpt-4-turbo, claude-sonnet-4-5)
+- Premium: 2 models (claude-opus-4-5, gemini-2.5-pro)
+- Cutting edge: 1 model (gemini-3-pro-preview)
+
+**Provider diversity**: 2 OpenAI, 2 Anthropic, 2 Google (balanced representation)
+
+**Cost variation**: Wide range from cheap (gpt-4o-mini) to expensive (claude-opus-4-5) - tests router's cost-quality tradeoff learning
+
+#### Why Actual API Names (Not Aliases)
+
+**Problem with aliases** (e.g., using "gpt-5" instead of "gpt-4o"):
+- Research reproducibility issues (aliases change over time)
+- Documentation confusion (official docs use API names)
+- Version ambiguity (which model was actually tested?)
+
+**Solution**: Use exact API model IDs from provider documentation
+
+**Frozen for reproducibility**: These exact model IDs are frozen in EXPERIMENTAL_DESIGN.md - changing models invalidates all benchmark results
 
 ## Performance Optimization
 
-### Decision: Oracle Caching for Cost Reduction
+### Decision: Parallel Execution + Database Streaming
 
-**Date**: 2024-11-24
+**Date**: 2025-11-27
 
-**Context**: Running benchmarks is expensive (9 models × N queries).
+**Context**: Minimize benchmark runtime while maintaining data integrity.
 
-**Strategy**:
-1. Generate oracle results once (9 models × N queries)
-2. Cache oracle routing decisions
-3. Reuse oracle results for bandit algorithm comparison
+**Optimizations implemented**:
 
-**Cost savings**:
-- Without caching: 225,000 LLM calls (5 algorithms × 9 models × 5,000 queries)
-- With caching: 50,000 LLM calls (oracle + 4 bandits × 5,000)
-- **Cost reduction: 78%**
+1. **Parallel algorithm execution**:
+   - All algorithms run concurrently (not sequential)
+   - Max concurrency: 10 (configurable)
+   - Time savings: ~65% vs sequential
 
-**Time savings**:
-- Without caching: ~10 hours
-- With caching: ~2 hours
-- **Time reduction: 80%**
+2. **Database streaming writes**:
+   - Results written to database as they complete
+   - No catastrophic data loss if benchmark interrupted
+   - Enables real-time monitoring
 
-**Implementation**:
-```bash
-# Step 1: Generate oracle once
-uv run conduit-bench run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms oracle \
-  --output results/oracle.json
+3. **Algorithm reduction** (11 → 4):
+   - Focus on Thompson validation only
+   - Cost savings: 64% ($195-270 vs $600-840)
+   - Time savings: 65% (2.5-4 hours vs 12-17 hours)
 
-# Step 2: Reuse oracle for bandits
-uv run conduit-bench run \
-  --dataset data/synthetic_10k.jsonl \
-  --algorithms linucb,thompson,ucb1,epsilon_greedy \
-  --oracle-reference results/oracle.json \
-  --output results/bandits.json
-```
+**Total efficiency gain**:
+- **Original plan**: 11 algorithms × 2,483 queries = $600-840, 12-17 hours
+- **Optimized plan**: 4 algorithms × 2,483 queries = $195-270, 2.5-4 hours
+- **Savings**: 64% cost, 65% time
 
 ---
 
-## Scalability Considerations
+## Production Concerns (Conduit Library)
 
-### Decision: Implement Scalable LinUCB (Future)
+### PCA Persistence Architecture Issue
 
-**Date**: 2024-11-26
+**Date**: 2025-11-27 (Identified, not yet resolved)
 
-**Context**: Standard LinUCB has O(d³) complexity with 387-dim features.
+**Problem**: PCA models currently stored in filesystem (`~/.cache/conduit/`), should be in database
 
-**Problem**:
-- Computation: O(387³) = 59x slower than necessary
-- Memory: O(387²) = 3.1x more than necessary
-- Convergence: Requires 30×387 = 11,610 samples
+**Issues**:
+- Cache loss on instance restart
+- No multi-instance sharing (each instance trains own PCA)
+- No versioning or rollback capability
+- No auditability of PCA changes
 
-**Proposed solution** (Issue #141):
-- Implement Scalable LinUCB (arXiv:2510.19349)
-- Low-rank parametrization (rank=64)
-- 59x faster, 3.1x less memory
-- Same quality as standard LinUCB
+**Impact**: Not blocking benchmark execution, but affects production deployment
 
-**Timeline**: After initial benchmarking validates standard LinUCB works
-
-**Reference**: https://github.com/ashita-ai/conduit/issues/141
-
----
-
-## Archive
-
-### Rejected: RouterBench Dataset
-
-**Date**: 2024-11-26
-
-**Reason**: Incompatible with semantic evaluation (Arbiter)
-
-**Archived files**:
-- `archive/routerbench/routerbench_loader.py`
-- `archive/routerbench/test_routerbench_adapter.py`
-- `archive/routerbench/generate_routerbench_dataset.py`
-
-**Kept for reference**: Implementation may be useful for future binary correctness benchmarks.
+**Resolution**: Future work for conduit library (separate from benchmark project)
 
 ---
 
 ## Future Considerations
 
-### Open Questions
+### MATH Dataset - Comprehensive Hybrid Validation
 
-1. **Template diversity**: Should we expand beyond 200 templates?
-   - Current: 10 categories, 200+ templates
-   - Risk: Pattern overfitting on templates
-   - Mitigation: GSM8K validation catches overfitting
+**Date**: 2025-11-27
 
-2. **Domain expansion**: Should we add more domain-specific datasets?
-   - Candidates: HumanEval (code), MATH (advanced math), TriviaQA (knowledge)
-   - **ELI5 (Planned)**: Reddit-style explanations for extreme generalization testing
-     - Transfer distance: Code/Math → General explanations (maximum shift)
-     - Tests if router learned truly generalizable strategies vs domain patterns
-     - Expected: <40% performance drop indicates exceptional robustness
-   - Benefit: Validates generalization across domains
-   - Cost: Integration effort, API costs
+**Context**: Current benchmark (2,483 queries) insufficient for hybrid algorithm testing.
 
-3. **Real production data**: Should we benchmark on actual usage?
-   - Benefit: Most realistic validation
-   - Challenge: Privacy, labeling, diversity
+**Proposal**:
+- **Dataset**: MATH (12,500 test queries)
+- **Source**: [hendrycks/math](https://huggingface.co/datasets/hendrycks/math)
+- **Evaluation**: Exact match on final answer
+- **Sufficient data**: 12,500 >> 4,000 needed for hybrid convergence
 
-4. **Multi-metric evaluation**: Should we use multiple evaluators?
-   - Current: Arbiter (semantic similarity)
-   - Alternatives: BLEU, ROUGE, BERTScore, LLM-as-judge
-   - Trade-off: More robust vs more complex
+**Scope**:
+- All 11 algorithms (5 hybrids + 4 standalone + 2 baselines)
+- 3 independent runs for statistical significance
+- Cost: $1,265-1,771 (full suite)
+- Time: 16-24 hours
 
-### Decision Framework
+**Research questions**:
+1. Do hybrids outperform pure Thompson with sufficient data?
+2. What is the optimal switch_threshold for production?
+3. Does LinUCB phase provide value over pure Thompson?
+4. How does PCA dimensionality reduction impact convergence?
 
-For future dataset decisions, evaluate:
-1. **Arbiter compatibility**: Full text reference answers required
+**Expected outcome**: Thompson likely matches or exceeds hybrids even with ample data (research-backed)
+
+**Priority**: Low - not required for conduit default decision (GitHub conduit#169)
+
+### Domain Expansion Candidates
+
+**Post-Thompson validation**, consider adding:
+1. **TriviaQA**: Knowledge retrieval and factual accuracy
+2. **HellaSwag**: Commonsense reasoning
+3. **DROP**: Reading comprehension and numerical reasoning
+
+**Criteria for inclusion**:
+1. **Objective evaluation**: Exact match or code execution (no LLM-as-judge)
 2. **Production alignment**: Matches real use cases
-3. **Diversity**: Covers multiple domains/categories
-4. **Cost**: Generation/acquisition cost
-5. **Validation value**: Tests generalization vs overfitting
+3. **Domain diversity**: Tests different model strengths
+4. **Cost effectiveness**: Reasonable API costs
+
+---
+
+## Archive
+
+### Deprecated: Synthetic Data + Arbiter Evaluation
+
+**Date**: 2025-11-27
+
+**Reason**: Replaced with established benchmarks + objective evaluation
+
+**Why deprecated**:
+- Synthetic data risks pattern overfitting
+- Arbiter (LLM-as-judge) creates circular dependency
+- Established benchmarks more credible and reproducible
+
+**Original approach** (archived):
+- 10,000 synthetic queries (10 categories, 200+ templates)
+- Semantic similarity evaluation via Arbiter
+- Transfer learning validation with GSM8K
+
+**Current approach**: Real benchmarks (GSM8K, MMLU, HumanEval) with objective evaluation
+
+### Rejected: RouterBench Dataset
+
+**Date**: 2024-11-26
+
+**Reason**: Incompatible with both Arbiter and objective evaluation needs
+
+**Why rejected**:
+- Multiple choice format (A/B/C/D reference answers)
+- Not suitable for semantic similarity evaluation
+- Better alternatives available (MMLU for multiple choice)
 
 ---
 
 ## Change Log
 
-- **2024-11-26**: Initial design decisions documented
+- **2025-11-27**: MAJOR REDESIGN - Real benchmarks + objective evaluation
+- **2025-11-27**: Algorithm reduction: 11 → 4 (Thompson validation focus)
+- **2025-11-27**: Model canonicalization (6 current-gen models with API names)
+- **2025-11-27**: Added MATH dataset as future research direction
+- **2025-11-27**: Deprecated synthetic data + Arbiter approach
+- **2024-11-26**: Initial design decisions documented (DEPRECATED)
 - **2024-11-26**: Rejected RouterBench, archived implementation
-- **2024-11-26**: Defined synthetic + GSM8K strategy
-- **2024-11-26**: Documented transfer learning approach
+- **2024-11-26**: Defined synthetic + GSM8K strategy (DEPRECATED)
+- **2024-11-26**: Documented transfer learning approach (DEPRECATED)
