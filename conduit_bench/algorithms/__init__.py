@@ -9,7 +9,10 @@ from conduit.engines.bandits import (
     AlwaysCheapestBaseline,
     BanditAlgorithm,
     BanditFeedback,
+    ContextualThompsonSamplingBandit,
+    DuelingBandit,
     EpsilonGreedyBandit,
+    LinUCBBandit,
     ModelArm,
     OracleBaseline,
     RandomBaseline,
@@ -21,9 +24,15 @@ __all__ = [
     "BanditAlgorithm",
     "ModelArm",
     "BanditFeedback",
+    # Contextual algorithms
+    "LinUCBBandit",
+    "ContextualThompsonSamplingBandit",
+    "DuelingBandit",
+    # Non-contextual algorithms
     "ThompsonSamplingBandit",
     "UCB1Bandit",
     "EpsilonGreedyBandit",
+    # Baselines
     "RandomBaseline",
     "OracleBaseline",
     "AlwaysBestBaseline",
