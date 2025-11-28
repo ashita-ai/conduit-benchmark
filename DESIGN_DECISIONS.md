@@ -248,6 +248,42 @@ reward = 1.0 if result.returncode == 0 else 0.0
 
 **Conclusion**: Not worth testing algorithms we can't properly evaluate
 
+#### Why NOT Test Dueling Bandits
+
+**What is Dueling Bandits**:
+- **Algorithm**: FGTS.CDB (Fast Gradient Thompson Sampling for Contextual Dueling Bandits)
+- **Feedback mechanism**: Pairwise comparisons (A vs B) instead of absolute quality scores
+- **Availability**: Conduit supports via `algorithm="dueling"` parameter
+- **Claims**: 30-50% faster convergence, better for human evaluation
+
+**Why excluded from this benchmark**:
+1. **Incompatible feedback mechanism**:
+   - Dueling requires selecting 2 models and judging which is better (pairwise)
+   - All other algorithms use absolute quality scores (0.0-1.0)
+   - Not directly comparable in same experiment
+2. **Infrastructure complexity**:
+   - Would require modifying benchmark to evaluate model pairs
+   - Different data flow: select_pair() vs select_arm()
+   - Different update: DuelingFeedback vs BanditFeedback
+3. **Evaluation complexity**:
+   - Need to generate response from BOTH models for each query
+   - Need pairwise comparison judge (2× the evaluation work)
+   - Binary preference scores harder to compare with absolute rewards
+4. **Research scope**:
+   - Current experiment focuses on Thompson Sampling validation
+   - Dueling bandits are a different research question entirely
+
+**When Dueling makes sense**:
+- Human-in-the-loop evaluation (comparing outputs more natural than rating)
+- Subjective quality assessment (creative writing, style preferences)
+- Relative performance matters more than absolute scores
+- AB testing scenarios
+
+**Future work**:
+- Separate experiment comparing pairwise vs absolute feedback mechanisms
+- Research question: "Do dueling bandits converge faster with human feedback?"
+- Not a priority for current Thompson Sampling validation
+
 #### Future Work: MATH Dataset
 
 **If comprehensive hybrid validation needed**:
@@ -442,6 +478,7 @@ reward = 1.0 if result.returncode == 0 else 0.0
 
 ## Change Log
 
+- **2025-11-27**: Documented dueling bandits support and exclusion rationale
 - **2025-11-27**: MAJOR REDESIGN - Real benchmarks + objective evaluation
 - **2025-11-27**: Algorithm reduction: 11 → 4 (Thompson validation focus)
 - **2025-11-27**: Model canonicalization (6 current-gen models with API names)

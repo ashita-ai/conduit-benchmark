@@ -106,10 +106,13 @@ Arbiter (LLM-as-judge) is still available for:
 
 **Note**: Oracle baseline can be added optionally for regret calculation upper bound.
 
-**Why Not Test Hybrids/Contextual?**
+**Why Not Test Hybrids/Contextual/Dueling?**
 - **Data constraint**: Hybrids need 3,000-4,000 queries, we have 2,483
 - **Research evidence**: BayesianRouter (arXiv 2510.02850) shows Thompson > LinUCB/hybrids
+- **Dueling bandits**: Incompatible feedback mechanism (pairwise comparisons vs absolute scores)
 - **Focus**: Validate Thompson as new default, not test algorithms we can't properly evaluate
+
+**Note on Dueling Bandits**: Conduit supports dueling bandits (`algorithm="dueling"`), which uses pairwise comparisons (A vs B) instead of absolute quality scores. This requires a different experimental setup and is not directly comparable with other algorithms. See DESIGN_DECISIONS.md for details.
 
 ## 📱 Model Arms (6 Models)
 
