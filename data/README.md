@@ -12,6 +12,7 @@ All synthetic datasets in this directory were generated using the standardized p
 2. **Model Execution**: Different LLMs generate 100 programming questions following the template
 3. **Filename Convention**: `synthetic_{model_name}.jsonl` where model name indicates the generator
 4. **Quality Control**: Generated datasets follow strict schema and validation requirements
+5. **Quality Validation**: Datasets with vague or placeholder queries are rejected
 
 ### Dataset Schema
 
@@ -54,7 +55,13 @@ Each entry in the JSONL files contains:
 
 | File | Generator Model | Entries | Status |
 |------|----------------|---------|--------|
-| `synthetic_gpt5.jsonl` | GPT-4o (gpt-5) | 90 | In progress |
+| `synthetic_gpt5.jsonl` | GPT-4o (gpt-5) | 100 | ✅ Complete |
+| `synthetic_claude-sonnet-4-5.jsonl` | Claude Sonnet 4.5 | 100 | ✅ Complete |
+| `synthetic_claude_opus_4_5.jsonl` | Claude Opus 4.5 | 100 | ✅ Complete |
+| `synthetic_grok-2.jsonl` | Grok-2 | 100 | ✅ Complete |
+| `synthetic_auto.jsonl` | Auto-generated | 100 | ✅ Complete |
+| `synthetic_composer_example.jsonl` | Reference examples | 2 | Reference only |
+| ~~`synthetic_composer_1.jsonl`~~ | Composer | ❌ Rejected | 84% vague/placeholder queries |
 
 ## Usage
 
