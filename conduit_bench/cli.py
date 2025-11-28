@@ -82,6 +82,43 @@ CONDUIT_TO_API_MODEL = {
 }
 
 
+# Model pricing ($/1M tokens) and quality priors for baseline algorithms
+# Costs from README.md pricing table, quality priors from model performance
+# Note: Actual execution costs calculated dynamically by Arbiter
+MODEL_PRIORS = {
+    "o4-mini": {
+        "input_cost_per_1m": 1.10,
+        "output_cost_per_1m": 4.40,
+        "expected_quality": 0.75,
+    },
+    "gpt-5": {
+        "input_cost_per_1m": 2.00,
+        "output_cost_per_1m": 8.00,
+        "expected_quality": 0.82,
+    },
+    "gpt-5.1": {
+        "input_cost_per_1m": 2.00,
+        "output_cost_per_1m": 8.00,
+        "expected_quality": 0.85,
+    },
+    "claude-sonnet-4.5": {
+        "input_cost_per_1m": 3.00,
+        "output_cost_per_1m": 15.00,
+        "expected_quality": 0.88,
+    },
+    "claude-opus-4.5": {
+        "input_cost_per_1m": 5.00,
+        "output_cost_per_1m": 25.00,
+        "expected_quality": 0.92,
+    },
+    "gemini-2.5-pro": {
+        "input_cost_per_1m": 1.25,
+        "output_cost_per_1m": 5.00,
+        "expected_quality": 0.80,
+    },
+}
+
+
 def _detect_provider(model_id: str) -> str:
     """Detect provider from model ID.
 
@@ -109,7 +146,9 @@ def get_default_arms() -> list[ModelArm]:
 
     Uses conduit.core.config.settings.default_models as the single source of truth.
     Maps conduit's internal model names to actual API model names.
-    Costs are calculated dynamically by Arbiter at execution time.
+
+    Costs and quality priors are used by baseline algorithms (AlwaysBest/AlwaysCheapest)
+    to make informed decisions. Actual execution costs are calculated dynamically by Arbiter.
 
     Returns:
         List of ModelArm objects for benchmarking.
@@ -119,13 +158,25 @@ def get_default_arms() -> list[ModelArm]:
         # Map conduit name to API name (fallback to same name if not mapped)
         api_model_name = CONDUIT_TO_API_MODEL.get(conduit_model_id, conduit_model_id)
         provider = _detect_provider(api_model_name)
+
+        # Get pricing and quality priors for baselines
+        priors = MODEL_PRIORS.get(conduit_model_id, {
+            "input_cost_per_1m": 2.0,
+            "output_cost_per_1m": 8.0,
+            "expected_quality": 0.80,
+        })
+
+        # Convert $/1M to $/token for ModelArm
+        input_cost_per_token = priors["input_cost_per_1m"] / 1_000_000
+        output_cost_per_token = priors["output_cost_per_1m"] / 1_000_000
+
         arms.append(ModelArm(
             model_id=conduit_model_id,  # Keep conduit ID for tracking
             model_name=api_model_name,  # Use API name for execution
             provider=provider,
-            cost_per_input_token=0.0,  # Dynamic via Arbiter
-            cost_per_output_token=0.0,
-            expected_quality=0.85,  # Default prior, overridden by bandit learning
+            cost_per_input_token=input_cost_per_token,  # Prior for baselines
+            cost_per_output_token=output_cost_per_token,  # Prior for baselines
+            expected_quality=priors["expected_quality"],  # Prior for baselines
         ))
     return arms
 
