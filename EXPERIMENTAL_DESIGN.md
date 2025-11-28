@@ -272,6 +272,46 @@ uv run conduit-bench analyze \
 - Performance on open-ended queries (no ground truth)
 - Production cost savings (requires real traffic)
 - Generalization to other model providers
+- Hybrid algorithm performance with sufficient data (need 3,000-4,000+ queries)
+
+## 🔬 Future Research
+
+### MATH Dataset - Comprehensive Hybrid Validation
+
+**Why not now?**
+- Current plan (2,483 queries) insufficient for hybrids (need 3,000-4,000+)
+- Research evidence (BayesianRouter) already shows Thompson > hybrids
+- Not required for conduit default decision (GitHub #169)
+
+**Future work** (if comprehensive hybrid validation needed):
+
+**Dataset**: MATH (12,500 test queries)
+- Source: [hendrycks/math](https://huggingface.co/datasets/hendrycks/math)
+- Size: 12,500 test problems with step-by-step solutions
+- Domain: Competition-level mathematics (AMC 8/10/12, AIME)
+- Evaluation: Exact match on final answer
+- **Sufficient data**: 12,500 >> 4,000 needed for hybrid convergence
+
+**Scope**: All 11 algorithms with proper convergence data
+- 5 hybrid variants (Thompson→LinUCB, UCB1→LinUCB, etc.)
+- 4 standalone bandits (Thompson, UCB1, LinUCB, Epsilon)
+- 2 baselines (Random, Oracle)
+- 3 independent runs for statistical significance
+
+**Research Questions**:
+1. Do hybrids outperform pure Thompson with sufficient data?
+2. What is the optimal switch_threshold for production? (test 1000, 2000, 3000)
+3. Does LinUCB phase provide value over pure Thompson?
+4. How does PCA dimensionality reduction impact convergence?
+
+**Cost & Time**:
+- Full suite: 11 algorithms × 12,500 queries × 3 runs = $1,265-1,771, 16-24 hours
+- Hybrids-focused: 7 algorithms × 12,500 queries × 3 runs = $690-966, 10-14 hours
+
+**Expected Outcome** (based on BayesianRouter research):
+- Thompson likely matches or exceeds hybrid performance
+- Validates that simpler algorithm (Thompson) is better choice
+- Provides definitive empirical evidence even with ample data
 
 ## 📝 Comparison to Other Routers
 
