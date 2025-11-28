@@ -440,12 +440,8 @@ def run(
         # This is needed because HybridRouter._infer_provider() pattern-matches on the model name
         model_names = [arm.model_name for arm in DEFAULT_ARMS]
         algorithm_map = {
-            # Production algorithm (what conduit ships) ⭐
-            "hybrid": HybridRouterBanditAdapter(
-                HybridRouter(model_names, switch_threshold=50)
-            ),
-            # 4 Hybrid Router Configurations (all combinations)
-            # Default: Thompson → LinUCB (quality-first cold start)
+            # Hybrid Router Configurations (2 core variants)
+            # Thompson → LinUCB (quality-first cold start)
             "hybrid_thompson_linucb": HybridRouterBanditAdapter(
                 HybridRouter(
                     model_names,
@@ -454,31 +450,13 @@ def run(
                     phase2_algorithm="linucb",
                 )
             ),
-            # Fast convergence: UCB1 → LinUCB
+            # UCB1 → LinUCB (fast convergence)
             "hybrid_ucb1_linucb": HybridRouterBanditAdapter(
                 HybridRouter(
                     model_names,
                     switch_threshold=50,
                     phase1_algorithm="ucb1",
                     phase2_algorithm="linucb",
-                )
-            ),
-            # Bayesian warm routing: UCB1 → Contextual Thompson
-            "hybrid_ucb1_c_thompson": HybridRouterBanditAdapter(
-                HybridRouter(
-                    model_names,
-                    switch_threshold=50,
-                    phase1_algorithm="ucb1",
-                    phase2_algorithm="contextual_thompson_sampling",
-                )
-            ),
-            # Full Bayesian: Thompson → Contextual Thompson
-            "hybrid_thompson_c_thompson": HybridRouterBanditAdapter(
-                HybridRouter(
-                    model_names,
-                    switch_threshold=50,
-                    phase1_algorithm="thompson_sampling",
-                    phase2_algorithm="contextual_thompson_sampling",
                 )
             ),
             # Standard (non-contextual) bandits
