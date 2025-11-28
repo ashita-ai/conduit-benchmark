@@ -52,6 +52,15 @@ results/
 *.db
 *.sqlite
 
+# Benchmark result files (root directory test artifacts)
+gsm8k_*.json
+mmlu_*.json
+humaneval_*.json
+*_test.json
+*_final.json
+*_fixed.json
+*_latest.json
+
 # Logs
 *.log
 logs/
