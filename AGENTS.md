@@ -7,7 +7,7 @@ description: Bandit algorithm benchmarking researcher - evaluating LLM routing s
 
 **Purpose**: Development guidelines for Conduit Bench bandit benchmarking
 **Last Updated**: 2025-11-27
-**Status**: ✅ Synced with real benchmarks (70% coverage, HybridRouter, 7 current-gen models)
+**Status**: ✅ Synced with real benchmarks (70% coverage, HybridRouter, 6 default models)
 
 **Design Philosophy**: Simplicity wins, use good defaults, YAML config where needed, no hardcoded assumptions.
 
@@ -42,7 +42,7 @@ uv run ruff check conduit_bench/
 
 **Conduit Bench**: Multi-armed bandit algorithm benchmarking for LLM routing
 **Stack**: Python 3.13+, uv package manager, real datasets (GSM8K, MMLU, HumanEval)
-**Models**: 7 current-generation models (GPT-5/5.1/o4-mini, Claude 4.5 Sonnet/Opus, Gemini 2.5 Pro/2.0 Flash)
+**Models**: 6 default models (o4-mini/gpt-5/gpt-5.1 from OpenAI, claude-sonnet-4.5/opus-4.5 from Anthropic, gemini-2.5-pro from Google)
 **Algorithms**: 11 total (HybridRouter + 4 variants, Thompson, UCB1, LinUCB, ContextualThompson, Epsilon, Random)
 **Purpose**: Validate HybridRouter's cost/quality trade-off against baselines using objective evaluation
 
@@ -111,7 +111,7 @@ Action Taken: Proposed rule update to user mid-session, updated AGENTS.md
 - **Role**: Quality evaluation for model responses
 - **Usage**: `evaluate(output, reference, evaluators=["semantic"])`
 - **Integration**: Used by benchmark runner for quality scoring
-- **Why**: Provider-agnostic, battle-tested, handles all 17 models
+- **Why**: Provider-agnostic, battle-tested, handles all configured models
 
 **Loom (NOT NEEDED)**:
 - Too heavyweight for research benchmark
@@ -412,18 +412,15 @@ class MyBandit(BanditAlgorithm):
 ### Model Registry Usage
 
 ```python
-from conduit_bench.models import DEFAULT_REGISTRY, filter_models
+from conduit.models import DEFAULT_REGISTRY
 
-# Get all 17 models
+# Get default models from conduit (6 models)
 all_models = DEFAULT_REGISTRY
 
-# Filter models
-high_quality_models = filter_models(
-    DEFAULT_REGISTRY,
-    min_quality=0.85,
-    max_cost=0.005,
-    providers=["openai", "anthropic"]
-)
+# Models are configured in conduit/core/config.py default_models:
+# - o4-mini, gpt-5, gpt-5.1 (OpenAI)
+# - claude-sonnet-4.5, claude-opus-4.5 (Anthropic)
+# - gemini-2.5-pro (Google)
 ```
 
 ### Running Benchmark
@@ -443,10 +440,10 @@ from conduit.models import DEFAULT_REGISTRY
 # Or import adapters for production algorithms
 from conduit_bench.adapters.hybrid_router_adapter import HybridRouterAdapter
 
-# Current models (7 total, 3 providers):
-# OpenAI: gpt-5, gpt-5.1, o4-mini
+# Default models from conduit (6 total, 3 providers):
+# OpenAI: o4-mini, gpt-5, gpt-5.1
 # Anthropic: claude-sonnet-4.5, claude-opus-4.5
-# Google: gemini-2.5-pro, gemini-2.0-flash
+# Google: gemini-2.5-pro
 
 # Create all 11 algorithms
 algorithms = [

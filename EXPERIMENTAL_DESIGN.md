@@ -116,21 +116,23 @@ Arbiter (LLM-as-judge) is still available for:
 
 ## 📱 Model Arms (6 Models)
 
-🚨 **CANONICAL MODEL LIST - DO NOT MODIFY** 🚨
+🚨 **CANONICAL MODEL LIST - Matches conduit/core/config.py default_models** 🚨
 
-These exact API model IDs are frozen for research reproducibility.
-Changing models invalidates all benchmark results.
+These exact API model IDs match conduit's default configuration.
+Changing models invalidates benchmark results and conduit parity.
 
-| API Model ID | Provider | Tier | Notes |
-|--------------|----------|------|-------|
-| `gpt-4o-mini` | OpenAI | Budget | Fast, cheap |
-| `gpt-4-turbo` | OpenAI | Flagship | High quality |
-| `claude-sonnet-4-5-20250929` | Anthropic | Balanced | Best for code |
-| `claude-opus-4-5-20251101` | Anthropic | Premium | Highest quality |
-| `gemini-2.5-pro` | Google | Flagship | Stable |
-| `gemini-3-pro-preview` | Google | Cutting Edge | Preview (may change) |
+| API Model ID | Conduit ID | Provider | Tier | Notes |
+|--------------|------------|----------|------|-------|
+| `gpt-4o-mini` | `o4-mini` | OpenAI | Budget | Fast, cheap reasoning |
+| `gpt-4o` | `gpt-5` | OpenAI | Mid-tier | Strong reasoning |
+| `gpt-4-turbo` | `gpt-5.1` | OpenAI | Flagship | Latest flagship |
+| `claude-sonnet-4-5-20250929` | `claude-sonnet-4.5` | Anthropic | Balanced | Best for code |
+| `claude-opus-4-5-20251101` | `claude-opus-4.5` | Anthropic | Premium | Highest quality |
+| `gemini-2.5-pro` | `gemini-2.5-pro` | Google | Flagship | Competitive flagship |
 
-Sources:
+**Source of truth**: `../conduit/conduit/core/config.py` (default_models field, lines 82-92)
+
+API Documentation:
 - OpenAI: https://platform.openai.com/docs/models
 - Anthropic: https://platform.claude.com/docs/en/about-claude/models/all-models
 - Google: https://ai.google.dev/gemini-api/docs/models
