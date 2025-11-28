@@ -6,8 +6,8 @@ description: Bandit algorithm benchmarking researcher - evaluating LLM routing s
 # AGENTS.md - AI Agent Guide
 
 **Purpose**: Development guidelines for Conduit Bench bandit benchmarking
-**Last Updated**: 2025-01-22
-**Status**: ✅ Synced with Conduit test improvements (85% coverage, bandit fixes)
+**Last Updated**: 2025-11-27
+**Status**: ✅ Synced with real benchmarks (70% coverage, HybridRouter, 7 current-gen models)
 
 **Design Philosophy**: Simplicity wins, use good defaults, YAML config where needed, no hardcoded assumptions.
 
@@ -22,18 +22,18 @@ description: Bandit algorithm benchmarking researcher - evaluating LLM routing s
 git status && git branch
 
 # 2. Install dependencies and run tests
-poetry install
-poetry run pytest --cov=conduit_bench
+uv sync
+uv run pytest --cov=conduit_bench
 
 # 3. Run specific algorithm test to verify environment
-poetry run pytest tests/test_algorithms.py -v
+uv run pytest tests/test_algorithms.py -v
 
 # 4. Check for any TODOs or placeholders (should be NONE)
 grep -r "TODO\|FIXME\|NotImplementedError" conduit_bench/ || echo "✅ No placeholders found"
 
 # 5. Verify type checking and linting
-poetry run mypy conduit_bench/
-poetry run ruff check conduit_bench/
+uv run mypy conduit_bench/
+uv run ruff check conduit_bench/
 ```
 
 ---
@@ -41,10 +41,12 @@ poetry run ruff check conduit_bench/
 ## Quick Orientation
 
 **Conduit Bench**: Multi-armed bandit algorithm benchmarking for LLM routing
-**Stack**: Python 3.10+, PydanticAI, Arbiter (evaluation), 17 models across 6 providers
-**Purpose**: Compare bandit algorithms (Thompson Sampling, UCB1, Epsilon-Greedy) to identify optimal cost/quality trade-off
+**Stack**: Python 3.13+, uv package manager, real datasets (GSM8K, MMLU, HumanEval)
+**Models**: 7 current-generation models (GPT-5/5.1/o4-mini, Claude 4.5 Sonnet/Opus, Gemini 2.5 Pro/2.0 Flash)
+**Algorithms**: 11 total (HybridRouter + 4 variants, Thompson, UCB1, LinUCB, ContextualThompson, Epsilon, Random)
+**Purpose**: Validate HybridRouter's cost/quality trade-off against baselines using objective evaluation
 
-**Research Methodology**: See [RESEARCH.md](RESEARCH.md) for experimental design, sample sizes, and expected results
+**Research Methodology**: See [EXPERIMENTAL_DESIGN.md](EXPERIMENTAL_DESIGN.md) for experimental design, datasets, and expected results
 
 ---
 
@@ -138,10 +140,10 @@ Production-grade code only. Complete implementations or nothing.
 ## Boundaries
 
 ### ✅ Always Do (No Permission Needed)
-- Run tests: `poetry run pytest`, `pytest --cov=conduit_bench`, `pytest -v`
-- Format code: `poetry run black conduit_bench/`
-- Lint code: `poetry run ruff check conduit_bench/`
-- Type check: `poetry run mypy conduit_bench/` (strict mode required)
+- Run tests: `uv run pytest`, `uv run pytest --cov=conduit_bench`, `uv run pytest -v`
+- Format code: `uv run black conduit_bench/` or `uv run ruff format conduit_bench/`
+- Lint code: `uv run ruff check conduit_bench/`
+- Type check: `uv run mypy conduit_bench/` (strict mode required)
 - Add unit tests for new algorithms in `tests/`
 - Update docstrings when changing function signatures
 - Add examples to `examples/` for new benchmarks
@@ -284,19 +286,19 @@ async def test_runner():
 
 ```bash
 # 1. Tests pass
-poetry run pytest --cov=conduit_bench
+uv run pytest --cov=conduit_bench
 if [ $? -ne 0 ]; then echo "🚨 TESTS FAILED"; exit 1; fi
 
 # 2. Type checking clean
-poetry run mypy conduit_bench/
+uv run mypy conduit_bench/
 if [ $? -ne 0 ]; then echo "🚨 TYPE ERRORS - FIX BEFORE COMMIT"; exit 1; fi
 
 # 3. Linting clean
-poetry run ruff check conduit_bench/
+uv run ruff check conduit_bench/
 if [ $? -ne 0 ]; then echo "🚨 LINT ERRORS - FIX BEFORE COMMIT"; exit 1; fi
 
 # 4. Formatted
-poetry run black conduit_bench/
+uv run ruff format conduit_bench/
 
 # 5. No TODOs or placeholders
 grep -r "TODO\|FIXME\|NotImplementedError" conduit_bench/ && echo "🚨 REMOVE TODOs" && exit 1
@@ -331,25 +333,25 @@ git commit -m "Clear message"
 
 ```bash
 # Install dependencies
-poetry install
+uv sync
 
 # Run tests
-poetry run pytest
+uv run pytest
 
 # Type check
-poetry run mypy conduit_bench/
+uv run mypy conduit_bench/
 
 # Format
-poetry run black conduit_bench/
+uv run ruff format conduit_bench/
 ```
 
 ### Before Committing
 
 ```bash
-poetry run pytest --cov=conduit_bench   # Tests pass
-poetry run mypy conduit_bench/          # Type checking clean
-poetry run ruff check conduit_bench/    # Linting clean
-poetry run black conduit_bench/         # Formatted
+uv run pytest --cov=conduit_bench   # Tests pass
+uv run mypy conduit_bench/          # Type checking clean
+uv run ruff check conduit_bench/    # Linting clean
+uv run ruff format conduit_bench/   # Formatted
 ```
 
 ---
@@ -431,31 +433,38 @@ high_quality_models = filter_models(
 from conduit.engines.bandits import (
     ThompsonSamplingBandit,
     UCB1Bandit,
+    LinUCBBandit,
+    ContextualThompsonSamplingBandit,
     EpsilonGreedyBandit,
     RandomBaseline,
-    OracleBaseline,
-    AlwaysBestBaseline,
-    AlwaysCheapestBaseline,
 )
 from conduit.models import DEFAULT_REGISTRY
 
-# Or import from conduit_bench (re-exports for convenience)
-# from conduit_bench.algorithms import ThompsonSamplingBandit, ...
-# from conduit_bench.models import DEFAULT_REGISTRY
+# Or import adapters for production algorithms
+from conduit_bench.adapters.hybrid_router_adapter import HybridRouterAdapter
 
-# Create all 7 algorithms
+# Current models (7 total, 3 providers):
+# OpenAI: gpt-5, gpt-5.1, o4-mini
+# Anthropic: claude-sonnet-4.5, claude-opus-4.5
+# Google: gemini-2.5-pro, gemini-2.0-flash
+
+# Create all 11 algorithms
 algorithms = [
+    HybridRouterAdapter(DEFAULT_REGISTRY),  # Production algorithm
+    HybridRouterAdapter(DEFAULT_REGISTRY, variant="thompson_linucb"),
+    HybridRouterAdapter(DEFAULT_REGISTRY, variant="ucb1_linucb"),
+    HybridRouterAdapter(DEFAULT_REGISTRY, variant="ucb1_contextual_thompson"),
+    HybridRouterAdapter(DEFAULT_REGISTRY, variant="thompson_contextual_thompson"),
     ThompsonSamplingBandit(DEFAULT_REGISTRY),
     UCB1Bandit(DEFAULT_REGISTRY, c=1.5),
+    LinUCBBandit(DEFAULT_REGISTRY, alpha=1.0),
+    ContextualThompsonSamplingBandit(DEFAULT_REGISTRY),
     EpsilonGreedyBandit(DEFAULT_REGISTRY, epsilon=0.1),
     RandomBaseline(DEFAULT_REGISTRY),
-    OracleBaseline(DEFAULT_REGISTRY),
-    AlwaysBestBaseline(DEFAULT_REGISTRY),
-    AlwaysCheapestBaseline(DEFAULT_REGISTRY),
 ]
 
-# Run experiment (to be implemented)
-# results = await run_benchmark(dataset, algorithms)
+# Run benchmark using CLI
+# uv run conduit-bench run --dataset gsm8k --max-queries 500 --algorithms hybrid,thompson,ucb1,epsilon,random
 ```
 
 ---
@@ -465,30 +474,33 @@ algorithms = [
 ```
 conduit-bench/
 ├── conduit_bench/
-│   ├── algorithms/              # ✅ COMPLETE
-│   │   ├── base.py              # Base classes and interfaces
-│   │   ├── thompson_sampling.py # Bayesian approach
-│   │   ├── ucb.py               # Upper Confidence Bound
-│   │   ├── epsilon_greedy.py    # Simple exploration
-│   │   └── baselines.py         # Random, Oracle, Always-*
-│   ├── models/                  # ✅ COMPLETE
-│   │   └── registry.py          # 17 models with pricing
-│   ├── generators/              # ⚠️ TO BUILD
-│   │   └── synthetic.py         # Generate diverse queries
-│   ├── runners/                 # ⚠️ TO BUILD
-│   │   ├── model_executor.py    # Direct PydanticAI calls
+│   ├── algorithms/              # ✅ COMPLETE - Re-exported from Conduit
+│   ├── adapters/                # ✅ COMPLETE - HybridRouter adapter
+│   │   └── hybrid_router_adapter.py  # Wraps Conduit's HybridRouter
+│   ├── datasets/                # ✅ COMPLETE - Real benchmark loaders
+│   │   ├── gsm8k.py             # GSM8K math problems (1,319)
+│   │   ├── mmlu.py              # MMLU knowledge questions (1,000)
+│   │   └── humaneval.py         # HumanEval Python coding (164)
+│   ├── evaluators/              # ✅ COMPLETE - Objective evaluation
+│   │   ├── exact_match.py       # GSM8K/MMLU exact match
+│   │   └── code_execution.py    # HumanEval code execution
+│   ├── runners/                 # ✅ COMPLETE
+│   │   ├── model_executor.py    # LLM query execution
 │   │   └── benchmark_runner.py  # Algorithm comparison
-│   ├── analysis/                # ⚠️ TO BUILD
-│   │   ├── metrics.py           # Regret, cost, quality
-│   │   └── visualize.py         # Charts and plots
-│   └── cli.py                   # ⚠️ TO BUILD
-├── tests/                       # ⚠️ TO BUILD
-│   ├── test_algorithms.py       # Test bandit algorithms
-│   ├── test_models.py           # Test model registry
+│   ├── metrics/                 # ✅ COMPLETE
+│   │   └── metrics.py           # Cost, accuracy, latency tracking
+│   ├── visualization/           # ✅ COMPLETE
+│   │   └── plots.py             # Results visualization
+│   └── cli.py                   # ✅ COMPLETE - CLI interface
+├── tests/                       # ✅ 70% coverage
+│   ├── test_gsm8k_loader.py     # GSM8K loader tests (100% coverage)
+│   ├── test_exact_match_evaluator.py  # Evaluator tests (100% coverage)
+│   ├── test_algorithms.py       # Algorithm tests
 │   └── test_benchmark.py        # Integration tests
 ├── AGENTS.md                    # This file
+├── EXPERIMENTAL_DESIGN.md       # Research methodology
 ├── README.md                    # User documentation
-└── pyproject.toml               # Dependencies
+└── pyproject.toml               # Dependencies (uv-managed)
 ```
 
 ---
@@ -557,27 +569,26 @@ async def test_benchmark_runner():
 
 ## Common Tasks
 
-### Generate Dataset
-
-```bash
-poetry run conduit-bench generate --queries 10000 --seed 42
-```
-
 ### Run Benchmark
 
 ```bash
-# Single run
-poetry run conduit-bench run --dataset data/queries_10000.jsonl
+# GSM8K validation (500 queries)
+uv run conduit-bench run --dataset gsm8k --max-queries 500 --algorithms hybrid,thompson,ucb1,epsilon,random
 
-# Multiple runs for statistical significance
-poetry run conduit-bench run --dataset data/queries_10000.jsonl --runs 10
+# Full GSM8K benchmark (1,319 queries)
+uv run conduit-bench run --dataset gsm8k --algorithms hybrid,thompson,ucb1,linucb,contextual_thompson,epsilon,random
+
+# MMLU benchmark (1,000 queries)
+uv run conduit-bench run --dataset mmlu --max-queries 1000 --algorithms hybrid,thompson,ucb1,epsilon,random
+
+# HumanEval benchmark (164 queries)
+uv run conduit-bench run --dataset humaneval --algorithms hybrid,thompson,ucb1,epsilon,random
 ```
 
 ### Analyze Results
 
 ```bash
-poetry run conduit-bench analyze --results results/experiment_001/
-poetry run conduit-bench visualize --results results/experiment_001/
+uv run python benchmarks/cost_comparison.py results/gsm8k_500.json
 ```
 
 ---
@@ -628,49 +639,52 @@ BENCHMARK_SEED=42
 ### Run Full Benchmark
 
 ```bash
-# Generate dataset (10,000 queries)
-poetry run conduit-bench generate --queries 10000 --seed 42
+# GSM8K validation (Issue #48)
+uv run conduit-bench run --dataset gsm8k --max-queries 500 \
+  --algorithms hybrid,hybrid_thompson_linucb,hybrid_ucb1_linucb,hybrid_ucb1_c_thompson,hybrid_thompson_c_thompson,thompson,ucb1,epsilon,random \
+  --output results/gsm8k_500.json --parallel
 
-# Run all 7 algorithms (10 independent runs)
-poetry run conduit-bench run --dataset data/queries_10000.jsonl --runs 10
+# Full benchmark suite (Issue #49)
+# GSM8K (1,319), MMLU (1,000), HumanEval (164) across 11 algorithms × 3 runs
+uv run conduit-bench run --dataset gsm8k --algorithms hybrid,thompson,ucb1,linucb,contextual_thompson,epsilon,random --runs 3
+uv run conduit-bench run --dataset mmlu --max-queries 1000 --algorithms hybrid,thompson,ucb1,epsilon,random --runs 3
+uv run conduit-bench run --dataset humaneval --algorithms hybrid,thompson,ucb1,epsilon,random --runs 3
 
 # Analyze results
-poetry run conduit-bench analyze --results results/experiment_001/
-
-# Generate visualizations
-poetry run conduit-bench visualize --results results/experiment_001/
+uv run python benchmarks/cost_comparison.py results/gsm8k_500.json
 ```
 
 ### Development
 
 ```bash
 # Tests
-poetry run pytest --cov=conduit_bench
+uv run pytest --cov=conduit_bench
 
 # Type check
-poetry run mypy conduit_bench/
+uv run mypy conduit_bench/
 
 # Format
-poetry run black conduit_bench/
+uv run ruff format conduit_bench/
 
 # Lint
-poetry run ruff check conduit_bench/
+uv run ruff check conduit_bench/
 ```
 
 ---
 
 ## Related Documents
 
-- **[RESEARCH.md](RESEARCH.md)**: Experimental design and methodology
+- **[EXPERIMENTAL_DESIGN.md](EXPERIMENTAL_DESIGN.md)**: Experimental design and methodology
 - **[README.md](README.md)**: User documentation, algorithm explanations
+- **[DESIGN_DECISIONS.md](DESIGN_DECISIONS.md)**: Key architectural and research decisions
 - **[conduit_bench/algorithms/](conduit_bench/algorithms/)**: Algorithm implementations
+- **[conduit.yaml](conduit.yaml)**: Model configuration with current-gen model names (GPT-5, Claude 4.5, Gemini 2.5/2.0)
 
 ## Related Projects
 
-- **[Conduit](../conduit/)**: ML-powered LLM routing (algorithm source)
-- **[Arbiter](../arbiter/)**: LLM evaluation framework (essential)
-- **[Loom](../loom/)**: AI pipeline orchestration (optional)
+- **[Conduit](../conduit/)**: ML-powered LLM routing (algorithm source, model registry)
+- **[Arbiter](https://arbiter-ai.com)**: LLM evaluation framework
 
 ---
 
-**Last Updated**: 2025-01-22
+**Last Updated**: 2025-11-27
