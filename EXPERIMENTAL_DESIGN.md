@@ -2,11 +2,13 @@
 
 ## 🎯 Objectives
 
-1. **Validate HybridRouter** - the production routing algorithm conduit ships
+1. **Validate Thompson Sampling as optimal default** - research shows Thompson > LinUCB/hybrids for LLM routing
 2. **Use objective evaluation** - exact-match and code execution, NOT LLM-as-judge
 3. **Benchmark on established datasets** - GSM8K, MMLU, HumanEval (credible, reproducible)
 4. Measure accuracy, cost, latency across multiple domains
-5. Compare against baselines and alternative algorithms
+5. Compare Thompson against baselines (UCB1, Epsilon-Greedy, Random)
+
+**Research Context**: Recent findings (BayesianRouter, arXiv 2510.02850) show Thompson Sampling outperforms LinUCB and hybrid routing for LLM domains. This benchmark validates those findings and supports changing conduit's default from HybridRouter to pure Thompson Sampling (GitHub Issue #169).
 
 ## 📊 Benchmark Suite (3 Datasets)
 
@@ -82,26 +84,32 @@ Arbiter (LLM-as-judge) is still available for:
 
 **NOT used for benchmarking** due to circular dependency (LLM judging LLM).
 
-## 🤖 Algorithms Under Test (7 Total)
+## 🤖 Algorithms Under Test (4 Core Algorithms)
 
-### Production Algorithm (1) - What conduit ships ⭐
-1. **HybridRouter** - Phase1 (0-50 queries) → Phase2 (50+)
-   - Phase1: UCB1 or Thompson Sampling (explores without needing context)
-   - Phase2: LinUCB or Contextual Thompson (exploits query features)
-   - switch_threshold=50 for testing (production may use higher)
-   - **This is the algorithm we're validating**
+**Tier 1 - Core Validation** (Data: 2,483 queries)
 
-### Component Algorithms (2) - HybridRouter building blocks
-2. **LinUCBBandit** - Linear UCB with contextual features
-3. **UCB1Bandit** - Upper confidence bound (non-contextual)
+### Primary Algorithm - Proposed Default ⭐
+1. **ThompsonSamplingBandit** - Bayesian probability matching
+   - **This is the algorithm we're validating as new default**
+   - Works from query 1, converges in 100-500 queries
+   - Research-backed: BayesianRouter shows Thompson > LinUCB/hybrids
 
-### Alternative Algorithms (2) - Comparison
-4. **ThompsonSamplingBandit** - Bayesian probability matching
-5. **EpsilonGreedyBandit** - Simple exploration-exploitation
+### Comparison Algorithms (2) - Alternative non-contextual bandits
+2. **UCB1Bandit** - Upper confidence bound (non-contextual)
+   - Converges in 100-500 queries
+3. **EpsilonGreedyBandit** - Simple ε-greedy exploration
+   - Converges in 100-500 queries
 
-### Baselines (2) - Upper/lower bounds
-6. **RandomBaseline** - Uniform random selection (lower bound)
-7. **OracleBaseline** - Best model per query (upper bound, requires all models run)
+### Baseline (1) - Lower bound
+4. **RandomBaseline** - Uniform random selection (lower bound)
+   - No learning, immediate performance
+
+**Note**: Oracle baseline can be added optionally for regret calculation upper bound.
+
+**Why Not Test Hybrids/Contextual?**
+- **Data constraint**: Hybrids need 3,000-4,000 queries, we have 2,483
+- **Research evidence**: BayesianRouter (arXiv 2510.02850) shows Thompson > LinUCB/hybrids
+- **Focus**: Validate Thompson as new default, not test algorithms we can't properly evaluate
 
 ## 📱 Model Arms (6 Models)
 
@@ -161,24 +169,27 @@ For each query:
 # GSM8K Benchmark (Math Reasoning)
 uv run conduit-bench run \
   --dataset gsm8k \
-  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --algorithms thompson,ucb1,epsilon,random \
   --evaluator exact_match \
-  --output results/gsm8k.json
+  --output results/gsm8k.json \
+  --parallel
 
 # MMLU Benchmark (Knowledge)
 uv run conduit-bench run \
   --dataset mmlu \
   --mmlu-limit 1000 \
-  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --algorithms thompson,ucb1,epsilon,random \
   --evaluator exact_match \
-  --output results/mmlu.json
+  --output results/mmlu.json \
+  --parallel
 
 # HumanEval Benchmark (Coding)
 uv run conduit-bench run \
   --dataset humaneval \
-  --algorithms hybrid,linucb,ucb1,thompson,epsilon,random \
+  --algorithms thompson,ucb1,epsilon,random \
   --evaluator code_execution \
-  --output results/humaneval.json
+  --output results/humaneval.json \
+  --parallel
 
 # Generate combined analysis
 uv run conduit-bench analyze \
@@ -188,45 +199,52 @@ uv run conduit-bench analyze \
 
 ## 💰 Cost Estimation
 
-### Per Benchmark
+### Per Benchmark (4 Algorithms × 3 Runs)
 
-| Benchmark | Queries | LLM Calls (bandits) | Oracle Calls | Total Calls | Est. Cost |
-|-----------|---------|---------------------|--------------|-------------|-----------|
-| GSM8K | 1,319 | ~9,200 | ~12,000 | ~21,000 | ~$100-150 |
-| MMLU | 1,000 | ~7,000 | ~9,000 | ~16,000 | ~$80-100 |
-| HumanEval | 164 | ~1,150 | ~1,500 | ~2,650 | ~$20-30 |
-| **Total** | **2,483** | **~17,000** | **~22,500** | **~40,000** | **~$200-300** |
+| Benchmark | Queries | Algorithms × Runs | LLM Calls | Est. Cost per Run | Total (3 runs) |
+|-----------|---------|-------------------|-----------|-------------------|----------------|
+| GSM8K | 1,319 | 4 × 3 | ~5,300 | ~$31-44 | ~$93-132 |
+| MMLU | 1,000 | 4 × 3 | ~4,000 | ~$24-33 | ~$72-99 |
+| HumanEval | 164 | 4 × 3 | ~660 | ~$10-13 | ~$30-39 |
+| **Total** | **2,483** | **12 runs** | **~9,960** | **~$65-90** | **~$195-270** |
+
+**64% cost savings vs original 11-algorithm plan** (~$600-840)
 
 ### Cost Breakdown
-- Bandit algorithms: Each selects 1 model per query
-- Oracle: Runs all 9 models per query (expensive but needed for regret)
+- 4 bandit algorithms: Thompson, UCB1, Epsilon-Greedy, Random
+- Each algorithm: 1 model selected per query
+- 3 independent runs for statistical significance
 - Embeddings: ~$1 total (negligible)
 - **No Arbiter costs** - exact match/code execution is free
+- Optional: Add Oracle baseline (+$140-200) for regret upper bound
 
 ## ⏱️ Runtime Estimation
 
 **Per Query:**
-- Embedding: ~0.3s
+- Embedding: ~0.3s (Thompson, UCB1, Epsilon don't need embeddings - even faster)
 - Model execution: ~2-4s
 - Evaluation: ~0s (exact match) or ~2s (code execution)
 
-**Total Runtime (with concurrency=30):**
-- GSM8K: ~2-3 hours
-- MMLU: ~1.5-2 hours
-- HumanEval: ~30-45 minutes
-- **Total: ~4-6 hours**
+**Total Runtime (with concurrency=10, 4 algorithms × 3 runs):**
+- GSM8K: ~1.5-2 hours (faster without embedding overhead)
+- MMLU: ~1-1.5 hours
+- HumanEval: ~20-30 minutes
+- **Total: ~2.5-4 hours (65% time savings vs 11-algorithm plan)**
 
 ## 📊 Success Criteria
 
-### HybridRouter Validation (Primary Goal)
-- **Accuracy**: Matches or exceeds standalone LinUCB/UCB1
-- **Cost efficiency**: Achieves >85% of oracle accuracy at <50% oracle cost
-- **Convergence**: Shows clear learning curve improvement
+### Thompson Sampling Validation (Primary Goal)
+- **Accuracy**: Thompson outperforms or matches UCB1/Epsilon baselines
+- **Cost efficiency**: Achieves competitive cost-per-correct-answer vs baselines
+- **Convergence**: Shows clear learning curve improvement over Random baseline
+- **Consistency**: Performs well across all 3 domains (math, knowledge, code)
+
+**Target**: Empirical validation that Thompson Sampling is the right default for conduit (supporting GitHub Issue #169)
 
 ### Headline Results (Target)
-1. **GSM8K**: "85% accuracy at 40% the cost of always using best model"
-2. **MMLU**: "Matches top-tier accuracy while cutting costs in half"
-3. **HumanEval**: "75% pass rate with intelligent model selection"
+1. **GSM8K**: "Thompson Sampling achieves 85%+ accuracy while learning optimal model selection"
+2. **MMLU**: "Learns to route across 57 knowledge domains intelligently"
+3. **HumanEval**: "Smart model selection for code generation with minimal exploration overhead"
 
 ### Statistical Requirements
 - Report mean ± 95% CI for all metrics
@@ -268,9 +286,11 @@ uv run conduit-bench analyze \
 
 ---
 
-**Last Updated:** 2025-11-27
+**Last Updated:** 2025-11-27 (Revised for Thompson Sampling validation)
 **Evaluation Strategy:** Exact match (GSM8K, MMLU) + Code execution (HumanEval)
 **Total Benchmark Size:** 2,483 queries across 3 datasets
-**Estimated Cost:** ~$200-300
-**Estimated Time:** ~4-6 hours
-**Primary Goal:** Validate HybridRouter with objective, reproducible benchmarks
+**Algorithms**: 4 core algorithms (Thompson, UCB1, Epsilon, Random)
+**Estimated Cost:** ~$195-270 (64% savings vs 11-algorithm plan)
+**Estimated Time:** ~2.5-4 hours (65% time savings)
+**Primary Goal:** Validate Thompson Sampling as optimal default for conduit (GitHub #169)
+**Research Backing:** BayesianRouter (arXiv 2510.02850) - Thompson > LinUCB/hybrids for LLM routing
