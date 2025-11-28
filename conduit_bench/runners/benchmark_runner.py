@@ -243,9 +243,13 @@ class BenchmarkRunner:
             selected_arm = await algorithm.select_arm(features)
             selections.append((query.query_id, selected_arm.model_id))
 
-            # Execute query with selected model
-            execution_result = await self.executor.execute(
-                arm=selected_arm,
+            # Get fallback chain from algorithm
+            fallback_arms = algorithm.get_fallback_chain(features, exclude=selected_arm, max_fallbacks=3)
+
+            # Execute query with fallback support
+            execution_result = await self.executor.execute_with_fallback(
+                primary_arm=selected_arm,
+                fallback_arms=fallback_arms,
                 query_text=query.query_text,
                 system_prompt="You are a helpful assistant.",
             )
@@ -295,22 +299,41 @@ class BenchmarkRunner:
                     await self.database.write_query_evaluation(
                         run_id=run_id,
                         query_id=query.query_id,
-                        model_id=selected_arm.model_id,
+                        model_id=execution_result.model_id,  # Use actually used model (may be fallback)
                         quality_score=quality_score,
                         cost=execution_result.cost,
                         latency=execution_result.latency,
                         success=execution_result.success,
                         metadata={
                             "response_length": len(execution_result.response_text),
+                            "response_text": execution_result.response_text,  # Store actual response
                             "has_reference": has_reference,
+                            "was_fallback": execution_result.was_fallback,
+                            "primary_model": execution_result.primary_model,
+                            "failed_models": execution_result.failed_models,
+                            "error_details": execution_result.error,  # Error messages from failed models
+                            "query_text": execution_result.query_text,  # For debugging
                         },
                     )
                 except Exception as e:
                     console.print(f"[yellow]Warning: Failed to write query evaluation: {e}[/yellow]")
 
-            # Update algorithm with feedback (all queries now evaluated)
+            # Update algorithm with feedback - penalize failures, reward success
+            if execution_result.was_fallback and execution_result.failed_models:
+                # Penalize all failed models with quality=0.0
+                for failed_model_id in execution_result.failed_models:
+                    failed_feedback = BanditFeedback(
+                        model_id=failed_model_id,
+                        cost=0.0,
+                        quality_score=0.0,
+                        latency=0.0,
+                        success=False,
+                    )
+                    await algorithm.update(failed_feedback, features)
+
+            # Reward the successful model (or penalize if all failed)
             bandit_feedback = BanditFeedback(
-                model_id=selected_arm.model_id,
+                model_id=execution_result.model_id,
                 cost=execution_result.cost,
                 quality_score=quality_score,
                 latency=execution_result.latency,

@@ -29,6 +29,11 @@ class ModelExecutionResult(BaseModel):
         output_tokens: Number of output tokens generated
         success: Whether execution succeeded
         error: Error message if execution failed
+        was_fallback: Whether a fallback model was used
+        primary_model: The originally selected model (if fallback was used)
+        failed_models: List of models that failed before success
+        query_text: The query text (for debugging)
+        system_prompt: The system prompt used (for debugging)
     """
 
     model_id: str
@@ -39,6 +44,11 @@ class ModelExecutionResult(BaseModel):
     output_tokens: int = Field(..., ge=0)
     success: bool = True
     error: str | None = None
+    was_fallback: bool = False
+    primary_model: str | None = None
+    failed_models: list[str] = Field(default_factory=list)
+    query_text: str | None = None
+    system_prompt: str | None = None
 
 
 class ModelExecutor:
@@ -144,15 +154,23 @@ class ModelExecutor:
 
                 latency = time.time() - start_time
 
+                response_text = result.output if hasattr(result, 'output') else str(result.data)
+
+                # Detect empty responses (API returned but with no content)
+                if not response_text or response_text.strip() == "":
+                    raise ValueError("Empty response from API")
+
                 return ModelExecutionResult(
                     model_id=arm.model_id,
-                    response_text=result.output if hasattr(result, 'output') else str(result.data),
+                    response_text=response_text,
                     cost=cost_usd,
                     latency=latency,
                     input_tokens=input_tokens,
                     output_tokens=output_tokens,
                     success=True,
                     error=None,
+                    query_text=query_text,
+                    system_prompt=system_prompt,
                 )
 
             except asyncio.TimeoutError as e:
@@ -182,7 +200,84 @@ class ModelExecutor:
             output_tokens=0,
             success=False,
             error=error_msg,
+            query_text=query_text,
+            system_prompt=system_prompt,
         )
+
+    async def execute_with_fallback(
+        self,
+        primary_arm: ModelArm,
+        fallback_arms: list[ModelArm],
+        query_text: str,
+        system_prompt: str | None = None,
+    ) -> ModelExecutionResult:
+        """Execute query with automatic fallback to alternative models on failure.
+
+        Tries the primary model first, then fallback models in order until success.
+        Designed to handle empty responses and API failures gracefully.
+
+        Args:
+            primary_arm: Primary model to try first
+            fallback_arms: Ordered list of fallback models to try on failure
+            query_text: User query text
+            system_prompt: Optional system prompt
+
+        Returns:
+            ModelExecutionResult with was_fallback, failed_models, and error messages
+
+        Example:
+            >>> result = await executor.execute_with_fallback(
+            ...     primary_arm=opus_arm,
+            ...     fallback_arms=[sonnet_arm, haiku_arm],
+            ...     query_text="What is 2+2?",
+            ... )
+            >>> if result.was_fallback:
+            ...     print(f"Primary {result.primary_model} failed, used {result.model_id}")
+            ...     print(f"Failed models: {result.failed_models}")
+        """
+        failed_models: list[str] = []
+        failed_errors: dict[str, str] = {}  # Map model_id → error message
+
+        # Try primary model
+        result = await self.execute(primary_arm, query_text, system_prompt)
+
+        if result.success:
+            return result
+
+        # Primary failed, record it with error
+        failed_models.append(primary_arm.model_id)
+        if result.error:
+            failed_errors[primary_arm.model_id] = result.error
+
+        # Try fallback models in order
+        for fallback_arm in fallback_arms:
+            result = await self.execute(fallback_arm, query_text, system_prompt)
+
+            if result.success:
+                # Fallback succeeded!
+                result.was_fallback = True
+                result.primary_model = primary_arm.model_id
+                result.failed_models = failed_models.copy()
+                # Store error messages as JSON string in result.error for logging
+                if failed_errors:
+                    import json
+                    result.error = json.dumps(failed_errors)
+                return result
+
+            # Fallback also failed
+            failed_models.append(fallback_arm.model_id)
+            if result.error:
+                failed_errors[fallback_arm.model_id] = result.error
+
+        # All models failed - return the last failure with metadata
+        result.was_fallback = True  # Attempted fallback but all failed
+        result.primary_model = primary_arm.model_id
+        result.failed_models = failed_models.copy()
+        # Store all error messages
+        if failed_errors:
+            import json
+            result.error = json.dumps(failed_errors)
+        return result
 
     async def execute_batch(
         self,

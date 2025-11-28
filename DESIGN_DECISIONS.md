@@ -297,6 +297,70 @@ reward = 1.0 if result.returncode == 0 else 0.0
 
 ---
 
+## Reward Weights Configuration
+
+### Decision: Use `user_facing` Preset for Benchmarks
+
+**Date**: 2025-11-28
+
+**Context**: Multi-objective routing requires balancing quality, latency, and cost. Conduit provides 5 production presets in `conduit.yaml`.
+
+**Decision**: Benchmarks use **`user_facing` preset** (quality: 60%, latency: 30%, cost: 10%)
+
+**Available presets**:
+
+| Preset | Quality | Latency | Cost | Use Case |
+|--------|---------|---------|------|----------|
+| **`user_facing`** | 60% | 30% | 10% | Most production apps (DEFAULT) |
+| `internal_tools` | 55% | 25% | 20% | Dev tools, automation, benchmarks |
+| `realtime` | 50% | 40% | 10% | Live chat, search, autocomplete |
+| `batch` | 50% | 10% | 40% | Background jobs, reports |
+| `critical` | 85% | 10% | 5% | Medical, legal, financial |
+
+**Rationale**:
+
+#### Why `user_facing` for Benchmarks
+
+**Represents 80% of use cases**:
+- Customer-facing applications where quality matters
+- Users notice and hate waiting (latency important)
+- Cost is secondary to user experience
+
+**Aligns with production defaults**:
+- Conduit's default optimization is `user_facing`
+- Benchmark results reflect typical production behavior
+- Most users won't change default weights
+
+**Balances all three objectives**:
+- Quality (60%): Correct answers critical
+- Latency (30%): Users notice delays
+- Cost (10%): Optimize after UX is good
+
+#### Future Research Area
+
+**Research question**: How do different reward weights affect algorithm performance?
+
+**Hypothesis**: Algorithms may converge differently with alternative presets:
+- `critical` (85% quality): May favor expensive models earlier
+- `batch` (40% cost): May converge faster to cheap models
+- `realtime` (40% latency): May favor fast models over accurate ones
+
+**Experiment design**:
+- Run benchmarks with all 5 presets
+- Compare convergence speed and final performance
+- Identify preset-specific algorithm advantages
+
+**Cost**: 5× current benchmark cost (~$1,000-1,500)
+**Timeline**: Post-Thompson validation
+**Priority**: Low - not required for default algorithm decision
+
+**Why not now**:
+- Current focus is Thompson Sampling validation
+- `user_facing` represents typical production use
+- Research can wait until after primary validation complete
+
+---
+
 ## Model Canonicalization
 
 ### Decision: Use Current-Generation Models with Actual API Names
@@ -478,6 +542,8 @@ reward = 1.0 if result.returncode == 0 else 0.0
 
 ## Change Log
 
+- **2025-11-28**: Documented reward weights configuration (`user_facing` preset)
+- **2025-11-28**: Added future research area: multi-preset benchmarking
 - **2025-11-27**: Documented dueling bandits support and exclusion rationale
 - **2025-11-27**: MAJOR REDESIGN - Real benchmarks + objective evaluation
 - **2025-11-27**: Algorithm reduction: 11 → 4 (Thompson validation focus)

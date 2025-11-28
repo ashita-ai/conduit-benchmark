@@ -165,8 +165,9 @@ class MMLULoader:
             formatted += f"({letter}) {choice}\n"
 
         formatted += (
-            "\nPlease select the correct answer (A, B, C, or D). "
-            "Provide your answer as a single letter."
+            "\n\nIMPORTANT: Respond with ONLY a single letter (A, B, C, or D). "
+            "Do not provide any explanation, reasoning, or additional text. "
+            "Just the letter."
         )
 
         return formatted
