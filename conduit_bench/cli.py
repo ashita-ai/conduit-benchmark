@@ -17,6 +17,7 @@ from rich.console import Console
 from rich.table import Table
 
 from conduit.core.config import settings as conduit_settings
+from conduit.core.pricing_manager import PricingManager
 from conduit.engines.bandits import (
     ContextualThompsonSamplingBandit,
     DuelingBandit,
@@ -82,41 +83,43 @@ CONDUIT_TO_API_MODEL = {
 }
 
 
-# Model pricing ($/1M tokens) and quality priors for baseline algorithms
-# Costs from README.md pricing table, quality priors from model performance
-# Note: Actual execution costs calculated dynamically by Arbiter
-MODEL_PRIORS = {
-    "o4-mini": {
-        "input_cost_per_1m": 1.10,
-        "output_cost_per_1m": 4.40,
-        "expected_quality": 0.75,
-    },
-    "gpt-5": {
-        "input_cost_per_1m": 2.00,
-        "output_cost_per_1m": 8.00,
-        "expected_quality": 0.82,
-    },
-    "gpt-5.1": {
-        "input_cost_per_1m": 2.00,
-        "output_cost_per_1m": 8.00,
-        "expected_quality": 0.85,
-    },
-    "claude-sonnet-4.5": {
-        "input_cost_per_1m": 3.00,
-        "output_cost_per_1m": 15.00,
-        "expected_quality": 0.88,
-    },
-    "claude-opus-4.5": {
-        "input_cost_per_1m": 5.00,
-        "output_cost_per_1m": 25.00,
-        "expected_quality": 0.92,
-    },
-    "gemini-2.5-pro": {
-        "input_cost_per_1m": 1.25,
-        "output_cost_per_1m": 5.00,
-        "expected_quality": 0.80,
-    },
+# Quality priors for baseline algorithms (AlwaysBest/AlwaysCheapest)
+# These represent expected quality for each model based on benchmark performance
+# Note: Pricing is loaded dynamically from Conduit's PricingManager
+QUALITY_PRIORS = {
+    "o4-mini": 0.75,
+    "gpt-5": 0.82,
+    "gpt-5.1": 0.85,
+    "claude-sonnet-4.5": 0.88,
+    "claude-opus-4.5": 0.92,
+    "gemini-2.5-pro": 0.80,
+    "gemini-2.5-flash": 0.70,
+    "gemini-2.0-flash": 0.70,
 }
+
+
+async def _load_pricing_from_conduit():
+    """Load pricing from Conduit's PricingManager.
+
+    Returns dict mapping model_id to pricing info with keys:
+    - input_cost_per_1m: Input cost per 1M tokens
+    - output_cost_per_1m: Output cost per 1M tokens
+    """
+    pricing_manager = PricingManager(database=None)  # Use cache-only mode
+    pricing_data = await pricing_manager.get_pricing()
+
+    # Convert ModelPricing objects to dict format needed by get_default_arms()
+    return {
+        model_id: {
+            "input_cost_per_1m": pricing.input_cost_per_million,
+            "output_cost_per_1m": pricing.output_cost_per_million,
+        }
+        for model_id, pricing in pricing_data.items()
+    }
+
+
+# Load pricing at module import time
+_PRICING_CACHE = asyncio.run(_load_pricing_from_conduit())
 
 
 def _detect_provider(model_id: str) -> str:
@@ -147,8 +150,9 @@ def get_default_arms() -> list[ModelArm]:
     Uses conduit.core.config.settings.default_models as the single source of truth.
     Maps conduit's internal model names to actual API model names.
 
-    Costs and quality priors are used by baseline algorithms (AlwaysBest/AlwaysCheapest)
-    to make informed decisions. Actual execution costs are calculated dynamically by Arbiter.
+    Pricing is loaded dynamically from Conduit's PricingManager at module import time.
+    Quality priors are used by baseline algorithms (AlwaysBest/AlwaysCheapest) to make
+    informed decisions. Actual execution costs are calculated dynamically by Arbiter.
 
     Returns:
         List of ModelArm objects for benchmarking.
@@ -159,16 +163,18 @@ def get_default_arms() -> list[ModelArm]:
         api_model_name = CONDUIT_TO_API_MODEL.get(conduit_model_id, conduit_model_id)
         provider = _detect_provider(api_model_name)
 
-        # Get pricing and quality priors for baselines
-        priors = MODEL_PRIORS.get(conduit_model_id, {
+        # Get pricing from Conduit's PricingManager (fallback to defaults if not found)
+        pricing = _PRICING_CACHE.get(conduit_model_id, {
             "input_cost_per_1m": 2.0,
             "output_cost_per_1m": 8.0,
-            "expected_quality": 0.80,
         })
 
+        # Get quality prior (fallback to 0.80 if not found)
+        expected_quality = QUALITY_PRIORS.get(conduit_model_id, 0.80)
+
         # Convert $/1M to $/token for ModelArm
-        input_cost_per_token = priors["input_cost_per_1m"] / 1_000_000
-        output_cost_per_token = priors["output_cost_per_1m"] / 1_000_000
+        input_cost_per_token = pricing["input_cost_per_1m"] / 1_000_000
+        output_cost_per_token = pricing["output_cost_per_1m"] / 1_000_000
 
         arms.append(ModelArm(
             model_id=conduit_model_id,  # Keep conduit ID for tracking
@@ -176,7 +182,7 @@ def get_default_arms() -> list[ModelArm]:
             provider=provider,
             cost_per_input_token=input_cost_per_token,  # Prior for baselines
             cost_per_output_token=output_cost_per_token,  # Prior for baselines
-            expected_quality=priors["expected_quality"],  # Prior for baselines
+            expected_quality=expected_quality,  # Prior for baselines
         ))
     return arms
 
