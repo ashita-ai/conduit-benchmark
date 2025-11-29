@@ -69,6 +69,8 @@ class AlgorithmRun(BaseModel):
         selections: List of (query_id, model_id) selections made
         feedback: List of QueryEvaluation results
         cumulative_cost: Cumulative cost over time (USD)
+        converged: Whether the algorithm converged during the run
+        convergence_point: Query index where convergence occurred (if converged)
         started_at: Run start timestamp
         completed_at: Run completion timestamp
         metadata: Additional run metadata (hyperparameters, etc.)
@@ -82,6 +84,8 @@ class AlgorithmRun(BaseModel):
     selections: list[tuple[str, str]] = Field(default_factory=list)
     feedback: list[QueryEvaluation] = Field(default_factory=list)
     cumulative_cost: list[float] = Field(default_factory=list)
+    converged: bool | None = None
+    convergence_point: float | None = None
     started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: datetime | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)

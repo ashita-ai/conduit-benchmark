@@ -11,10 +11,13 @@ Benchmark bandit algorithms using real evaluation datasets (GSM8K, MMLU, HumanEv
 **Research Question**: Which bandit algorithm achieves the best cost/quality trade-off for LLM routing?
 
 **What We Test**:
-- **10 Algorithms** from Conduit: 3 contextual, 3 non-contextual, 4 baselines
-- **7 Models**: OpenAI (o4-mini, gpt-5, gpt-5.1), Anthropic (claude-sonnet-4.5, claude-opus-4.5), Google (gemini-2.5-pro, gemini-2.5-flash)
-- **Real Datasets**: GSM8K (math), MMLU (knowledge), HumanEval (code)
+- **11 Algorithms** (all 12 except Oracle): 3 contextual, 3 non-contextual, 2 hybrid, 3 baselines
+  - Oracle excluded from default benchmarks due to 6x cost (executes all 6 models per query)
+- **6 Models**: OpenAI (o4-mini, gpt-5, gpt-5.1), Anthropic (claude-sonnet-4.5, claude-opus-4.5), Google (gemini-2.5-pro)
+- **Real Datasets**: MMLU (~1,319 obs), GSM8K (~14,000 obs)
+  - **Sampling**: Randomly sample 1,000 observations from each dataset for experiments
 - **Synthetic Queries**: Diverse categories with complexity variation
+- **Algorithm Presets**: balanced, quality, cost, speed (see [ORACLE_AND_PRESETS.md](DOCS/ORACLE_AND_PRESETS.md))
 
 **Goal**: Validate that Thompson Sampling and contextual bandits achieve 40-50% cost savings while maintaining 95%+ quality.
 
@@ -49,30 +52,39 @@ Benchmark bandit algorithms using real evaluation datasets (GSM8K, MMLU, HumanEv
 
 All algorithms are imported from `conduit.engines.bandits`. No duplication.
 
+**Total: 12 algorithms** (11 tested by default, Oracle excluded)
+
 ### Contextual Algorithms (use query features)
 
-| Algorithm | Description | Best For |
-|-----------|-------------|----------|
-| **LinUCBBandit** | Linear UCB with ridge regression | Production routing with query features |
-| **ContextualThompsonSamplingBandit** | Bayesian linear regression | Complex query-dependent routing |
-| **DuelingBandit** | Pairwise preference learning | High sample efficiency |
+| Algorithm | CLI Name | Description | Best For |
+|-----------|----------|-------------|----------|
+| **LinUCBBandit** | `linucb` | Linear UCB with ridge regression | Production routing with query features |
+| **ContextualThompsonSamplingBandit** | `contextual_thompson` | Bayesian linear regression | Complex query-dependent routing |
+| **DuelingBandit** | `dueling` | Pairwise preference learning | High sample efficiency |
 
 ### Non-Contextual Algorithms
 
-| Algorithm | Description | Best For |
-|-----------|-------------|----------|
-| **ThompsonSamplingBandit** | Beta-Bernoulli Bayesian | Cold start, default in Conduit |
-| **UCB1Bandit** | Upper confidence bound | Fast convergence, deterministic |
-| **EpsilonGreedyBandit** | Simple exploration/exploitation | Baseline comparison |
+| Algorithm | CLI Name | Description | Best For |
+|-----------|----------|-------------|----------|
+| **ThompsonSamplingBandit** | `thompson` | Beta-Bernoulli Bayesian | Cold start, default in Conduit |
+| **UCB1Bandit** | `ucb1` | Upper confidence bound | Fast convergence, deterministic |
+| **EpsilonGreedyBandit** | `epsilon` | Simple exploration/exploitation | Baseline comparison |
+
+### Hybrid Algorithms (combine strategies)
+
+| Algorithm | CLI Name | Description | Best For |
+|-----------|----------|-------------|----------|
+| **HybridThompsonLinUCBBandit** | `hybrid_thompson_linucb` | Thompson → LinUCB transition | Production hybrid routing |
+| **HybridUCB1LinUCBBandit** | `hybrid_ucb1_linucb` | UCB1 → LinUCB transition | Fast hybrid routing |
 
 ### Baselines
 
-| Algorithm | Description | Purpose |
-|-----------|-------------|---------|
-| **RandomBaseline** | Uniform random selection | Lower bound |
-| **OracleBaseline** | Perfect knowledge | Upper bound (expensive) |
-| **AlwaysBestBaseline** | Always highest quality model | Quality ceiling |
-| **AlwaysCheapestBaseline** | Always lowest cost model | Cost floor |
+| Algorithm | CLI Name | Description | Purpose |
+|-----------|----------|-------------|---------|
+| **RandomBaseline** | `random` | Uniform random selection | Lower bound |
+| **OracleBaseline** | `oracle` | Perfect knowledge (6x cost) | Upper bound (NOT tested by default) |
+| **AlwaysBestBaseline** | `always_best` | Always highest quality model | Quality ceiling |
+| **AlwaysCheapestBaseline** | `always_cheapest` | Always lowest cost model | Cost floor |
 
 ---
 
@@ -115,16 +127,20 @@ All algorithms are imported from `conduit.engines.bandits`. No duplication.
 
 ### Real Evaluation Datasets
 
-**GSM8K** (Grade School Math):
-- 8,792 train + 1,319 test problems
-- Multi-step reasoning required
-- Evaluation: Exact match on numeric answer after `#### `
-- Source: `huggingface.co/datasets/openai/gsm8k`
-
 **MMLU** (Massive Multitask Language Understanding):
-- 57 subjects across STEM, humanities, social sciences
-- Multiple choice format
-- Evaluation: Exact match on letter choice (A/B/C/D)
+- **Total observations**: ~1,319 test problems
+- **Sampling**: Randomly sample 1,000 observations for benchmark experiments
+- **Format**: Multiple choice (A/B/C/D)
+- **Coverage**: 57 subjects across STEM, humanities, social sciences
+- **Evaluation**: Exact match on letter choice
+- **Source**: `huggingface.co/datasets/cais/mmlu`
+
+**GSM8K** (Grade School Math):
+- **Total observations**: ~14,000 problems (8,792 train + 1,319 test)
+- **Sampling**: Randomly sample 1,000 observations for benchmark experiments
+- **Format**: Multi-step math reasoning problems
+- **Evaluation**: Exact match on numeric answer after `#### `
+- **Source**: `huggingface.co/datasets/openai/gsm8k`
 
 **HumanEval** (Code Generation):
 - 164 Python programming problems
@@ -166,22 +182,36 @@ export CONDUIT_QUALITY_CONTEXT=code  # Options: code, creative, analysis, simple
 ### Run Benchmark
 
 ```bash
-# Run with GSM8K dataset
-uv run conduit-bench run --dataset gsm8k --limit 1000
+# Run with algorithm preset (recommended)
+uv run conduit-bench run --dataset mmlu --mmlu-limit 1000 --preset balanced --parallel
+
+# Run all 11 algorithms (excluding Oracle)
+uv run conduit-bench run --dataset mmlu --mmlu-limit 1000 \
+  --algorithms thompson,ucb1,epsilon,linucb,contextual_thompson,dueling,\
+hybrid_thompson_linucb,hybrid_ucb1_linucb,random,always_best,always_cheapest \
+  --parallel
+
+# Run with GSM8K dataset (1000 sample)
+uv run conduit-bench run --dataset gsm8k --limit 1000 --preset balanced
 
 # Run with specific quality context
-CONDUIT_QUALITY_CONTEXT=code uv run conduit-bench run --dataset gsm8k --limit 500
+CONDUIT_QUALITY_CONTEXT=code uv run conduit-bench run --dataset gsm8k --limit 500 --preset quality
 
-# Run with synthetic queries
-uv run conduit-bench generate --queries 1000 --seed 42
-uv run conduit-bench run --dataset data/queries_1000.jsonl
+# Run specific algorithms (custom selection)
+uv run conduit-bench run --dataset mmlu --mmlu-limit 1000 --algorithms thompson,linucb,ucb1
 
-# Run specific algorithms
-uv run conduit-bench run --dataset gsm8k --algorithms thompson_sampling,linucb,ucb1
+# Include Oracle (explicit opt-in, 6x cost)
+uv run conduit-bench run --dataset mmlu --mmlu-limit 100 --algorithms oracle,thompson,random
 
 # Analyze results
 uv run conduit-bench analyze --results results/experiment_001/
 ```
+
+**Algorithm Presets** (see [ORACLE_AND_PRESETS.md](DOCS/ORACLE_AND_PRESETS.md) for details):
+- `--preset balanced`: Best mix of learning algorithms (5 algorithms)
+- `--preset quality`: Prioritize accuracy over cost (4 algorithms)
+- `--preset cost`: Minimize inference costs (3 algorithms)
+- `--preset speed`: Fast non-contextual algorithms (4 algorithms)
 
 ---
 

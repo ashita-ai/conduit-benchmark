@@ -247,22 +247,82 @@ class BenchmarkRunner:
             # Use Conduit's QueryAnalyzer to extract real features (NO CHEATING!)
             features = await self.analyzer.analyze(query.query_text)
 
-            # Algorithm selects model
-            selected_arm = await algorithm.select_arm(features)
-            selections.append((query.query_id, selected_arm.model_id))
+            # Special handling for Oracle: execute ALL arms to give it perfect knowledge
+            if algorithm.name == "oracle":
+                # Execute all arms and feed results to Oracle
+                all_results = []
+                for arm in algorithm.arms.values():
+                    exec_result = await self.executor.execute_with_fallback(
+                        primary_arm=arm,
+                        fallback_arms=[],
+                        query_text=query.query_text,
+                        system_prompt="You are a helpful assistant.",
+                    )
 
-            # Get fallback chain from algorithm if supported
-            fallback_arms = []
-            if hasattr(algorithm, 'get_fallback_chain'):
-                fallback_arms = algorithm.get_fallback_chain(features, exclude=selected_arm, max_fallbacks=3)
+                    # Evaluate this result
+                    has_reference = bool(query.reference_answer)
+                    if exec_result.success:
+                        if self.evaluator is not None:
+                            quality_score = await self._evaluate_with_evaluator(
+                                response=exec_result.response_text,
+                                query=query,
+                            )
+                        elif has_reference:
+                            quality_score = await self._evaluate_with_reference(
+                                output=exec_result.response_text,
+                                query=query.query_text,
+                                reference=query.reference_answer,
+                            )
+                        else:
+                            quality_score = await self._evaluate_without_reference(
+                                output=exec_result.response_text,
+                                query=query.query_text,
+                            )
+                    else:
+                        quality_score = 0.0
 
-            # Execute query with fallback support
-            execution_result = await self.executor.execute_with_fallback(
-                primary_arm=selected_arm,
-                fallback_arms=fallback_arms,
-                query_text=query.query_text,
-                system_prompt="You are a helpful assistant.",
-            )
+                    # Feed result to Oracle
+                    oracle_feedback = BanditFeedback(
+                        model_id=arm.model_id,
+                        cost=exec_result.cost,
+                        quality_score=quality_score,
+                        latency=exec_result.latency,
+                        success=exec_result.success,
+                    )
+                    await algorithm.update(oracle_feedback, features)
+                    all_results.append((exec_result, quality_score))
+
+                # Now Oracle has perfect knowledge - select best arm
+                selected_arm = await algorithm.select_arm(features)
+                selections.append((query.query_id, selected_arm.model_id))
+
+                # Find the execution result for the selected arm
+                execution_result = None
+                for exec_result, qual_score in all_results:
+                    if exec_result.model_id == selected_arm.model_id:
+                        execution_result = exec_result
+                        quality_score = qual_score
+                        break
+
+                if execution_result is None:
+                    raise ValueError(f"Oracle selected {selected_arm.model_id} but no execution found")
+            else:
+                # Normal algorithm: select arm, then execute
+                selected_arm = await algorithm.select_arm(features)
+                selections.append((query.query_id, selected_arm.model_id))
+
+                # Get fallback chain from algorithm if supported
+                fallback_arms = []
+                if hasattr(algorithm, 'get_fallback_chain'):
+                    fallback_arms = algorithm.get_fallback_chain(features, exclude=selected_arm, max_fallbacks=3)
+
+                # Execute query with fallback support
+                execution_result = await self.executor.execute_with_fallback(
+                    primary_arm=selected_arm,
+                    fallback_arms=fallback_arms,
+                    query_text=query.query_text,
+                    system_prompt="You are a helpful assistant.",
+                )
 
             # Evaluate quality using pluggable evaluator or Arbiter (legacy)
             has_reference = bool(query.reference_answer)

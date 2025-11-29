@@ -337,11 +337,24 @@ def generate(
     help="Dataset: 'gsm8k', 'mmlu', 'humaneval', or path to JSONL file",
 )
 @click.option(
+    "--preset",
+    "-p",
+    type=click.Choice(["balanced", "quality", "cost", "speed"]),
+    help=(
+        "Algorithm preset configuration:\n"
+        "  balanced: Best mix of learning algorithms\n"
+        "  quality: Prioritize accuracy over cost\n"
+        "  cost: Minimize inference costs\n"
+        "  speed: Fast non-contextual algorithms\n"
+        "Note: Oracle excluded from all presets (6x cost)"
+    ),
+)
+@click.option(
     "--algorithms",
     "-a",
     type=str,
-    default="hybrid,ucb1,random",
-    help="Comma-separated list of algorithms to run",
+    default="hybrid_thompson_linucb,ucb1,random",
+    help="Comma-separated list of algorithms to run (overrides --preset)",
     show_default=True,
 )
 @click.option(
@@ -397,6 +410,7 @@ def generate(
 )
 def run(
     dataset: str,
+    preset: str | None,
     algorithms: str,
     evaluator: str | None,
     output: Path,
@@ -425,6 +439,23 @@ def run(
     """
 
     async def _run() -> None:
+        # Handle preset configurations
+        # Oracle excluded from all presets due to 6x cost (executes all 6 models per query)
+        ALGORITHM_PRESETS = {
+            "balanced": "thompson,linucb,contextual_thompson,hybrid_thompson_linucb,random",
+            "quality": "contextual_thompson,linucb,dueling,always_best",
+            "cost": "linucb,always_cheapest,random",
+            "speed": "thompson,ucb1,epsilon,random",
+        }
+
+        # Use preset if specified, otherwise use --algorithms value
+        selected_algorithms = algorithms
+        if preset:
+            selected_algorithms = ALGORITHM_PRESETS[preset]
+            console.print(
+                f"\n[bold cyan]Using '{preset}' preset:[/bold cyan] {selected_algorithms}"
+            )
+
         console.print("\n[bold cyan]Loading dataset...[/bold cyan]")
 
         # Determine dataset type and load accordingly
@@ -496,7 +527,7 @@ def run(
             console.print(f"[cyan]Evaluator: {selected_evaluator.name}[/cyan]")
 
         # Parse algorithm list
-        algo_names = [a.strip().lower() for a in algorithms.split(",")]
+        algo_names = [a.strip().lower() for a in selected_algorithms.split(",")]
 
         # If oracle reference provided, skip oracle in algorithm list
         if oracle_reference:
