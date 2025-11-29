@@ -136,17 +136,17 @@ class BenchmarkRunner:
             from uuid import uuid4
             _benchmark_id = benchmark_id or str(uuid4())
 
+            # Merge provided metadata with runtime info (needed for both DB and JSON export)
+            run_metadata = {
+                "algorithm_names": [algo.name for algo in self.algorithms],
+                "parallel": parallel,
+            }
+            if benchmark_metadata:
+                run_metadata.update(benchmark_metadata)
+
             # Create benchmark run record in database
             if db_connected and self.database:
                 try:
-                    # Merge provided metadata with runtime info
-                    run_metadata = {
-                        "algorithm_names": [algo.name for algo in self.algorithms],
-                        "parallel": parallel,
-                    }
-                    if benchmark_metadata:
-                        run_metadata.update(benchmark_metadata)
-
                     await self.database.create_benchmark_run(
                         benchmark_id=_benchmark_id,
                         dataset_size=len(dataset),
@@ -186,6 +186,7 @@ class BenchmarkRunner:
                 benchmark_id=_benchmark_id,
                 dataset_size=len(dataset),
                 algorithms=algorithm_runs,
+                metadata=run_metadata,
             )
 
             console.print("\n[bold green]Benchmark complete![/bold green]\n")
