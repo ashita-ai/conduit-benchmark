@@ -3,18 +3,21 @@
 Provides async PostgreSQL connection handling and result storage for streaming benchmark writes.
 """
 
+import asyncio
 import json
 import math
 import os
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Callable, TypeVar
 
 import asyncpg
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+T = TypeVar('T')
 
 
 def sanitize_metadata(metadata: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -46,6 +49,69 @@ def sanitize_metadata(metadata: dict[str, Any] | None) -> dict[str, Any] | None:
         return v
 
     return sanitize_value(metadata)
+
+
+async def retry_with_exponential_backoff(
+    func: Callable[[], T],
+    max_retries: int = 3,
+    initial_delay: float = 0.5,
+    max_delay: float = 5.0,
+    backoff_factor: float = 2.0,
+) -> T:
+    """Retry async operation with exponential backoff.
+
+    Only retries on transient database errors (connection issues, timeouts).
+    Does not retry on constraint violations or data errors.
+
+    Args:
+        func: Async function to retry
+        max_retries: Maximum retry attempts
+        initial_delay: Initial delay in seconds
+        max_delay: Maximum delay in seconds
+        backoff_factor: Multiplier for delay after each retry
+
+    Returns:
+        Result from successful function call
+
+    Raises:
+        Last exception if all retries exhausted
+    """
+    delay = initial_delay
+    last_exception = None
+
+    for attempt in range(max_retries + 1):
+        try:
+            return await func()
+        except (
+            asyncpg.PostgresConnectionError,
+            asyncpg.ConnectionDoesNotExistError,
+            asyncpg.InterfaceError,
+            asyncio.TimeoutError,
+            ConnectionError,
+        ) as e:
+            # Transient errors - retry with backoff
+            last_exception = e
+            if attempt < max_retries:
+                await asyncio.sleep(delay)
+                delay = min(delay * backoff_factor, max_delay)
+            else:
+                raise
+        except (
+            asyncpg.UniqueViolationError,
+            asyncpg.ForeignKeyViolationError,
+            asyncpg.CheckViolationError,
+            asyncpg.NotNullViolationError,
+        ):
+            # Data integrity errors - don't retry
+            raise
+        except Exception:
+            # Unknown errors - don't retry
+            raise
+
+    # Should never reach here, but for type safety
+    if last_exception:
+        raise last_exception
+    raise RuntimeError("Retry logic error - no exception but no success")
 
 
 class BenchmarkDatabase:
@@ -166,7 +232,7 @@ class BenchmarkDatabase:
         success: bool,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Write a single query evaluation result (streaming).
+        """Write a single query evaluation result (streaming) with retry.
 
         Args:
             run_id: Algorithm run ID
@@ -183,24 +249,27 @@ class BenchmarkDatabase:
 
         evaluation_id = str(uuid.uuid4())
 
-        await self.pool.execute(
-            """
-            INSERT INTO query_evaluations (
-                evaluation_id, run_id, query_id, model_id,
-                quality_score, cost, latency, success, metadata
+        async def _write():
+            await self.pool.execute(
+                """
+                INSERT INTO query_evaluations (
+                    evaluation_id, run_id, query_id, model_id,
+                    quality_score, cost, latency, success, metadata
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+                """,
+                evaluation_id,
+                run_id,
+                query_id,
+                model_id,
+                quality_score,
+                cost,
+                latency,
+                success,
+                json.dumps(sanitize_metadata(metadata)) if metadata else None,
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
-            """,
-            evaluation_id,
-            run_id,
-            query_id,
-            model_id,
-            quality_score,
-            cost,
-            latency,
-            success,
-            json.dumps(sanitize_metadata(metadata)) if metadata else None,
-        )
+
+        await retry_with_exponential_backoff(_write)
 
     async def update_algorithm_run(
         self,
@@ -209,6 +278,7 @@ class BenchmarkDatabase:
         average_quality: float,
         total_queries: int,
         completed_at: datetime | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Update algorithm run with cumulative metrics.
 
@@ -218,40 +288,77 @@ class BenchmarkDatabase:
             average_quality: Average quality across all queries
             total_queries: Number of queries processed
             completed_at: Completion timestamp (if completed)
+            metadata: Algorithm-specific metadata (e.g., learned parameters)
         """
         if not self.pool:
             raise RuntimeError("Database not connected. Call connect() first.")
 
         if completed_at:
-            await self.pool.execute(
-                """
-                UPDATE algorithm_runs
-                SET total_cost = $1,
-                    average_quality = $2,
-                    total_queries = $3,
-                    completed_at = $4
-                WHERE run_id = $5
-                """,
-                total_cost,
-                average_quality,
-                total_queries,
-                completed_at,
-                run_id,
-            )
+            if metadata:
+                await self.pool.execute(
+                    """
+                    UPDATE algorithm_runs
+                    SET total_cost = $1,
+                        average_quality = $2,
+                        total_queries = $3,
+                        completed_at = $4,
+                        metadata = $5
+                    WHERE run_id = $6
+                    """,
+                    total_cost,
+                    average_quality,
+                    total_queries,
+                    completed_at,
+                    json.dumps(sanitize_metadata(metadata)),
+                    run_id,
+                )
+            else:
+                await self.pool.execute(
+                    """
+                    UPDATE algorithm_runs
+                    SET total_cost = $1,
+                        average_quality = $2,
+                        total_queries = $3,
+                        completed_at = $4
+                    WHERE run_id = $5
+                    """,
+                    total_cost,
+                    average_quality,
+                    total_queries,
+                    completed_at,
+                    run_id,
+                )
         else:
-            await self.pool.execute(
-                """
-                UPDATE algorithm_runs
-                SET total_cost = $1,
-                    average_quality = $2,
-                    total_queries = $3
-                WHERE run_id = $4
-                """,
-                total_cost,
-                average_quality,
-                total_queries,
-                run_id,
-            )
+            if metadata:
+                await self.pool.execute(
+                    """
+                    UPDATE algorithm_runs
+                    SET total_cost = $1,
+                        average_quality = $2,
+                        total_queries = $3,
+                        metadata = $4
+                    WHERE run_id = $5
+                    """,
+                    total_cost,
+                    average_quality,
+                    total_queries,
+                    json.dumps(sanitize_metadata(metadata)),
+                    run_id,
+                )
+            else:
+                await self.pool.execute(
+                    """
+                    UPDATE algorithm_runs
+                    SET total_cost = $1,
+                        average_quality = $2,
+                        total_queries = $3
+                    WHERE run_id = $4
+                    """,
+                    total_cost,
+                    average_quality,
+                    total_queries,
+                    run_id,
+                )
 
     async def get_benchmark_run(self, benchmark_id: str) -> dict[str, Any] | None:
         """Retrieve benchmark run by ID.

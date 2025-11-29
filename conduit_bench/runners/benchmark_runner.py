@@ -95,6 +95,7 @@ class BenchmarkRunner:
         show_progress: bool = True,
         parallel: bool = False,
         benchmark_id: str | None = None,
+        benchmark_metadata: dict | None = None,
     ) -> BenchmarkResult:
         """Run benchmark across all algorithms.
 
@@ -103,6 +104,7 @@ class BenchmarkRunner:
             show_progress: Whether to show progress bars
             parallel: Run algorithms in parallel (3x faster for 3 algorithms)
             benchmark_id: Optional benchmark ID (auto-generated if None)
+            benchmark_metadata: Optional metadata dict with dataset, evaluator, config info
 
         Returns:
             Complete benchmark results with all algorithm runs
@@ -137,13 +139,18 @@ class BenchmarkRunner:
             # Create benchmark run record in database
             if db_connected and self.database:
                 try:
+                    # Merge provided metadata with runtime info
+                    run_metadata = {
+                        "algorithm_names": [algo.name for algo in self.algorithms],
+                        "parallel": parallel,
+                    }
+                    if benchmark_metadata:
+                        run_metadata.update(benchmark_metadata)
+
                     await self.database.create_benchmark_run(
                         benchmark_id=_benchmark_id,
                         dataset_size=len(dataset),
-                        metadata={
-                            "algorithm_names": [algo.name for algo in self.algorithms],
-                            "parallel": parallel,
-                        },
+                        metadata=run_metadata,
                     )
                 except Exception as e:
                     console.print(f"[yellow]Warning: Failed to create benchmark run: {e}[/yellow]")
@@ -243,8 +250,10 @@ class BenchmarkRunner:
             selected_arm = await algorithm.select_arm(features)
             selections.append((query.query_id, selected_arm.model_id))
 
-            # Get fallback chain from algorithm
-            fallback_arms = algorithm.get_fallback_chain(features, exclude=selected_arm, max_fallbacks=3)
+            # Get fallback chain from algorithm if supported
+            fallback_arms = []
+            if hasattr(algorithm, 'get_fallback_chain'):
+                fallback_arms = algorithm.get_fallback_chain(features, exclude=selected_arm, max_fallbacks=3)
 
             # Execute query with fallback support
             execution_result = await self.executor.execute_with_fallback(
@@ -351,6 +360,11 @@ class BenchmarkRunner:
         # Calculate final metrics (all queries are now evaluated)
         average_quality = total_quality / len(dataset) if dataset else 0.0
 
+        # Calculate convergence using quality history
+        from conduit_bench.analysis.metrics import calculate_convergence
+        quality_history = [eval.quality_score for eval in feedback_list]
+        convergence_result = calculate_convergence(quality_history)
+
         # Update algorithm run with final metrics in database
         if self.enable_db_write and self.database:
             try:
@@ -360,6 +374,7 @@ class BenchmarkRunner:
                     average_quality=average_quality,
                     total_queries=len(dataset),
                     completed_at=completed_at,
+                    metadata=algorithm.get_stats(),  # Update final metadata after all learning
                 )
             except Exception as e:
                 console.print(f"[yellow]Warning: Failed to update algorithm run: {e}[/yellow]")
@@ -373,6 +388,8 @@ class BenchmarkRunner:
             selections=selections,
             feedback=feedback_list,
             cumulative_cost=cumulative_cost,
+            converged=convergence_result.converged,
+            convergence_point=convergence_result.convergence_point,
             started_at=started_at,
             completed_at=completed_at,
             metadata=algorithm.get_stats(),

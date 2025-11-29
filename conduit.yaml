@@ -150,10 +150,10 @@ embeddings:
 
 # Feature Dimensions
 # Controls dimensionality of feature vectors for bandit algorithms
-# These are auto-calculated based on embedding provider and PCA settings
+# TODO: Auto-detect from embedding provider at runtime (see GitHub issue #53)
 features:
-  embedding_dim: 384              # Base embedding dimension (provider-dependent)
-  full_dim: 386                   # Full feature dimension (embedding + 2 metadata)
+  embedding_dim: 1536             # Base embedding dimension (OpenAI text-embedding-3-small: 1536, sentence-transformers: 384)
+  full_dim: 1538                  # Full feature dimension (embedding + 2 metadata: 1536 + 2 = 1538)
   pca_dim: 66                     # PCA feature dimension (64 components + 2 metadata)
   token_count_normalization: 1000.0  # Divisor for token count normalization
 

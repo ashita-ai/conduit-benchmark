@@ -572,10 +572,51 @@ def run(
         if oracle_reference:
             console.print(f"[cyan]Oracle reference: {oracle_reference}[/cyan]")
 
+        # Build comprehensive metadata for benchmark run
+        benchmark_metadata = {
+            # Dataset information
+            "dataset": {
+                "name": dataset,
+                "size": len(queries),
+                "max_queries": max_queries,
+            },
+            # Evaluator configuration
+            "evaluator": {
+                "type": evaluator if evaluator else ("exact_match" if dataset in ["mmlu", "gsm8k"] else "code_execution" if dataset == "humaneval" else "arbiter"),
+                "model": "gpt-4o-mini" if not selected_evaluator else None,
+            },
+            # Model pool configuration
+            "model_pool": {
+                "arms": [
+                    {
+                        "model_id": arm.model_id,
+                        "model_name": arm.model_name,
+                        "provider": arm.provider,
+                        "input_price_per_m": arm.cost_per_input_token * 1000,  # Convert per-1K to per-1M
+                        "output_price_per_m": arm.cost_per_output_token * 1000,
+                        "expected_quality": arm.expected_quality,
+                    }
+                    for arm in DEFAULT_ARMS
+                ]
+            },
+            # Benchmark configuration
+            "config": {
+                "max_concurrency": max_concurrency,
+                "timeout_per_query": 30,  # Default from ModelExecutor
+            },
+        }
+
+        # Add dataset-specific configuration
+        if dataset == "mmlu":
+            benchmark_metadata["dataset"]["mmlu_limit"] = mmlu_limit
+        elif dataset == "humaneval":
+            benchmark_metadata["config"]["code_timeout"] = code_timeout
+
         result: BenchmarkResult = await runner.run(
             dataset=queries,
             show_progress=True,
             parallel=parallel,
+            benchmark_metadata=benchmark_metadata,
         )
 
         # Ensure output directory exists
