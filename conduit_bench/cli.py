@@ -10,13 +10,14 @@ Supports three benchmark datasets with objective evaluation:
 
 import asyncio
 import json
+import os
 from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.table import Table
 
-from conduit.core.config import settings as conduit_settings
+from conduit.core.config import load_context_priors, settings as conduit_settings
 from conduit.core.pricing_manager import PricingManager
 from conduit.engines.bandits import (
     ContextualThompsonSamplingBandit,
@@ -83,19 +84,32 @@ CONDUIT_TO_API_MODEL = {
 }
 
 
-# Quality priors for baseline algorithms (AlwaysBest/AlwaysCheapest)
-# These represent expected quality for each model based on benchmark performance
-# Note: Pricing is loaded dynamically from Conduit's PricingManager
-QUALITY_PRIORS = {
-    "o4-mini": 0.75,
-    "gpt-5": 0.82,
-    "gpt-5.1": 0.85,
-    "claude-sonnet-4.5": 0.88,
-    "claude-opus-4.5": 0.92,
-    "gemini-2.5-pro": 0.80,
-    "gemini-2.5-flash": 0.70,
-    "gemini-2.0-flash": 0.70,
-}
+def _load_quality_priors(context: str = "general") -> dict[str, float]:
+    """Load quality priors from Conduit's context-specific configuration.
+
+    Args:
+        context: Quality prior context (code, creative, analysis, simple_qa, general)
+
+    Returns:
+        Dictionary mapping model_id to expected quality (0.0-1.0)
+    """
+    # Load priors from conduit.yaml (returns dict[str, tuple[float, float]])
+    priors_beta = load_context_priors(context)
+
+    # Convert Beta distribution (alpha, beta) to quality scores
+    quality_priors = {}
+    for model_id, (alpha, beta) in priors_beta.items():
+        quality = alpha / (alpha + beta)
+        quality_priors[model_id] = quality
+
+    return quality_priors
+
+
+# Load quality priors at module import time (using "general" context by default)
+# Contexts available: code, creative, analysis, simple_qa, general
+# To use different context, set CONDUIT_QUALITY_CONTEXT env var before import
+_QUALITY_CONTEXT = os.getenv("CONDUIT_QUALITY_CONTEXT", "general")
+_QUALITY_PRIORS = _load_quality_priors(_QUALITY_CONTEXT)
 
 
 async def _load_pricing_from_conduit():
@@ -170,7 +184,7 @@ def get_default_arms() -> list[ModelArm]:
         })
 
         # Get quality prior (fallback to 0.80 if not found)
-        expected_quality = QUALITY_PRIORS.get(conduit_model_id, 0.80)
+        expected_quality = _QUALITY_PRIORS.get(conduit_model_id, 0.80)
 
         # Convert $/1M to $/token for ModelArm
         input_cost_per_token = pricing["input_cost_per_1m"] / 1_000_000
