@@ -1,75 +1,19 @@
 """Visualization module for benchmark results.
 
-Generates publication-quality charts and reports:
+Generates interactive charts and reports using Plotly:
 - Regret curves with 95% confidence interval bands
 - Cost-quality scatter plots (Pareto frontier)
 - Model selection heatmaps over time
 - Convergence detection plots
-- HTML reports with embedded charts
+- HTML reports with embedded interactive charts
 """
 
 from pathlib import Path
 from typing import Any
 
-import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
-from matplotlib.figure import Figure
-
-# Set seaborn style for modern, clean visualizations
-sns.set_theme(style="whitegrid", context="talk", font="Inter", palette="deep")
-sns.set_context("talk", rc={"font.family": "sans-serif", "font.sans-serif": ["Inter", "Arial", "Helvetica"]})
-
-# Set publication-quality defaults for ultra-sharp graphics
-plt.rcParams.update(
-    {
-        # Figure settings - larger for more detail
-        "figure.figsize": (12, 8),
-        "figure.dpi": 150,  # Higher display DPI
-        "savefig.dpi": 600,  # Ultra-high save DPI for crisp output
-        "savefig.format": "png",
-        "savefig.bbox": "tight",
-        "savefig.pad_inches": 0.1,
-
-        # Font settings - crisp text rendering
-        "font.size": 12,
-        "axes.labelsize": 14,
-        "axes.titlesize": 16,
-        "axes.titleweight": "bold",
-        "xtick.labelsize": 11,
-        "ytick.labelsize": 11,
-        "legend.fontsize": 11,
-        "font.family": "sans-serif",
-        "font.sans-serif": ["Inter", "Arial", "Helvetica", "DejaVu Sans"],
-
-        # Line and marker settings - smooth, anti-aliased
-        "lines.linewidth": 2.5,
-        "lines.antialiased": True,
-        "lines.markersize": 8,
-        "patch.linewidth": 0.5,
-        "patch.antialiased": True,
-
-        # Grid and axis settings
-        "grid.alpha": 0.25,
-        "grid.linewidth": 0.8,
-        "axes.linewidth": 1.2,
-        "axes.edgecolor": "#333333",
-        "axes.grid": True,
-        "axes.grid.which": "major",
-
-        # Rendering settings for crisp output
-        "path.simplify": False,  # Don't simplify paths for maximum quality
-        "path.simplify_threshold": 0.1,
-        "agg.path.chunksize": 0,  # Render full paths for quality
-
-        # Text rendering
-        "text.antialiased": True,
-        "mathtext.fontset": "dejavusans",
-    }
-)
-
-# Use seaborn style with vibrant, distinct colors
-sns.set_palette("husl")
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 def plot_cost_curves(
@@ -77,19 +21,19 @@ def plot_cost_curves(
     benchmark_data: dict[str, Any] | None = None,
     output_path: str | Path | None = None,
     show_ci: bool = True,
-) -> Figure:
+) -> go.Figure:
     """Plot cumulative cost curves over time for multiple algorithms.
 
     Args:
         algorithms_data: Dict mapping algorithm names to their metrics data
         benchmark_data: Optional raw benchmark data with cumulative_cost histories
-        output_path: Optional path to save figure (PNG)
+        output_path: Optional path to save figure (HTML)
         show_ci: Whether to show 95% confidence interval bands
 
     Returns:
-        Matplotlib Figure object
+        Plotly Figure object
     """
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig = go.Figure()
 
     # Try to get cost history from benchmark data if available
     if benchmark_data and "algorithms" in benchmark_data:
@@ -102,8 +46,17 @@ def plot_cost_curves(
 
             queries = np.arange(1, len(cost_history) + 1)
 
-            # Plot main line
-            ax.plot(queries, cost_history, label=algo_name, linewidth=2.5, alpha=0.8)
+            # Add main line
+            fig.add_trace(
+                go.Scatter(
+                    x=queries,
+                    y=cost_history,
+                    mode="lines",
+                    name=algo_name,
+                    line=dict(width=2.5),
+                    hovertemplate=f"{algo_name}<br>Query: %{{x}}<br>Cost: $%{{y:.4f}}<extra></extra>",
+                )
+            )
 
             # Add CI bands if requested (simplified - would need multiple runs for real CI)
             if show_ci and len(cost_history) > 10:
@@ -115,25 +68,50 @@ def plot_cost_curves(
                 ci_lower = np.maximum(0, cost_array - 1.96 * std_estimate)
                 ci_upper = cost_array + 1.96 * std_estimate
 
-                ax.fill_between(
-                    queries, ci_lower, ci_upper, alpha=0.2, label=f"{algo_name} 95% CI"
+                # Add upper bound
+                fig.add_trace(
+                    go.Scatter(
+                        x=queries,
+                        y=ci_upper,
+                        mode="lines",
+                        line=dict(width=0),
+                        showlegend=False,
+                        hoverinfo="skip",
+                    )
                 )
 
-    ax.set_xlabel("Number of Queries", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Cumulative Cost ($)", fontsize=14, fontweight="bold")
-    ax.set_title(
-        "Cumulative Cost Over Time\n(Lower is Better)",
-        fontsize=16,
-        fontweight="bold",
-        pad=20,
-    )
-    ax.legend(loc="best", framealpha=0.9)
-    ax.grid(True, alpha=0.3, linestyle="--")
+                # Add filled area for CI
+                fig.add_trace(
+                    go.Scatter(
+                        x=queries,
+                        y=ci_lower,
+                        mode="lines",
+                        line=dict(width=0),
+                        fillcolor=f"rgba(0,0,0,0.1)",
+                        fill="tonexty",
+                        name=f"{algo_name} 95% CI",
+                        hoverinfo="skip",
+                    )
+                )
 
-    plt.tight_layout()
+    fig.update_layout(
+        title={
+            "text": "Cumulative Cost Over Time<br><sub>(Lower is Better)</sub>",
+            "x": 0.5,
+            "xanchor": "center",
+            "font": {"size": 20, "family": "Inter, Arial, sans-serif"},
+        },
+        xaxis_title="Number of Queries",
+        yaxis_title="Cumulative Cost ($)",
+        hovermode="x unified",
+        template="plotly_white",
+        font=dict(family="Inter, Arial, sans-serif", size=12),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        height=600,
+    )
 
     if output_path:
-        fig.savefig(output_path, dpi=300, bbox_inches="tight")
+        fig.write_html(str(output_path))
 
     return fig
 
@@ -142,18 +120,18 @@ def plot_cost_quality_scatter(
     algorithms_data: dict[str, dict[str, Any]],
     pareto_optimal: list[str] | None = None,
     output_path: str | Path | None = None,
-) -> Figure:
+) -> go.Figure:
     """Plot cost vs quality scatter with Pareto frontier highlighted.
 
     Args:
         algorithms_data: Dict mapping algorithm names to their metrics
         pareto_optimal: List of Pareto optimal algorithm names
-        output_path: Optional path to save figure (PNG)
+        output_path: Optional path to save figure (HTML)
 
     Returns:
-        Matplotlib Figure object
+        Plotly Figure object
     """
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig = go.Figure()
 
     # Extract cost and quality for each algorithm
     costs = []
@@ -170,92 +148,91 @@ def plot_cost_quality_scatter(
         is_pareto.append(algo_name in (pareto_optimal or []))
 
     # Plot non-Pareto points
-    non_pareto_mask = [not p for p in is_pareto]
-    if any(non_pareto_mask):
-        ax.scatter(
-            [c for c, p in zip(costs, non_pareto_mask) if p],
-            [q for q, p in zip(qualities, non_pareto_mask) if p],
-            s=200,
-            alpha=0.6,
-            c="gray",
-            edgecolors="black",
-            linewidth=1.5,
-            label="Non-Pareto",
-            zorder=2,
+    non_pareto_indices = [i for i, p in enumerate(is_pareto) if not p]
+    if non_pareto_indices:
+        fig.add_trace(
+            go.Scatter(
+                x=[costs[i] for i in non_pareto_indices],
+                y=[qualities[i] for i in non_pareto_indices],
+                mode="markers+text",
+                marker=dict(size=12, color="gray", line=dict(color="black", width=1)),
+                text=[names[i] for i in non_pareto_indices],
+                textposition="top center",
+                name="Non-Pareto",
+                hovertemplate="<b>%{text}</b><br>Cost: $%{x:.4f}<br>Quality: %{y:.3f}<extra></extra>",
+            )
         )
 
     # Plot Pareto optimal points
-    pareto_mask = is_pareto
-    if any(pareto_mask):
-        ax.scatter(
-            [c for c, p in zip(costs, pareto_mask) if p],
-            [q for q, p in zip(qualities, pareto_mask) if p],
-            s=300,
-            alpha=0.9,
-            c="gold",
-            edgecolors="darkred",
-            linewidth=2.5,
-            marker="*",
-            label="Pareto Optimal",
-            zorder=3,
-        )
-
-    # Add labels for each point
-    for i, name in enumerate(names):
-        ax.annotate(
-            name,
-            (costs[i], qualities[i]),
-            xytext=(8, 8),
-            textcoords="offset points",
-            fontsize=10,
-            fontweight="bold" if is_pareto[i] else "normal",
-            bbox=dict(
-                boxstyle="round,pad=0.4",
-                facecolor="yellow" if is_pareto[i] else "white",
-                edgecolor="black",
-                alpha=0.8,
-            ),
+    pareto_indices = [i for i, p in enumerate(is_pareto) if p]
+    if pareto_indices:
+        fig.add_trace(
+            go.Scatter(
+                x=[costs[i] for i in pareto_indices],
+                y=[qualities[i] for i in pareto_indices],
+                mode="markers+text",
+                marker=dict(
+                    size=18,
+                    color="gold",
+                    symbol="star",
+                    line=dict(color="darkred", width=2),
+                ),
+                text=[names[i] for i in pareto_indices],
+                textposition="top center",
+                textfont=dict(size=12, color="darkred"),
+                name="Pareto Optimal",
+                hovertemplate="<b>%{text}</b><br>Cost: $%{x:.4f}<br>Quality: %{y:.3f}<extra></extra>",
+            )
         )
 
     # Draw Pareto frontier line if we have Pareto optimal points
     if pareto_optimal and len(pareto_optimal) > 1:
-        pareto_costs = [c for c, p in zip(costs, is_pareto) if p]
-        pareto_qualities = [q for q, p in zip(qualities, is_pareto) if p]
+        pareto_costs = [costs[i] for i in pareto_indices]
+        pareto_qualities = [qualities[i] for i in pareto_indices]
 
         # Sort by cost
         sorted_pairs = sorted(zip(pareto_costs, pareto_qualities))
         frontier_costs, frontier_qualities = zip(*sorted_pairs)
 
-        ax.plot(
-            frontier_costs,
-            frontier_qualities,
-            "r--",
-            linewidth=2,
-            alpha=0.5,
-            label="Pareto Frontier",
-            zorder=1,
+        fig.add_trace(
+            go.Scatter(
+                x=frontier_costs,
+                y=frontier_qualities,
+                mode="lines",
+                line=dict(color="red", width=2, dash="dash"),
+                name="Pareto Frontier",
+                hoverinfo="skip",
+            )
         )
 
-    ax.set_xlabel("Total Cost ($)", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Average Quality", fontsize=14, fontweight="bold")
-    ax.set_title(
-        "Cost-Quality Trade-off\n(Best algorithms: low cost + high quality)",
-        fontsize=16,
-        fontweight="bold",
-        pad=20,
-    )
-    ax.legend(loc="best", framealpha=0.9)
-    ax.grid(True, alpha=0.3, linestyle="--")
-
-    # Add diagonal reference lines
-    ax.axhline(
-        y=0.8, color="green", linestyle=":", alpha=0.4, label="Target Quality (0.8)"
+    # Add target quality line
+    fig.add_hline(
+        y=0.8,
+        line_dash="dot",
+        line_color="green",
+        opacity=0.4,
+        annotation_text="Target Quality (0.8)",
+        annotation_position="right",
     )
 
-    plt.tight_layout()
+    fig.update_layout(
+        title={
+            "text": "Cost-Quality Trade-off<br><sub>(Best algorithms: low cost + high quality)</sub>",
+            "x": 0.5,
+            "xanchor": "center",
+            "font": {"size": 20, "family": "Inter, Arial, sans-serif"},
+        },
+        xaxis_title="Total Cost ($)",
+        yaxis_title="Average Quality",
+        template="plotly_white",
+        font=dict(family="Inter, Arial, sans-serif", size=12),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        height=700,
+        hovermode="closest",
+    )
 
     if output_path:
-        fig.savefig(output_path, dpi=300, bbox_inches="tight")
+        fig.write_html(str(output_path))
 
     return fig
 
@@ -263,18 +240,16 @@ def plot_cost_quality_scatter(
 def plot_convergence_comparison(
     algorithms_data: dict[str, dict[str, Any]],
     output_path: str | Path | None = None,
-) -> Figure:
+) -> go.Figure:
     """Plot convergence points comparison across algorithms.
 
     Args:
         algorithms_data: Dict mapping algorithm names to their convergence data
-        output_path: Optional path to save figure (PNG)
+        output_path: Optional path to save figure (HTML)
 
     Returns:
-        Matplotlib Figure object
+        Plotly Figure object
     """
-    fig, ax = plt.subplots(figsize=(12, 6))
-
     algo_names = []
     convergence_points = []
     converged_flags = []
@@ -298,63 +273,56 @@ def plot_convergence_comparison(
     valid_points = [p for p in convergence_points if p > 0]
     all_identical = len(set(valid_points)) == 1 if valid_points else False
 
-    # Plot bars
+    # Create bar chart
     colors = ["green" if c else "red" for c in converged_flags]
-    bars = ax.bar(algo_names, convergence_points, color=colors, alpha=0.7, edgecolor="black")
 
-    # Add value labels on bars
-    for i, (bar, point) in enumerate(zip(bars, convergence_points)):
+    # Create hover text
+    hover_texts = []
+    for point, converged in zip(convergence_points, converged_flags):
         if point > 0:
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + 5,
-                f"Query #{int(point)}",
-                ha="center",
-                va="bottom",
-                fontweight="bold",
-                fontsize=11,
-                bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="gray", alpha=0.8),
-            )
+            hover_texts.append(f"Query #{int(point)}")
         else:
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                5,
-                "Never Converged",
-                ha="center",
-                va="bottom",
-                fontsize=10,
-                fontweight="bold",
-                style="italic",
-                color="darkred",
-            )
+            hover_texts.append("Never Converged")
 
-    ax.set_ylabel("Convergence Point (Query #)", fontsize=14, fontweight="bold")
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=algo_names,
+                y=convergence_points,
+                marker_color=colors,
+                marker_line=dict(color="black", width=1.5),
+                text=hover_texts,
+                textposition="outside",
+                hovertemplate="<b>%{x}</b><br>%{text}<extra></extra>",
+            )
+        ]
+    )
 
     # Adjust title based on whether points are identical
     if all_identical and valid_points:
         title_text = (
-            f"Algorithm Convergence Speed\n"
-            f"(All algorithms converged at query #{int(valid_points[0])})"
+            f"Algorithm Convergence Speed<br>"
+            f"<sub>(All algorithms converged at query #{int(valid_points[0])})</sub>"
         )
     else:
-        title_text = "Algorithm Convergence Speed\n(Lower is Faster)"
+        title_text = "Algorithm Convergence Speed<br><sub>(Lower is Faster)</sub>"
 
-    ax.set_title(
-        title_text,
-        fontsize=16,
-        fontweight="bold",
-        pad=20,
+    fig.update_layout(
+        title={
+            "text": title_text,
+            "x": 0.5,
+            "xanchor": "center",
+            "font": {"size": 20, "family": "Inter, Arial, sans-serif"},
+        },
+        yaxis_title="Convergence Point (Query #)",
+        template="plotly_white",
+        font=dict(family="Inter, Arial, sans-serif", size=12),
+        height=600,
+        showlegend=False,
     )
-    ax.grid(True, axis="y", alpha=0.3, linestyle="--")
-
-    # Rotate x-axis labels if many algorithms
-    if len(algo_names) > 5:
-        plt.xticks(rotation=45, ha="right")
-
-    plt.tight_layout()
 
     if output_path:
-        fig.savefig(output_path, dpi=300, bbox_inches="tight")
+        fig.write_html(str(output_path))
 
     return fig
 
@@ -362,18 +330,16 @@ def plot_convergence_comparison(
 def plot_quality_ranking(
     algorithms_data: dict[str, dict[str, Any]],
     output_path: str | Path | None = None,
-) -> Figure:
+) -> go.Figure:
     """Plot quality ranking with confidence intervals.
 
     Args:
         algorithms_data: Dict mapping algorithm names to their quality data
-        output_path: Optional path to save figure (PNG)
+        output_path: Optional path to save figure (HTML)
 
     Returns:
-        Matplotlib Figure object
+        Plotly Figure object
     """
-    fig, ax = plt.subplots(figsize=(12, 7))
-
     # Sort algorithms by average quality
     sorted_algos = sorted(
         algorithms_data.items(), key=lambda x: x[1].get("average_quality", 0), reverse=True
@@ -385,46 +351,53 @@ def plot_quality_ranking(
     ci_uppers = [data.get("quality_ci_upper", q) for (_, data), q in zip(sorted_algos, qualities)]
 
     # Calculate error bars
-    yerr_lower = [q - l for q, l in zip(qualities, ci_lowers)]
-    yerr_upper = [u - q for q, u in zip(qualities, ci_uppers)]
+    error_x_minus = [q - l for q, l in zip(qualities, ci_lowers)]
+    error_x_plus = [u - q for q, u in zip(qualities, ci_uppers)]
 
-    # Plot bars with error bars
-    bars = ax.barh(algo_names, qualities, color="skyblue", edgecolor="navy", linewidth=1.5)
-    ax.errorbar(
-        qualities,
-        range(len(algo_names)),
-        xerr=[yerr_lower, yerr_upper],
-        fmt="none",
-        ecolor="black",
-        capsize=5,
-        capthick=2,
-    )
+    # Dynamic figure height based on number of algorithms
+    num_algos = len(algorithms_data)
+    fig_height = max(600, num_algos * 60 + 150)
 
-    # Add value labels
-    for i, (bar, quality) in enumerate(zip(bars, qualities)):
-        ax.text(
-            quality + 0.01,
-            bar.get_y() + bar.get_height() / 2,
-            f"{quality:.3f}",
-            va="center",
-            fontweight="bold",
-            fontsize=11,
+    fig = go.Figure()
+
+    # Add horizontal bars with error bars
+    fig.add_trace(
+        go.Bar(
+            y=algo_names,
+            x=qualities,
+            orientation="h",
+            marker=dict(color="skyblue", line=dict(color="navy", width=1.5)),
+            error_x=dict(
+                type="data",
+                symmetric=False,
+                array=error_x_plus,
+                arrayminus=error_x_minus,
+                color="black",
+                thickness=2,
+            ),
+            text=[f"{q:.3f}" for q in qualities],
+            textposition="outside",
+            hovertemplate="<b>%{y}</b><br>Quality: %{x:.3f}<extra></extra>",
         )
-
-    ax.set_xlabel("Average Quality Score", fontsize=14, fontweight="bold")
-    ax.set_title(
-        "Quality Ranking with 95% CI\n(Higher is Better)",
-        fontsize=16,
-        fontweight="bold",
-        pad=20,
     )
-    ax.set_xlim(0, 1.0)
-    ax.grid(True, axis="x", alpha=0.3, linestyle="--")
 
-    plt.tight_layout()
+    fig.update_layout(
+        title={
+            "text": "Quality Ranking with 95% CI<br><sub>(Higher is Better)</sub>",
+            "x": 0.5,
+            "xanchor": "center",
+            "font": {"size": 20, "family": "Inter, Arial, sans-serif"},
+        },
+        xaxis_title="Average Quality Score",
+        xaxis=dict(range=[0, 1.0]),
+        template="plotly_white",
+        font=dict(family="Inter, Arial, sans-serif", size=12),
+        height=fig_height,
+        showlegend=False,
+    )
 
     if output_path:
-        fig.savefig(output_path, dpi=300, bbox_inches="tight")
+        fig.write_html(str(output_path))
 
     return fig
 
@@ -432,14 +405,14 @@ def plot_quality_ranking(
 def generate_html_report(
     analysis: dict[str, Any],
     output_dir: str | Path,
-    chart_paths: dict[str, str] | None = None,
+    chart_figs: dict[str, go.Figure] | None = None,
 ) -> Path:
-    """Generate comprehensive HTML report with embedded charts.
+    """Generate comprehensive HTML report with embedded interactive charts.
 
     Args:
         analysis: Complete analysis dictionary from metrics module
-        output_dir: Directory to save HTML report and charts
-        chart_paths: Optional dict of chart type -> path mappings
+        output_dir: Directory to save HTML report
+        chart_figs: Optional dict of chart type -> Plotly Figure mappings
 
     Returns:
         Path to generated HTML report
@@ -463,6 +436,7 @@ def generate_html_report(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conduit Benchmark Report</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -478,7 +452,6 @@ def generate_html_report(
             margin: 0 auto;
             padding: 40px 60px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
             line-height: 1.7;
             color: #1a202c;
         }}
@@ -589,18 +562,6 @@ def generate_html_report(
             margin: 35px 0;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            text-align: center;
-        }}
-
-        .chart h3 {{
-            margin-bottom: 25px;
-            color: #2d3748;
-        }}
-
-        .chart img {{
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
         }}
 
         .pareto {{
@@ -778,14 +739,18 @@ def generate_html_report(
     </table>
 """
 
-    # Add charts if provided
-    if chart_paths:
-        html += "\n    <h2>📈 Visualizations</h2>\n"
-        for chart_name, chart_path in chart_paths.items():
+    # Add interactive charts if provided
+    if chart_figs:
+        html += "\n    <h2>📈 Interactive Visualizations</h2>\n"
+        for chart_name, fig in chart_figs.items():
+            chart_div = fig.to_html(
+                full_html=False,
+                include_plotlyjs=False,
+                div_id=f"chart_{chart_name.replace(' ', '_').lower()}",
+            )
             html += f"""
     <div class="chart">
-        <h3>{chart_name}</h3>
-        <img src="{Path(chart_path).name}" alt="{chart_name}">
+        {chart_div}
     </div>
 """
 
@@ -854,7 +819,7 @@ def generate_html_report(
     </div>
 
         <footer>
-            <p>Generated by Conduit-Bench</p>
+            <p>Generated by Conduit-Bench | Interactive visualizations powered by Plotly</p>
         </footer>
     </div>
 </body>
@@ -887,35 +852,41 @@ def create_all_visualizations(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     chart_paths = {}
+    chart_figs = {}
 
     # Extract algorithm data
     algorithms = analysis.get("algorithms", {})
 
     # 1. Cost curves (skip if no time series data)
     if benchmark_data:
-        cost_path = output_dir / "cost_curves.png"
-        plot_cost_curves(algorithms, benchmark_data, output_path=cost_path)
+        cost_path = output_dir / "cost_curves.html"
+        cost_fig = plot_cost_curves(algorithms, benchmark_data, output_path=cost_path)
         chart_paths["Cumulative Cost Curves"] = cost_path
+        chart_figs["Cumulative Cost Curves"] = cost_fig
 
     # 2. Cost-quality scatter
     pareto_optimal = analysis.get("pareto_frontier", [])
-    cost_quality_path = output_dir / "cost_quality_scatter.png"
-    plot_cost_quality_scatter(algorithms, pareto_optimal, output_path=cost_quality_path)
+    cost_quality_path = output_dir / "cost_quality_scatter.html"
+    cost_quality_fig = plot_cost_quality_scatter(
+        algorithms, pareto_optimal, output_path=cost_quality_path
+    )
     chart_paths["Cost-Quality Trade-off"] = cost_quality_path
+    chart_figs["Cost-Quality Trade-off"] = cost_quality_fig
 
     # 3. Convergence comparison
-    convergence_path = output_dir / "convergence_comparison.png"
-    plot_convergence_comparison(algorithms, output_path=convergence_path)
+    convergence_path = output_dir / "convergence_comparison.html"
+    convergence_fig = plot_convergence_comparison(algorithms, output_path=convergence_path)
     chart_paths["Convergence Speed"] = convergence_path
+    chart_figs["Convergence Speed"] = convergence_fig
 
     # 4. Quality ranking
-    quality_path = output_dir / "quality_ranking.png"
-    plot_quality_ranking(algorithms, output_path=quality_path)
+    quality_path = output_dir / "quality_ranking.html"
+    quality_fig = plot_quality_ranking(algorithms, output_path=quality_path)
     chart_paths["Quality Ranking"] = quality_path
+    chart_figs["Quality Ranking"] = quality_fig
 
-    # 5. HTML report
-    chart_path_strings = {k: str(v) for k, v in chart_paths.items()}
-    html_path = generate_html_report(analysis, output_dir, chart_path_strings)
+    # 5. HTML report with embedded interactive charts
+    html_path = generate_html_report(analysis, output_dir, chart_figs)
     chart_paths["HTML Report"] = html_path
 
     return chart_paths

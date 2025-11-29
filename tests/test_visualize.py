@@ -2,10 +2,7 @@
 
 import pytest
 from pathlib import Path
-import matplotlib
-import matplotlib.pyplot as plt
-
-matplotlib.use("Agg")  # Non-interactive backend for testing
+import plotly.graph_objects as go
 
 from conduit_bench.analysis.visualize import (
     plot_cost_curves,
@@ -30,31 +27,40 @@ def sample_algorithms_data() -> dict[str, dict[str, any]]:
     """Create sample algorithm data for visualization testing."""
     return {
         "thompson": {
-            "avg_quality": 0.85,
+            "average_quality": 0.85,
             "quality_ci": (0.80, 0.90),
+            "quality_ci_lower": 0.80,
+            "quality_ci_upper": 0.90,
             "total_cost": 0.050,
             "cumulative_cost": 0.050,
-            "converged": True,
-            "convergence_step": 450,
-            "convergence": {"converged": True, "convergence_step": 450},
+            "convergence": {
+                "converged": True,
+                "convergence_point": 450
+            },
         },
         "ucb1": {
-            "avg_quality": 0.78,
+            "average_quality": 0.78,
             "quality_ci": (0.73, 0.83),
+            "quality_ci_lower": 0.73,
+            "quality_ci_upper": 0.83,
             "total_cost": 0.040,
             "cumulative_cost": 0.040,
-            "converged": True,
-            "convergence_step": 520,
-            "convergence": {"converged": True, "convergence_step": 520},
+            "convergence": {
+                "converged": True,
+                "convergence_point": 520
+            },
         },
         "random": {
-            "avg_quality": 0.65,
+            "average_quality": 0.65,
             "quality_ci": (0.60, 0.70),
+            "quality_ci_lower": 0.60,
+            "quality_ci_upper": 0.70,
             "total_cost": 0.045,
             "cumulative_cost": 0.045,
-            "converged": False,
-            "convergence_step": None,
-            "convergence": {"converged": False, "convergence_step": None},
+            "convergence": {
+                "converged": False,
+                "convergence_point": None
+            },
         },
     }
 
@@ -68,14 +74,14 @@ def sample_benchmark_data() -> dict[str, any]:
         "algorithms": [
             {
                 "algorithm_name": "thompson",
-                "avg_quality": 0.85,
+                "average_quality": 0.85,
                 "total_cost": 0.05,
                 "cumulative_cost": [0.0005 * i for i in range(100)],
                 "quality_history": [0.5 + 0.005 * i for i in range(100)],
             },
             {
                 "algorithm_name": "ucb1",
-                "avg_quality": 0.78,
+                "average_quality": 0.78,
                 "total_cost": 0.04,
                 "cumulative_cost": [0.0004 * i for i in range(100)],
                 "quality_history": [0.4 + 0.004 * i for i in range(100)],
@@ -88,29 +94,30 @@ def sample_benchmark_data() -> dict[str, any]:
 def sample_analysis() -> dict[str, any]:
     """Create sample analysis results for HTML report testing."""
     return {
-        "summary": {
-            "num_algorithms": 2,
-            "best_quality_algorithm": "thompson",
-            "best_cost_algorithm": "ucb1",
-            "quality_rankings": ["thompson", "ucb1"],
-            "cost_rankings": ["ucb1", "thompson"],
-        },
+        "benchmark_id": "test_123",
+        "dataset_size": 100,
         "algorithms": {
             "thompson": {
-                "avg_quality": 0.85,
-                "quality_ci": (0.80, 0.90),
+                "average_quality": 0.85,
+                "quality_ci_lower": 0.80,
+                "quality_ci_upper": 0.90,
                 "total_cost": 0.050,
                 "cumulative_cost": 0.050,
-                "converged": True,
-                "convergence_step": 450,
+                "convergence": {
+                    "converged": True,
+                    "convergence_point": 450
+                },
             },
             "ucb1": {
-                "avg_quality": 0.78,
-                "quality_ci": (0.73, 0.83),
+                "average_quality": 0.78,
+                "quality_ci_lower": 0.73,
+                "quality_ci_upper": 0.83,
                 "total_cost": 0.040,
                 "cumulative_cost": 0.040,
-                "converged": True,
-                "convergence_step": 520,
+                "convergence": {
+                    "converged": True,
+                    "convergence_point": 520
+                },
             },
         },
         "statistical_tests": {
@@ -133,15 +140,14 @@ class TestPlotCostCurves:
         temp_output_dir: Path,
     ) -> None:
         """Test basic cost curve plotting."""
-        output_path = temp_output_dir / "cost.png"
+        output_path = temp_output_dir / "cost.html"
 
         fig = plot_cost_curves(
             sample_algorithms_data, output_path=str(output_path), show_ci=False
         )
 
-        assert fig is not None
+        assert isinstance(fig, go.Figure)
         assert output_path.exists()
-        plt.close(fig)
 
     def test_plot_cost_curves_with_ci(
         self,
@@ -150,7 +156,7 @@ class TestPlotCostCurves:
         temp_output_dir: Path,
     ) -> None:
         """Test cost curves with confidence intervals."""
-        output_path = temp_output_dir / "cost_ci.png"
+        output_path = temp_output_dir / "cost_ci.html"
 
         fig = plot_cost_curves(
             sample_algorithms_data,
@@ -159,9 +165,8 @@ class TestPlotCostCurves:
             show_ci=True,
         )
 
-        assert fig is not None
+        assert isinstance(fig, go.Figure)
         assert output_path.exists()
-        plt.close(fig)
 
     def test_plot_cost_curves_no_output_path(
         self, sample_algorithms_data: dict[str, dict[str, any]]
@@ -169,8 +174,7 @@ class TestPlotCostCurves:
         """Test cost curves without saving to file."""
         fig = plot_cost_curves(sample_algorithms_data, show_ci=False)
 
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
     def test_plot_cost_curves_single_algorithm(
         self, temp_output_dir: Path
@@ -178,16 +182,16 @@ class TestPlotCostCurves:
         """Test cost curves with single algorithm."""
         data = {
             "only_one": {
-                "avg_quality": 0.75,
-                "quality_ci": (0.70, 0.80),
+                "average_quality": 0.75,
+                "quality_ci_lower": 0.70,
+                "quality_ci_upper": 0.80,
                 "total_cost": 0.05,
                 "cumulative_cost": 0.05,
             }
         }
 
         fig = plot_cost_curves(data, show_ci=False)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
 
 class TestPlotCostQualityScatter:
@@ -199,15 +203,14 @@ class TestPlotCostQualityScatter:
         temp_output_dir: Path,
     ) -> None:
         """Test basic cost-quality scatter plot."""
-        output_path = temp_output_dir / "scatter.png"
+        output_path = temp_output_dir / "scatter.html"
 
         fig = plot_cost_quality_scatter(
             sample_algorithms_data, output_path=str(output_path)
         )
 
-        assert fig is not None
+        assert isinstance(fig, go.Figure)
         assert output_path.exists()
-        plt.close(fig)
 
     def test_plot_cost_quality_with_pareto(
         self,
@@ -215,7 +218,7 @@ class TestPlotCostQualityScatter:
         temp_output_dir: Path,
     ) -> None:
         """Test scatter plot with Pareto frontier highlighted."""
-        output_path = temp_output_dir / "scatter_pareto.png"
+        output_path = temp_output_dir / "scatter_pareto.html"
 
         fig = plot_cost_quality_scatter(
             sample_algorithms_data,
@@ -223,9 +226,8 @@ class TestPlotCostQualityScatter:
             output_path=str(output_path),
         )
 
-        assert fig is not None
+        assert isinstance(fig, go.Figure)
         assert output_path.exists()
-        plt.close(fig)
 
     def test_plot_cost_quality_no_output(
         self, sample_algorithms_data: dict[str, dict[str, any]]
@@ -233,21 +235,19 @@ class TestPlotCostQualityScatter:
         """Test scatter plot without saving."""
         fig = plot_cost_quality_scatter(sample_algorithms_data)
 
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
     def test_plot_cost_quality_single_point(self) -> None:
         """Test scatter plot with single algorithm."""
         data = {
             "only_one": {
-                "avg_quality": 0.75,
+                "average_quality": 0.75,
                 "total_cost": 0.05,
             }
         }
 
         fig = plot_cost_quality_scatter(data)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
 
 class TestPlotConvergenceComparison:
@@ -259,15 +259,14 @@ class TestPlotConvergenceComparison:
         temp_output_dir: Path,
     ) -> None:
         """Test basic convergence comparison plot."""
-        output_path = temp_output_dir / "convergence.png"
+        output_path = temp_output_dir / "convergence.html"
 
         fig = plot_convergence_comparison(
             sample_algorithms_data, output_path=str(output_path)
         )
 
-        assert fig is not None
+        assert isinstance(fig, go.Figure)
         assert output_path.exists()
-        plt.close(fig)
 
     def test_plot_convergence_mixed_states(
         self, temp_output_dir: Path
@@ -275,63 +274,67 @@ class TestPlotConvergenceComparison:
         """Test convergence plot with mixed convergence states."""
         data = {
             "converged1": {
-                "converged": True,
-                "convergence_step": 100,
-                "convergence": {"converged": True, "convergence_step": 100},
+                "convergence": {
+                    "converged": True,
+                    "convergence_point": 100
+                },
             },
             "converged2": {
-                "converged": True,
-                "convergence_step": 200,
-                "convergence": {"converged": True, "convergence_step": 200},
+                "convergence": {
+                    "converged": True,
+                    "convergence_point": 200
+                },
             },
             "not_converged": {
-                "converged": False,
-                "convergence_step": None,
-                "convergence": {"converged": False, "convergence_step": None},
+                "convergence": {
+                    "converged": False,
+                    "convergence_point": None
+                },
             },
         }
 
         fig = plot_convergence_comparison(data)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
     def test_plot_convergence_all_converged(self) -> None:
         """Test convergence plot when all algorithms converged."""
         data = {
             "algo1": {
-                "converged": True,
-                "convergence_step": 150,
-                "convergence": {"converged": True, "convergence_step": 150},
+                "convergence": {
+                    "converged": True,
+                    "convergence_point": 150
+                },
             },
             "algo2": {
-                "converged": True,
-                "convergence_step": 300,
-                "convergence": {"converged": True, "convergence_step": 300},
+                "convergence": {
+                    "converged": True,
+                    "convergence_point": 300
+                },
             },
         }
 
         fig = plot_convergence_comparison(data)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
     def test_plot_convergence_none_converged(self) -> None:
         """Test convergence plot when no algorithms converged."""
         data = {
             "algo1": {
-                "converged": False,
-                "convergence_step": None,
-                "convergence": {"converged": False, "convergence_step": None},
+                "convergence": {
+                    "converged": False,
+                    "convergence_point": None
+                },
             },
             "algo2": {
-                "converged": False,
-                "convergence_step": None,
-                "convergence": {"converged": False, "convergence_step": None},
+                "convergence": {
+                    "converged": False,
+                    "convergence_point": None
+                },
             },
         }
 
         fig = plot_convergence_comparison(data)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
 
 class TestPlotQualityRanking:
@@ -343,15 +346,14 @@ class TestPlotQualityRanking:
         temp_output_dir: Path,
     ) -> None:
         """Test basic quality ranking plot."""
-        output_path = temp_output_dir / "ranking.png"
+        output_path = temp_output_dir / "ranking.html"
 
         fig = plot_quality_ranking(
             sample_algorithms_data, output_path=str(output_path)
         )
 
-        assert fig is not None
+        assert isinstance(fig, go.Figure)
         assert output_path.exists()
-        plt.close(fig)
 
     def test_plot_quality_ranking_with_ci(
         self,
@@ -360,9 +362,8 @@ class TestPlotQualityRanking:
         """Test quality ranking includes confidence intervals."""
         fig = plot_quality_ranking(sample_algorithms_data)
 
-        assert fig is not None
-        # Visual inspection would verify error bars are present
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
+        # Plotly figures have error bars in data traces
 
     def test_plot_quality_ranking_sorted(
         self, sample_algorithms_data: dict[str, dict[str, any]]
@@ -370,27 +371,29 @@ class TestPlotQualityRanking:
         """Test that quality ranking is sorted correctly."""
         fig = plot_quality_ranking(sample_algorithms_data)
 
-        # Extract data from figure to verify sorting
-        ax = fig.axes[0]
-        y_data = [bar.get_height() for bar in ax.patches]
+        # Extract x values from Plotly bar chart (horizontal orientation)
+        # The figure should have one trace (the bar chart)
+        assert len(fig.data) > 0
+        bar_trace = fig.data[0]
+
+        # For horizontal bars, x contains the quality values
+        x_data = list(bar_trace.x)
 
         # Should be sorted in descending order
-        assert all(y_data[i] >= y_data[i + 1] for i in range(len(y_data) - 1))
-
-        plt.close(fig)
+        assert all(x_data[i] >= x_data[i + 1] for i in range(len(x_data) - 1))
 
     def test_plot_quality_ranking_single_algorithm(self) -> None:
         """Test quality ranking with single algorithm."""
         data = {
             "only_one": {
-                "avg_quality": 0.75,
-                "quality_ci": (0.70, 0.80),
+                "average_quality": 0.75,
+                "quality_ci_lower": 0.70,
+                "quality_ci_upper": 0.80,
             }
         }
 
         fig = plot_quality_ranking(data)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
 
 class TestGenerateHTMLReport:
@@ -415,27 +418,27 @@ class TestGenerateHTMLReport:
     def test_generate_html_report_with_charts(
         self,
         sample_analysis: dict[str, any],
+        sample_algorithms_data: dict[str, dict[str, any]],
         temp_output_dir: Path,
     ) -> None:
-        """Test HTML report with chart references."""
-        chart_paths = {
-            "regret_curves": "regret_curves.png",
-            "cost_quality_scatter": "cost_quality.png",
-            "convergence_comparison": "convergence.png",
-            "quality_ranking": "quality.png",
+        """Test HTML report with interactive chart figures."""
+        # Create actual Plotly figures
+        chart_figs = {
+            "Cost Curves": plot_cost_curves(sample_algorithms_data),
+            "Cost-Quality Scatter": plot_cost_quality_scatter(sample_algorithms_data),
+            "Convergence Comparison": plot_convergence_comparison(sample_algorithms_data),
+            "Quality Ranking": plot_quality_ranking(sample_algorithms_data),
         }
 
         report_path = generate_html_report(
-            sample_analysis, temp_output_dir, chart_paths=chart_paths
+            sample_analysis, temp_output_dir, chart_figs=chart_figs
         )
 
         html_content = report_path.read_text()
 
-        # Verify chart references in HTML
-        assert "regret_curves.png" in html_content
-        assert "cost_quality.png" in html_content
-        assert "convergence.png" in html_content
-        assert "quality.png" in html_content
+        # Verify Plotly charts are embedded
+        assert "plotly" in html_content.lower()
+        assert "Interactive Visualizations" in html_content
 
     def test_generate_html_report_summary_section(
         self, sample_analysis: dict[str, any], temp_output_dir: Path
@@ -494,8 +497,7 @@ class TestVisualizationEdgeCases:
         # Should not crash, but might return None or empty figure
         try:
             fig = plot_quality_ranking(empty_data)
-            if fig is not None:
-                plt.close(fig)
+            assert isinstance(fig, go.Figure)
         except (ValueError, KeyError):
             pass  # Acceptable to reject empty data
 
@@ -503,21 +505,20 @@ class TestVisualizationEdgeCases:
         """Test quality ranking handles missing CI data."""
         data = {
             "algo1": {
-                "avg_quality": 0.75,
-                # Missing quality_ci
+                "average_quality": 0.75,
+                # Missing quality_ci_lower and quality_ci_upper
             }
         }
 
         # Should handle gracefully (plot without error bars)
         fig = plot_quality_ranking(data)
-        assert fig is not None
-        plt.close(fig)
+        assert isinstance(fig, go.Figure)
 
     def test_invalid_output_path(
         self, sample_algorithms_data: dict[str, dict[str, any]]
     ) -> None:
         """Test visualization handles invalid output paths."""
-        invalid_path = "/nonexistent/directory/chart.png"
+        invalid_path = "/nonexistent/directory/chart.html"
 
         with pytest.raises((OSError, FileNotFoundError)):
             plot_quality_ranking(
@@ -529,14 +530,11 @@ class TestVisualizationEdgeCases:
     ) -> None:
         """Test HTML report handles missing Pareto frontier."""
         analysis = {
-            "summary": {
-                "num_algorithms": 1,
-                "best_quality_algorithm": "algo1",
-                "quality_rankings": ["algo1"],
-            },
+            "benchmark_id": "test_empty",
+            "dataset_size": 10,
             "algorithms": {
                 "algo1": {
-                    "avg_quality": 0.75,
+                    "average_quality": 0.75,
                     "total_cost": 0.05,
                 }
             },
@@ -551,15 +549,14 @@ class TestVisualizationEdgeCases:
         """Test convergence plot handles missing convergence data."""
         data = {
             "algo1": {
-                # Missing convergence data
-                "avg_quality": 0.75,
+                # Missing convergence data entirely
+                "average_quality": 0.75,
             }
         }
 
         # Should handle gracefully
         try:
             fig = plot_convergence_comparison(data)
-            if fig is not None:
-                plt.close(fig)
+            assert isinstance(fig, go.Figure)
         except KeyError:
             pass  # Acceptable to require convergence data
