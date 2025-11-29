@@ -12,7 +12,7 @@ Benchmark bandit algorithms using real evaluation datasets (GSM8K, MMLU, HumanEv
 
 **What We Test**:
 - **10 Algorithms** from Conduit: 3 contextual, 3 non-contextual, 4 baselines
-- **6 Models**: OpenAI (o4-mini, gpt-5, gpt-5.1), Anthropic (claude-sonnet-4.5, claude-opus-4.5), Google (gemini-2.5-pro)
+- **7 Models**: OpenAI (o4-mini, gpt-5, gpt-5.1), Anthropic (claude-sonnet-4.5, claude-opus-4.5), Google (gemini-2.5-pro, gemini-2.5-flash)
 - **Real Datasets**: GSM8K (math), MMLU (knowledge), HumanEval (code)
 - **Synthetic Queries**: Diverse categories with complexity variation
 
@@ -76,21 +76,38 @@ All algorithms are imported from `conduit.engines.bandits`. No duplication.
 
 ---
 
-## Model Pool (from Conduit)
+## Model Pool & Configuration (from Conduit)
 
-Models and pricing imported from `conduit.models.DEFAULT_REGISTRY`:
+**Dynamic Pricing**: Pricing loaded from Conduit's PricingManager with three-tier fallback:
+1. **Database**: Latest pricing snapshots from `model_prices` table
+2. **Cache**: Redis-cached pricing (24-hour TTL)
+3. **Live Fetch**: llm-prices.com API for latest pricing
+
+**Quality Priors**: Context-specific quality expectations loaded from `conduit.yaml`:
+
+| Context | Description | Best Models |
+|---------|-------------|-------------|
+| `code` | Programming tasks | claude-sonnet-4.5 (0.92), claude-opus-4.5 (0.91) |
+| `creative` | Creative writing | claude-opus-4.5 (0.94), claude-sonnet-4.5 (0.90) |
+| `analysis` | Analytical reasoning | claude-opus-4.5 (0.92), gpt-5.1 (0.89) |
+| `simple_qa` | Simple questions | o4-mini (0.90), gemini-2.0-flash (0.88) |
+| `general` | General purpose | gpt-5.1 (0.88), claude-opus-4.5 (0.87) |
+
+**Model Pool** (7 models across 3 providers):
 
 | Model | Provider | Input $/1M | Output $/1M |
 |-------|----------|------------|-------------|
-| o4-mini | OpenAI | $1.10 | $4.40 |
-| gpt-5 | OpenAI | $2.00 | $8.00 |
-| gpt-5.1 | OpenAI | $2.00 | $8.00 |
+| o4-mini | OpenAI | $0.15 | $0.60 |
+| gpt-5 | OpenAI | $2.50 | $10.00 |
+| gpt-5.1 | OpenAI | $2.50 | $10.00 |
 | claude-sonnet-4.5 | Anthropic | $3.00 | $15.00 |
-| claude-opus-4.5 | Anthropic | $5.00 | $25.00 |
+| claude-opus-4.5 | Anthropic | $15.00 | $75.00 |
 | gemini-2.5-pro | Google | $1.25 | $5.00 |
+| gemini-2.5-flash | Google | $0.075 | $0.30 |
 
-**Price Range**: $1.10 - $25.00 per 1M tokens
-**Cost Optimization Target**: Route simple queries to o4-mini, complex to opus/gpt-5.1
+**Price Range**: $0.075 - $75.00 per 1M tokens (100x spread)
+**Quality Context**: Set via `CONDUIT_QUALITY_CONTEXT=code` (default: `general`)
+**Cost Optimization**: Route simple queries to gemini-2.5-flash, complex to opus/gpt-5.1
 
 ---
 
@@ -130,7 +147,9 @@ Generated via `conduit_bench.generators.SyntheticQueryGenerator`:
 - Python 3.10+
 - Conduit installed (`pip install -e ../conduit`)
 - Arbiter installed (`pip install -e ../arbiter`)
-- API keys for evaluation models
+- API keys for LLM providers (OpenAI, Anthropic, Google)
+- PostgreSQL database (optional - for pricing database mode)
+- Redis (optional - for pricing cache mode)
 
 ### Installation
 
@@ -139,6 +158,9 @@ cd /Users/evan/Documents/gh/conduit-benchmark
 uv sync
 cp .env.example .env
 # Add API keys to .env
+
+# Configure quality priors context (optional, default: general)
+export CONDUIT_QUALITY_CONTEXT=code  # Options: code, creative, analysis, simple_qa, general
 ```
 
 ### Run Benchmark
@@ -146,6 +168,9 @@ cp .env.example .env
 ```bash
 # Run with GSM8K dataset
 uv run conduit-bench run --dataset gsm8k --limit 1000
+
+# Run with specific quality context
+CONDUIT_QUALITY_CONTEXT=code uv run conduit-bench run --dataset gsm8k --limit 500
 
 # Run with synthetic queries
 uv run conduit-bench generate --queries 1000 --seed 42

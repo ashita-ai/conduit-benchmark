@@ -6,8 +6,8 @@ description: Bandit algorithm benchmarking researcher - evaluating LLM routing s
 # AGENTS.md - AI Agent Guide
 
 **Purpose**: Development guidelines for Conduit Bench bandit benchmarking
-**Last Updated**: 2025-11-27
-**Status**: ✅ Synced with real benchmarks (70% coverage, HybridRouter, 6 default models)
+**Last Updated**: 2025-11-29
+**Status**: ✅ Synced with real benchmarks (70% coverage, dynamic pricing/quality, 6+ models)
 
 **Design Philosophy**: Simplicity wins, use good defaults, YAML config where needed, no hardcoded assumptions.
 
@@ -101,11 +101,14 @@ Action Taken: Proposed rule update to user mid-session, updated AGENTS.md
 
 ### 1. Integration Strategy
 
-**Conduit (ALGORITHM SOURCE - ESSENTIAL)**:
-- **Role**: Contains ALL bandit algorithm implementations
-- **Location**: `conduit.engines.bandits` (7 algorithms) + `conduit.models` (registry)
+**Conduit (ALGORITHM & CONFIGURATION SOURCE - ESSENTIAL)**:
+- **Role**: Contains ALL bandit algorithm implementations, pricing, and quality priors
+- **Location**:
+  - Algorithms: `conduit.engines.bandits` (7 algorithms)
+  - Pricing: `conduit.core.pricing.PricingManager` (Database → Cache → llm-prices.com)
+  - Quality Priors: `conduit.core.config.load_context_priors()` from `conduit.yaml`
 - **Import**: `from conduit.engines.bandits import ThompsonSamplingBandit, UCB1Bandit, ...`
-- **Why**: Single source of truth, no code duplication, algorithms usable by Router and benchmark
+- **Why**: Single source of truth for algorithms, pricing, and quality expectations
 
 **Arbiter (EVALUATION - ESSENTIAL)**:
 - **Role**: Quality evaluation for model responses
@@ -210,11 +213,13 @@ poetry run mypy conduit_bench/ && echo "✅ Type checking passed" || echo "🚨 
 **Fix**: Remove duplicated code, import from Conduit
 **Why It Matters**: Conduit is source of truth for all algorithms
 
-### Mistake 2: Hardcoding Model Lists
-**Detection**: Model lists defined directly in benchmark code
-**Prevention**: Use `conduit.models.DEFAULT_REGISTRY`
-**Fix**: Import and use model registry
-**Why It Matters**: Model updates should happen in one place
+### Mistake 2: Hardcoding Configuration Data
+**Detection**: Pricing or quality priors defined directly in benchmark code
+**Prevention**:
+- Pricing: Use `PricingManager` from Conduit
+- Quality: Use `load_context_priors()` from Conduit
+**Fix**: Import configuration dynamically from Conduit
+**Why It Matters**: Configuration updates should happen in one place (Conduit)
 
 ### Mistake 3: Skipping Statistical Significance Tests
 **Detection**: Single-run benchmarks without error bars
@@ -409,59 +414,52 @@ class MyBandit(BanditAlgorithm):
         # Clear state
 ```
 
-### Model Registry Usage
+### Configuration Loading
 
 ```python
-from conduit.models import DEFAULT_REGISTRY
+# Dynamic Pricing (from Conduit's PricingManager)
+# Three-tier fallback: Database → Cache → llm-prices.com
+# Loaded automatically when creating bandit arms
 
-# Get default models from conduit (6 models)
-all_models = DEFAULT_REGISTRY
+# Quality Priors (from Conduit's conduit.yaml)
+from conduit.core.config import load_context_priors
+import os
 
-# Models are configured in conduit/core/config.py default_models:
-# - o4-mini, gpt-5, gpt-5.1 (OpenAI)
-# - claude-sonnet-4.5, claude-opus-4.5 (Anthropic)
-# - gemini-2.5-pro (Google)
+# Load quality context (default: general)
+context = os.getenv("CONDUIT_QUALITY_CONTEXT", "general")
+priors_beta = load_context_priors(context)  # Returns dict[str, tuple[float, float]]
+
+# Convert Beta params to quality scores
+quality_priors = {}
+for model_id, (alpha, beta) in priors_beta.items():
+    quality_priors[model_id] = alpha / (alpha + beta)
+
+# Available contexts: code, creative, analysis, simple_qa, general
+# Example: CONDUIT_QUALITY_CONTEXT=code for coding benchmarks
 ```
 
 ### Running Benchmark
 
 ```python
-# Import from Conduit (algorithms live here)
-from conduit.engines.bandits import (
-    ThompsonSamplingBandit,
-    UCB1Bandit,
-    LinUCBBandit,
-    ContextualThompsonSamplingBandit,
-    EpsilonGreedyBandit,
-    RandomBaseline,
-)
-from conduit.models import DEFAULT_REGISTRY
+# Algorithms imported from Conduit (single source of truth)
+# Pricing loaded from PricingManager (Database → Cache → llm-prices.com)
+# Quality priors loaded from conduit.yaml via load_context_priors()
 
-# Or import adapters for production algorithms
-from conduit_bench.adapters.hybrid_router_adapter import HybridRouterAdapter
+# Run benchmark using CLI with quality context
+# Default context: general
+uv run conduit-bench run --dataset gsm8k --max-queries 500 \
+  --algorithms thompson,ucb1,epsilon,random
 
-# Default models from conduit (6 total, 3 providers):
-# OpenAI: o4-mini, gpt-5, gpt-5.1
-# Anthropic: claude-sonnet-4.5, claude-opus-4.5
-# Google: gemini-2.5-pro
+# Run with coding quality priors
+CONDUIT_QUALITY_CONTEXT=code uv run conduit-bench run --dataset gsm8k \
+  --max-queries 500 --algorithms thompson,ucb1,epsilon,random
 
-# Create all 11 algorithms
-algorithms = [
-    HybridRouterAdapter(DEFAULT_REGISTRY),  # Production algorithm
-    HybridRouterAdapter(DEFAULT_REGISTRY, variant="thompson_linucb"),
-    HybridRouterAdapter(DEFAULT_REGISTRY, variant="ucb1_linucb"),
-    HybridRouterAdapter(DEFAULT_REGISTRY, variant="ucb1_contextual_thompson"),
-    HybridRouterAdapter(DEFAULT_REGISTRY, variant="thompson_contextual_thompson"),
-    ThompsonSamplingBandit(DEFAULT_REGISTRY),
-    UCB1Bandit(DEFAULT_REGISTRY, c=1.5),
-    LinUCBBandit(DEFAULT_REGISTRY, alpha=1.0),
-    ContextualThompsonSamplingBandit(DEFAULT_REGISTRY),
-    EpsilonGreedyBandit(DEFAULT_REGISTRY, epsilon=0.1),
-    RandomBaseline(DEFAULT_REGISTRY),
-]
+# Run with creative writing quality priors
+CONDUIT_QUALITY_CONTEXT=creative uv run conduit-bench run --dataset gsm8k \
+  --max-queries 500 --algorithms thompson,ucb1,epsilon,random
 
-# Run benchmark using CLI
-# uv run conduit-bench run --dataset gsm8k --max-queries 500 --algorithms hybrid,thompson,ucb1,epsilon,random
+# Available contexts: code, creative, analysis, simple_qa, general
+# Each context has optimized quality expectations for 8 models
 ```
 
 ---
@@ -684,4 +682,4 @@ uv run ruff check conduit_bench/
 
 ---
 
-**Last Updated**: 2025-11-27
+**Last Updated**: 2025-11-29
