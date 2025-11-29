@@ -102,25 +102,39 @@ class ComparativeMetrics:
 
 def calculate_convergence(
     metric_history: list[float],
-    window: int = 200,
-    threshold: float = 0.05,
-    min_samples: int = 500,
+    window: int | None = None,
+    threshold: float = 0.10,
+    min_samples: int | None = None,
 ) -> ConvergenceMetrics:
-    """Detect convergence in algorithm performance.
+    """Detect convergence in algorithm performance (learning curve stabilization).
 
-    An algorithm is considered converged when coefficient of variation
-    stabilizes below threshold over a sliding window.
+    An algorithm is considered converged when the trend in the learning curve
+    flattens (slope near zero) over a sliding window, indicating the algorithm
+    has stopped meaningfully improving.
+
+    Adaptive defaults based on dataset size:
+    - min_samples: max(100, 20% of dataset)
+    - window: max(50, 10% of dataset)
 
     Args:
         metric_history: Time series of metric values (e.g., quality scores)
-        window: Sliding window size for convergence detection
-        threshold: CV threshold for convergence (default: 5%)
-        min_samples: Minimum samples before checking convergence
+        window: Sliding window size for convergence detection (default: adaptive)
+        threshold: Slope threshold for convergence (default: 0.10, i.e., <10% change)
+        min_samples: Minimum samples before checking convergence (default: adaptive)
 
     Returns:
         ConvergenceMetrics with convergence status and point
     """
-    if len(metric_history) < min_samples:
+    dataset_size = len(metric_history)
+
+    # Adaptive defaults based on dataset size
+    if min_samples is None:
+        min_samples = max(100, int(dataset_size * 0.2))  # 20% of dataset, min 100
+
+    if window is None:
+        window = max(50, int(dataset_size * 0.1))  # 10% of dataset, min 50
+
+    if dataset_size < min_samples:
         return ConvergenceMetrics(
             converged=False,
             convergence_point=None,
@@ -129,15 +143,49 @@ def calculate_convergence(
             threshold=threshold,
         )
 
-    # Calculate coefficient of variation for sliding window
+    # Calculate moving average to smooth out noise
+    window_size = min(50, window // 2)
+    smoothed = np.convolve(metric_history, np.ones(window_size)/window_size, mode='valid')
+
+    # Calculate slope of the last window of smoothed data
+    if len(smoothed) < window:
+        recent_smoothed = smoothed
+    else:
+        recent_smoothed = smoothed[-window:]
+
+    # Fit linear regression to detect trend
+    x = np.arange(len(recent_smoothed))
+    if len(x) > 1:
+        slope = np.polyfit(x, recent_smoothed, 1)[0]
+        # Normalize slope by mean to get percentage change per query
+        mean_recent = np.mean(recent_smoothed)
+        normalized_slope = abs(slope / mean_recent) if mean_recent > 0 else float("inf")
+    else:
+        normalized_slope = float("inf")
+
+    # Converged if slope is nearly flat (< threshold change per query)
+    converged = normalized_slope < threshold
+
+    # Find convergence point (when slope first dropped below threshold)
+    convergence_point = None
+    if converged:
+        # Search backwards to find when it first converged
+        for i in range(window, len(metric_history)):
+            segment = smoothed[max(0, i-window):i]
+            if len(segment) > 1:
+                x_seg = np.arange(len(segment))
+                seg_slope = np.polyfit(x_seg, segment, 1)[0]
+                seg_mean = np.mean(segment)
+                seg_norm_slope = abs(seg_slope / seg_mean) if seg_mean > 0 else float("inf")
+                if seg_norm_slope < threshold:
+                    convergence_point = i
+                    break
+
+    # Still compute CV for informational purposes
     recent_metric = metric_history[-window:]
     mean_recent = np.mean(recent_metric)
     std_recent = np.std(recent_metric, ddof=1)
-
     cv = std_recent / mean_recent if mean_recent > 0 else float("inf")
-
-    converged = cv < threshold
-    convergence_point = len(metric_history) - window if converged else None
 
     return ConvergenceMetrics(
         converged=converged,
