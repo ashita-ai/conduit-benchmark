@@ -20,24 +20,55 @@ from matplotlib.figure import Figure
 sns.set_theme(style="whitegrid", context="talk", font="Inter", palette="deep")
 sns.set_context("talk", rc={"font.family": "sans-serif", "font.sans-serif": ["Inter", "Arial", "Helvetica"]})
 
-# Set publication-quality defaults
+# Set publication-quality defaults for ultra-sharp graphics
 plt.rcParams.update(
     {
-        "figure.figsize": (10, 6),
-        "figure.dpi": 100,
-        "savefig.dpi": 300,
-        "font.size": 11,
-        "axes.labelsize": 12,
-        "axes.titlesize": 14,
-        "xtick.labelsize": 10,
-        "ytick.labelsize": 10,
-        "legend.fontsize": 10,
-        "lines.linewidth": 2,
-        "grid.alpha": 0.3,
+        # Figure settings - larger for more detail
+        "figure.figsize": (12, 8),
+        "figure.dpi": 150,  # Higher display DPI
+        "savefig.dpi": 600,  # Ultra-high save DPI for crisp output
+        "savefig.format": "png",
+        "savefig.bbox": "tight",
+        "savefig.pad_inches": 0.1,
+
+        # Font settings - crisp text rendering
+        "font.size": 12,
+        "axes.labelsize": 14,
+        "axes.titlesize": 16,
+        "axes.titleweight": "bold",
+        "xtick.labelsize": 11,
+        "ytick.labelsize": 11,
+        "legend.fontsize": 11,
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Inter", "Arial", "Helvetica", "DejaVu Sans"],
+
+        # Line and marker settings - smooth, anti-aliased
+        "lines.linewidth": 2.5,
+        "lines.antialiased": True,
+        "lines.markersize": 8,
+        "patch.linewidth": 0.5,
+        "patch.antialiased": True,
+
+        # Grid and axis settings
+        "grid.alpha": 0.25,
+        "grid.linewidth": 0.8,
+        "axes.linewidth": 1.2,
+        "axes.edgecolor": "#333333",
+        "axes.grid": True,
+        "axes.grid.which": "major",
+
+        # Rendering settings for crisp output
+        "path.simplify": False,  # Don't simplify paths for maximum quality
+        "path.simplify_threshold": 0.1,
+        "agg.path.chunksize": 0,  # Render full paths for quality
+
+        # Text rendering
+        "text.antialiased": True,
+        "mathtext.fontset": "dejavusans",
     }
 )
 
-# Use seaborn style
+# Use seaborn style with vibrant, distinct colors
 sns.set_palette("husl")
 
 
@@ -433,93 +464,238 @@ def generate_html_report(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conduit Benchmark Report</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            max-width: 1200px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
-            background: #fafafa;
-            line-height: 1.6;
+            padding: 40px 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.7;
+            color: #1a202c;
         }}
+
+        .container {{
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }}
+
         h1 {{
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+            padding-bottom: 20px;
+            border-bottom: 4px solid #f0f0f0;
         }}
+
         h2 {{
-            color: #34495e;
-            margin-top: 30px;
-            border-left: 4px solid #3498db;
-            padding-left: 15px;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 50px 0 25px 0;
+            padding-left: 20px;
+            border-left: 6px solid #667eea;
+            letter-spacing: -0.5px;
         }}
+
+        h3 {{
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin: 25px 0 15px 0;
+        }}
+
         .summary {{
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 20px 0;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+            margin: 30px 0;
+            border: 2px solid #e5e9f5;
         }}
+
+        .summary p {{
+            font-size: 1.05rem;
+            margin: 12px 0;
+            color: #2d3748;
+        }}
+
+        .summary strong {{
+            color: #667eea;
+            font-weight: 600;
+        }}
+
         table {{
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             background: white;
-            margin: 20px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            font-family: 'JetBrains Mono', monospace;
         }}
+
         th {{
-            background: #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px;
+            padding: 18px 16px;
             text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }}
+
         td {{
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 16px;
+            border-bottom: 1px solid #e5e9f5;
+            font-size: 0.95rem;
         }}
+
+        tr:last-child td {{
+            border-bottom: none;
+        }}
+
         tr:hover {{
-            background: #f8f9fa;
+            background: linear-gradient(90deg, #f8f9ff 0%, #ffffff 100%);
+            transition: all 0.2s ease;
         }}
+
+        td strong {{
+            color: #667eea;
+            font-weight: 600;
+        }}
+
         .chart {{
             background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 35px;
+            margin: 35px 0;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             text-align: center;
         }}
+
+        .chart h3 {{
+            margin-bottom: 25px;
+            color: #2d3748;
+        }}
+
         .chart img {{
             max-width: 100%;
             height: auto;
+            border-radius: 10px;
         }}
+
         .pareto {{
-            background: #fff3cd;
-            padding: 10px;
-            border-left: 4px solid #ffc107;
-            margin: 10px 0;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            padding: 25px 30px;
+            border-left: 6px solid #fbbf24;
+            margin: 30px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.15);
         }}
+
+        .pareto h3 {{
+            color: #92400e;
+            margin-bottom: 15px;
+        }}
+
+        .pareto p {{
+            color: #78350f;
+            font-size: 1.05rem;
+        }}
+
+        .pareto ul {{
+            list-style-position: inside;
+            margin-top: 12px;
+        }}
+
+        .pareto li {{
+            color: #78350f;
+            margin: 8px 0;
+            font-size: 1.05rem;
+        }}
+
         .metric {{
             display: inline-block;
-            margin: 10px 20px;
-            padding: 15px;
-            background: #e8f4f8;
-            border-radius: 5px;
+            margin: 15px 20px;
+            padding: 25px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }}
+
+        .metric:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }}
+
         .metric-value {{
-            font-size: 24px;
-            font-weight: bold;
-            color: #2980b9;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin: 8px 0;
+            font-family: 'Inter', sans-serif;
         }}
+
         .metric-label {{
-            font-size: 12px;
-            color: #7f8c8d;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
             text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }}
+
+        footer {{
+            margin-top: 60px;
+            padding: 30px 0;
+            text-align: center;
+            color: #718096;
+            border-top: 2px solid #e5e9f5;
+            font-size: 0.95rem;
+        }}
+
+        ul {{
+            padding-left: 25px;
+            margin: 15px 0;
+        }}
+
+        li {{
+            margin: 10px 0;
+            line-height: 1.7;
+            color: #4a5568;
+        }}
+
+        p {{
+            margin: 15px 0;
+            color: #4a5568;
+            font-size: 1.05rem;
         }}
     </style>
 </head>
 <body>
-    <h1>🎯 Conduit Benchmark Report</h1>
+    <div class="container">
+        <h1>🎯 Conduit Benchmark Report</h1>
 
-    <div class="summary">
+        <div class="summary">
         <h2>Executive Summary</h2>
         <p><strong>Benchmark ID:</strong> {analysis.get('benchmark_id', 'N/A')}</p>
         <p><strong>Dataset Size:</strong> {analysis.get('dataset_size', 0)} queries</p>
@@ -573,11 +749,11 @@ def generate_html_report(
             conv_point = data.get("convergence_point")
             converged = data.get("converged", False)
 
-        # Show actual convergence point (query number) instead of checkmark
+        # Show convergence in human-readable format
         if converged and conv_point:
-            converged_str = f"Query #{int(conv_point)}"
+            converged_str = f"Converged after {int(conv_point)} iterations"
         else:
-            converged_str = "Never"
+            converged_str = "Never converged"
 
         # Handle both tuple and separate CI fields
         quality_ci = data.get("quality_ci")
@@ -677,9 +853,10 @@ def generate_html_report(
         </ul>
     </div>
 
-    <footer style="margin-top: 40px; padding: 20px; text-align: center; color: #7f8c8d; border-top: 1px solid #ddd;">
-        <p>Generated by Conduit-Bench</p>
-    </footer>
+        <footer>
+            <p>Generated by Conduit-Bench</p>
+        </footer>
+    </div>
 </body>
 </html>
 """
