@@ -333,8 +333,30 @@ def friedman_test(algorithm_results: dict[str, list[float]]) -> StatisticalTest:
             significant=False,
         )
 
-    # Stack results into matrix (queries × algorithms)
-    samples = list(algorithm_results.values())
+    # Check sample sizes and truncate to minimum length if needed
+    sample_sizes = {name: len(values) for name, values in algorithm_results.items()}
+    min_size = min(sample_sizes.values())
+    max_size = max(sample_sizes.values())
+
+    if min_size != max_size:
+        # Log warning about unequal sample sizes
+        import logging
+        logger = logging.getLogger(__name__)
+        unequal_algos = {name: size for name, size in sample_sizes.items() if size != max_size}
+        logger.warning(
+            f"Unequal sample sizes detected in Friedman test. "
+            f"Truncating all samples to {min_size} observations. "
+            f"Algorithms with fewer samples: {unequal_algos}"
+        )
+
+        # Truncate all samples to minimum length
+        truncated_results = {
+            name: values[:min_size]
+            for name, values in algorithm_results.items()
+        }
+        samples = list(truncated_results.values())
+    else:
+        samples = list(algorithm_results.values())
 
     try:
         statistic, p_value = friedmanchisquare(*samples)
@@ -342,7 +364,7 @@ def friedman_test(algorithm_results: dict[str, list[float]]) -> StatisticalTest:
             test_name="Friedman",
             statistic=float(statistic),
             p_value=float(p_value),
-            significant=p_value < 0.05,
+            significant=bool(p_value < 0.05),
         )
     except Exception:
         return StatisticalTest(
@@ -442,22 +464,27 @@ def calculate_algorithm_metrics(
 
 def calculate_comparative_metrics(
     algorithm_metrics: list[AlgorithmMetrics],
+    quality_score_histories: dict[str, list[float]] | None = None,
 ) -> ComparativeMetrics:
     """Calculate comparative metrics across multiple algorithms.
 
     Args:
         algorithm_metrics: List of AlgorithmMetrics for each algorithm
+        quality_score_histories: Optional dict mapping algorithm names to full quality score lists.
+                                 If provided, used for Friedman test. Otherwise uses average quality.
 
     Returns:
         ComparativeMetrics with cross-algorithm analysis
     """
-    # Friedman test on quality scores
-    quality_results = {}
-    for metrics in algorithm_metrics:
-        # Use quality as repeated measure
-        quality_results[metrics.algorithm_name] = [metrics.average_quality]
-
-    friedman = friedman_test(quality_results)
+    # Friedman test on quality scores - use full histories if available
+    if quality_score_histories:
+        friedman = friedman_test(quality_score_histories)
+    else:
+        # Fallback to using average quality (single value per algorithm)
+        quality_results = {}
+        for metrics in algorithm_metrics:
+            quality_results[metrics.algorithm_name] = [metrics.average_quality]
+        friedman = friedman_test(quality_results)
 
     # Pairwise effect sizes
     pairwise_comparisons = {}
@@ -580,6 +607,7 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
 
     # Calculate individual algorithm metrics
     individual_metrics = []
+    quality_score_histories = {}  # For Friedman test
     for algo in normalized_algos:
         metrics = calculate_algorithm_metrics(
             algorithm_name=algo["name"],
@@ -590,6 +618,7 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
             cost_history=algo["cumulative_cost"],
         )
         individual_metrics.append(metrics)
+        quality_score_histories[algo["name"]] = algo["quality_scores"]
 
     # Handle empty input
     if not individual_metrics:
@@ -612,8 +641,8 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
             "pareto_frontier": [],
         }
 
-    # Comparative analysis
-    comparative = calculate_comparative_metrics(individual_metrics)
+    # Comparative analysis with full quality score histories
+    comparative = calculate_comparative_metrics(individual_metrics, quality_score_histories)
 
     # Extract rankings as simple lists of algorithm names
     quality_rankings = [name for name, _ in comparative.quality_ranking]
