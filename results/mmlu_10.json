@@ -1,0 +1,1272 @@
+{
+  "benchmark_id": "f101f4e9-4808-4933-b8dc-7427ecfa6c2f",
+  "dataset_size": 10,
+  "algorithms": [
+    {
+      "algorithm_name": "thompson_sampling",
+      "run_id": "5237998b-8bed-4f57-94d1-f4df1b496b56",
+      "total_queries": 10,
+      "total_cost": 0.0217981,
+      "average_quality": 0.9,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_1",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_2",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "mmlu_test_4",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_5",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_6",
+          "gpt-5.1"
+        ],
+        [
+          "mmlu_test_7",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_8",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_9",
+          "claude-sonnet-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "claude-opus-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00182,
+          "latency": 5.247121810913086,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0058825,
+          "latency": 6.230976104736328,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000735,
+          "latency": 2.272242784500122,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000339,
+          "latency": 1.9349229335784912,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.009313749999999999,
+          "latency": 9.366189002990723,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "gpt-5",
+          "response_text": "A",
+          "quality_score": 0.0,
+          "cost": 0.00039125,
+          "latency": 0.4951348304748535,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "gpt-5.1",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00011499999999999999,
+          "latency": 0.5223686695098877,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00009460000000000001,
+          "latency": 0.24547386169433594,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00269,
+          "latency": 3.1006929874420166,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.000417,
+          "latency": 2.301598072052002,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.00182,
+        0.007702499999999999,
+        0.008437499999999999,
+        0.0087765,
+        0.01809025,
+        0.018481499999999998,
+        0.0185965,
+        0.0186911,
+        0.0213811,
+        0.0217981
+      ],
+      "started_at": "2025-11-28T16:56:04.902781Z",
+      "completed_at": "2025-11-28T16:56:43.738061Z",
+      "metadata": {
+        "name": "thompson_sampling",
+        "total_queries": 10,
+        "n_arms": 6,
+        "prior_alpha": 1.0,
+        "prior_beta": 1.0,
+        "arm_pulls": {
+          "o4-mini": 1,
+          "gpt-5": 1,
+          "gpt-5.1": 1,
+          "claude-sonnet-4.5": 3,
+          "claude-opus-4.5": 2,
+          "gemini-2.5-pro": 2
+        },
+        "arm_successes": {
+          "o4-mini": 1,
+          "gpt-5": 0,
+          "gpt-5.1": 1,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 0,
+          "gemini-2.5-pro": 0
+        },
+        "arm_success_rates": {
+          "o4-mini": 1.0,
+          "gpt-5": 0.0,
+          "gpt-5.1": 1.0,
+          "claude-sonnet-4.5": 0.0,
+          "claude-opus-4.5": 0.0,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_distributions": {
+          "o4-mini": {
+            "alpha": 1.9507078956466002,
+            "beta": 1.0492921043533998,
+            "mean": 0.6502359652155334
+          },
+          "gpt-5": {
+            "alpha": 1.3671307806910435,
+            "beta": 1.6328692193089565,
+            "mean": 0.45571026023034783
+          },
+          "gpt-5.1": {
+            "alpha": 1.9141947805108714,
+            "beta": 1.0858052194891286,
+            "mean": 0.6380649268369571
+          },
+          "claude-sonnet-4.5": {
+            "alpha": 3.4870041838620405,
+            "beta": 1.5129958161379595,
+            "mean": 0.697400836772408
+          },
+          "claude-opus-4.5": {
+            "alpha": 2.6000838388300234,
+            "beta": 1.3999161611699766,
+            "mean": 0.6500209597075058
+          },
+          "gemini-2.5-pro": {
+            "alpha": 2.555675165167831,
+            "beta": 1.4443248348321691,
+            "mean": 0.6389187912919577
+          }
+        }
+      }
+    },
+    {
+      "algorithm_name": "ucb1",
+      "run_id": "2d386f43-32e1-4cef-8518-697a3f537173",
+      "total_queries": 10,
+      "total_cost": 0.0179082,
+      "average_quality": 0.9,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_1",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_2",
+          "gpt-5.1"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "mmlu_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_5",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_6",
+          "gpt-5.1"
+        ],
+        [
+          "mmlu_test_7",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "mmlu_test_8",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 0.0,
+          "cost": 0.0001782,
+          "latency": 0.7414748668670654,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "gpt-5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0001475,
+          "latency": 3.2819628715515137,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gpt-5.1",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00026999999999999995,
+          "latency": 0.4696948528289795,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000339,
+          "latency": 2.30710506439209,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00146,
+          "latency": 3.1444759368896484,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0122175,
+          "latency": 11.342023849487305,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "gpt-5.1",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00011499999999999999,
+          "latency": 0.5565497875213623,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000336,
+          "latency": 3.140052080154419,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00269,
+          "latency": 2.4862091541290283,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5",
+          "response_text": "(B)",
+          "quality_score": 1.0,
+          "cost": 0.000155,
+          "latency": 0.59977126121521,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.0001782,
+        0.0003257,
+        0.0005957,
+        0.0009347,
+        0.0023947,
+        0.014612199999999999,
+        0.0147272,
+        0.015063199999999999,
+        0.0177532,
+        0.0179082
+      ],
+      "started_at": "2025-11-28T16:56:04.903542Z",
+      "completed_at": "2025-11-28T16:56:39.924853Z",
+      "metadata": {
+        "name": "ucb1",
+        "total_queries": 10,
+        "n_arms": 6,
+        "c": 1.5,
+        "arm_pulls": {
+          "o4-mini": 1,
+          "gpt-5": 2,
+          "gpt-5.1": 2,
+          "claude-sonnet-4.5": 2,
+          "claude-opus-4.5": 2,
+          "gemini-2.5-pro": 1
+        },
+        "arm_mean_reward": {
+          "o4-mini": 0.25738695791444544,
+          "gpt-5": 0.9429011105671297,
+          "gpt-5.1": 0.966104502354832,
+          "claude-sonnet-4.5": 0.9271286288030289,
+          "claude-opus-4.5": 0.9259924121315319,
+          "gemini-2.5-pro": 0.9056883919915253
+        },
+        "arm_sum_reward": {
+          "o4-mini": 0.25738695791444544,
+          "gpt-5": 1.8858022211342593,
+          "gpt-5.1": 1.932209004709664,
+          "claude-sonnet-4.5": 1.8542572576060579,
+          "claude-opus-4.5": 1.8519848242630639,
+          "gemini-2.5-pro": 0.9056883919915253
+        },
+        "arm_ucb_values": {
+          "o4-mini": 2.533527651992165,
+          "gpt-5": 2.55237563028414,
+          "gpt-5.1": 2.5755790220718424,
+          "claude-sonnet-4.5": 2.5366031485200393,
+          "claude-opus-4.5": 2.5354669318485423,
+          "gemini-2.5-pro": 3.1818290860692446
+        },
+        "arm_successes": {
+          "o4-mini": 0,
+          "gpt-5": 2,
+          "gpt-5.1": 2,
+          "claude-sonnet-4.5": 2,
+          "claude-opus-4.5": 2,
+          "gemini-2.5-pro": 1
+        },
+        "arm_success_rates": {
+          "o4-mini": 0.0,
+          "gpt-5": 1.0,
+          "gpt-5.1": 1.0,
+          "claude-sonnet-4.5": 1.0,
+          "claude-opus-4.5": 1.0,
+          "gemini-2.5-pro": 1.0
+        }
+      }
+    },
+    {
+      "algorithm_name": "epsilon_greedy",
+      "run_id": "ac7bb44e-6a41-427f-b9b6-d2ca0822b572",
+      "total_queries": 10,
+      "total_cost": 0.00911625,
+      "average_quality": 1.0,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_1",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_2",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_5",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_6",
+          "gpt-5.1"
+        ],
+        [
+          "mmlu_test_7",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_8",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "claude-opus-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00182,
+          "latency": 4.3415281772613525,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "claude-opus-4.5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00133,
+          "latency": 2.436210870742798,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0023699999999999997,
+          "latency": 2.41666316986084,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00105,
+          "latency": 2.9791698455810547,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00146,
+          "latency": 2.478179931640625,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00039125,
+          "latency": 0.8212957382202148,
+          "success": true,
+          "error": "{\"claude-opus-4.5\": \"UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation\", \"claude-sonnet-4.5\": \"UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation\"}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "gpt-5.1",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00011499999999999999,
+          "latency": 0.662452220916748,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "gpt-5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0001125,
+          "latency": 0.41312670707702637,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "gpt-5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00031249999999999995,
+          "latency": 0.39716410636901855,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5",
+          "response_text": "(B)",
+          "quality_score": 1.0,
+          "cost": 0.000155,
+          "latency": 0.7958493232727051,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.00182,
+        0.00315,
+        0.00552,
+        0.0065699999999999995,
+        0.008029999999999999,
+        0.008421249999999998,
+        0.008536249999999999,
+        0.008648749999999998,
+        0.008961249999999999,
+        0.00911625
+      ],
+      "started_at": "2025-11-28T16:56:04.903793Z",
+      "completed_at": "2025-11-28T16:57:19.324796Z",
+      "metadata": {
+        "name": "epsilon_greedy",
+        "total_queries": 10,
+        "n_arms": 6,
+        "initial_epsilon": 0.1,
+        "current_epsilon": 0.1,
+        "decay": 1.0,
+        "min_epsilon": 0.01,
+        "exploration_count": 1,
+        "exploitation_count": 9,
+        "exploration_ratio": 0.1,
+        "arm_pulls": {
+          "o4-mini": 0,
+          "gpt-5": 3,
+          "gpt-5.1": 2,
+          "claude-sonnet-4.5": 1,
+          "claude-opus-4.5": 6,
+          "gemini-2.5-pro": 0
+        },
+        "arm_mean_reward": {
+          "o4-mini": 0.0,
+          "gpt-5": 0.9659688673504939,
+          "gpt-5.1": 0.9574784264428295,
+          "claude-sonnet-4.5": 0.30000000000000004,
+          "claude-opus-4.5": 0.8215616166583558,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_sum_reward": {
+          "o4-mini": 0.0,
+          "gpt-5": 2.897906602051482,
+          "gpt-5.1": 1.914956852885659,
+          "claude-sonnet-4.5": 0.30000000000000004,
+          "claude-opus-4.5": 4.929369699950135,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_successes": {
+          "o4-mini": 0,
+          "gpt-5": 3,
+          "gpt-5.1": 2,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 5,
+          "gemini-2.5-pro": 0
+        },
+        "arm_success_rates": {
+          "o4-mini": 0.0,
+          "gpt-5": 1.0,
+          "gpt-5.1": 1.0,
+          "claude-sonnet-4.5": 0.0,
+          "claude-opus-4.5": 0.8333333333333334,
+          "gemini-2.5-pro": 0.0
+        }
+      }
+    },
+    {
+      "algorithm_name": "random",
+      "run_id": "3d04ec4e-7608-40a1-8457-8378c1a36d1b",
+      "total_queries": 10,
+      "total_cost": 0.02321775,
+      "average_quality": 0.8,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_1",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_2",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_4",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "mmlu_test_5",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_6",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_7",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_8",
+          "gpt-5"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 0.0,
+          "cost": 0.0001782,
+          "latency": 0.5364639759063721,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0071425,
+          "latency": 10.450193166732788,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.013386249999999999,
+          "latency": 14.978384017944336,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00105,
+          "latency": 2.5881710052490234,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.000462,
+          "latency": 2.0619800090789795,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "o4-mini",
+          "response_text": "A",
+          "quality_score": 0.0,
+          "cost": 0.0003399,
+          "latency": 0.36993837356567383,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "o4-mini",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0000968,
+          "latency": 0.4001739025115967,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00009460000000000001,
+          "latency": 0.2578299045562744,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "gpt-5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00031249999999999995,
+          "latency": 0.3986399173736572,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5",
+          "response_text": "(B)",
+          "quality_score": 1.0,
+          "cost": 0.000155,
+          "latency": 0.6692249774932861,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.0001782,
+        0.0073207,
+        0.02070695,
+        0.021756949999999997,
+        0.022218949999999998,
+        0.02255885,
+        0.02265565,
+        0.02275025,
+        0.02306275,
+        0.02321775
+      ],
+      "started_at": "2025-11-28T16:56:04.905600Z",
+      "completed_at": "2025-11-28T16:56:46.080817Z",
+      "metadata": {
+        "name": "random",
+        "total_queries": 10,
+        "n_arms": 6,
+        "arm_pulls": {
+          "o4-mini": 4,
+          "gpt-5": 2,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 1,
+          "claude-opus-4.5": 1,
+          "gemini-2.5-pro": 2
+        }
+      }
+    },
+    {
+      "algorithm_name": "always_best",
+      "run_id": "3227c566-3e4b-4fcb-9a5d-edb43ae7ef3b",
+      "total_queries": 10,
+      "total_cost": 0.014451249999999999,
+      "average_quality": 1.0,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_1",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_2",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_5",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_6",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_7",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_8",
+          "claude-opus-4.5"
+        ],
+        [
+          "mmlu_test_9",
+          "claude-opus-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "claude-opus-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00182,
+          "latency": 3.8174960613250732,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "claude-opus-4.5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00133,
+          "latency": 2.4490978717803955,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0023699999999999997,
+          "latency": 2.1464579105377197,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00105,
+          "latency": 2.854412078857422,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00146,
+          "latency": 0.9297688007354736,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00039125,
+          "latency": 0.5489249229431152,
+          "success": true,
+          "error": "{\"claude-opus-4.5\": \"UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation\", \"claude-sonnet-4.5\": \"UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation\"}",
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "claude-opus-4.5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00099,
+          "latency": 4.646963119506836,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0010400000000000001,
+          "latency": 2.3820199966430664,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "claude-opus-4.5",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00269,
+          "latency": 2.4422309398651123,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "claude-opus-4.5",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00131,
+          "latency": 2.288749933242798,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.00182,
+        0.00315,
+        0.00552,
+        0.0065699999999999995,
+        0.008029999999999999,
+        0.008421249999999998,
+        0.009411249999999998,
+        0.010451249999999999,
+        0.013141249999999998,
+        0.014451249999999999
+      ],
+      "started_at": "2025-11-28T16:56:04.906966Z",
+      "completed_at": "2025-11-28T16:57:14.956817Z",
+      "metadata": {
+        "name": "always_best",
+        "total_queries": 10,
+        "n_arms": 6,
+        "best_arm": "claude-opus-4.5",
+        "best_arm_quality": 0.92,
+        "arm_pulls": {
+          "o4-mini": 0,
+          "gpt-5": 0,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 10,
+          "gemini-2.5-pro": 0
+        }
+      }
+    },
+    {
+      "algorithm_name": "always_cheapest",
+      "run_id": "0fba46a8-6c42-4be9-a982-878c522a740d",
+      "total_queries": 10,
+      "total_cost": 0.0017094,
+      "average_quality": 0.7,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_1",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_2",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_3",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_4",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_5",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_6",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_7",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_8",
+          "o4-mini"
+        ],
+        [
+          "mmlu_test_9",
+          "o4-mini"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 0.0,
+          "cost": 0.0001782,
+          "latency": 0.3590090274810791,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 0.0,
+          "cost": 0.0001254,
+          "latency": 3.048151969909668,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00023430000000000003,
+          "latency": 0.3191721439361572,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00010010000000000001,
+          "latency": 0.3240177631378174,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "o4-mini",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0001463,
+          "latency": 0.4228329658508301,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "o4-mini",
+          "response_text": "A",
+          "quality_score": 0.0,
+          "cost": 0.0003399,
+          "latency": 0.2417759895324707,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "o4-mini",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0000968,
+          "latency": 0.26750802993774414,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00009460000000000001,
+          "latency": 0.2755739688873291,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "o4-mini",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0002706,
+          "latency": 0.36631083488464355,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "o4-mini",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0001232,
+          "latency": 0.3128092288970947,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.0001782,
+        0.0003036,
+        0.0005379,
+        0.000638,
+        0.0007843,
+        0.0011242000000000001,
+        0.001221,
+        0.0013156,
+        0.0015862,
+        0.0017094
+      ],
+      "started_at": "2025-11-28T16:56:04.907982Z",
+      "completed_at": "2025-11-28T16:56:18.678651Z",
+      "metadata": {
+        "name": "always_cheapest",
+        "total_queries": 10,
+        "n_arms": 6,
+        "cheapest_arm": "o4-mini",
+        "cheapest_arm_avg_cost": 2.75e-6,
+        "arm_pulls": {
+          "o4-mini": 10,
+          "gpt-5": 0,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 0,
+          "gemini-2.5-pro": 0
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-11-28T16:57:19.776653Z",
+  "metadata": {}
+}

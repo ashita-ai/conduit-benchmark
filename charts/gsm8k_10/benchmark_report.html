@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conduit Benchmark Report</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .chart {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .chart img {
+            max-width: 100%;
+            height: auto;
+        }
+        .pareto {
+            background: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+        .metric {
+            display: inline-block;
+            margin: 10px 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Conduit Benchmark Report</h1>
+
+    <div class="summary">
+        <h2>Executive Summary</h2>
+        <p><strong>Benchmark ID:</strong> 2f4f1f82-486c-45ce-b598-8868fe5d90b2</p>
+        <p><strong>Dataset Size:</strong> 10 queries</p>
+        <p><strong>Algorithms Tested:</strong> 6</p>
+
+        <div class="metric">
+            <div class="metric-label">Friedman Test</div>
+            <div class="metric-value">Not Significant</div>
+            <div class="metric-label">p = 0.4159</div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">Pareto Optimal</div>
+            <div class="metric-value">5</div>
+            <div class="metric-label">algorithms</div>
+        </div>
+    </div>
+
+    <div class="pareto">
+        <h3>🏆 Pareto Optimal Algorithms</h3>
+        <p>The following algorithms achieve optimal cost-quality trade-offs:</p>
+        <ul>
+            <li><strong>thompson_sampling</strong></li>
+            <li><strong>ucb1</strong></li>
+            <li><strong>epsilon_greedy</strong></li>
+            <li><strong>always_best</strong></li>
+            <li><strong>always_cheapest</strong></li>
+
+        </ul>
+    </div>
+
+    <h2>📊 Algorithm Performance</h2>
+    <table>
+        <tr>
+            <th>Algorithm</th>
+            <th>Avg Quality</th>
+            <th>95% CI</th>
+            <th>Total Cost</th>
+            <th>Cum. Cost</th>
+            <th>Converged</th>
+        </tr>
+
+        <tr>
+            <td><strong>thompson_sampling</strong></td>
+            <td>0.700</td>
+            <td>[0.400, 1.000]</td>
+            <td>$0.0481</td>
+            <td>$0.0481</td>
+            <td>✗</td>
+        </tr>
+
+        <tr>
+            <td><strong>ucb1</strong></td>
+            <td>0.800</td>
+            <td>[0.500, 1.000]</td>
+            <td>$0.0565</td>
+            <td>$0.0565</td>
+            <td>✗</td>
+        </tr>
+
+        <tr>
+            <td><strong>epsilon_greedy</strong></td>
+            <td>0.900</td>
+            <td>[0.700, 1.000]</td>
+            <td>$0.0752</td>
+            <td>$0.0752</td>
+            <td>✗</td>
+        </tr>
+
+        <tr>
+            <td><strong>random</strong></td>
+            <td>0.700</td>
+            <td>[0.400, 1.000]</td>
+            <td>$0.0631</td>
+            <td>$0.0631</td>
+            <td>✗</td>
+        </tr>
+
+        <tr>
+            <td><strong>always_best</strong></td>
+            <td>1.000</td>
+            <td>[1.000, 1.000]</td>
+            <td>$0.0816</td>
+            <td>$0.0816</td>
+            <td>✗</td>
+        </tr>
+
+        <tr>
+            <td><strong>always_cheapest</strong></td>
+            <td>0.400</td>
+            <td>[0.100, 0.700]</td>
+            <td>$0.0184</td>
+            <td>$0.0184</td>
+            <td>✗</td>
+        </tr>
+
+    </table>
+
+    <h2>📈 Visualizations</h2>
+
+    <div class="chart">
+        <h3>Cumulative Cost Curves</h3>
+        <img src="cost_curves.png" alt="Cumulative Cost Curves">
+    </div>
+
+    <div class="chart">
+        <h3>Cost-Quality Trade-off</h3>
+        <img src="cost_quality_scatter.png" alt="Cost-Quality Trade-off">
+    </div>
+
+    <div class="chart">
+        <h3>Convergence Speed</h3>
+        <img src="convergence_comparison.png" alt="Convergence Speed">
+    </div>
+
+    <div class="chart">
+        <h3>Quality Ranking</h3>
+        <img src="quality_ranking.png" alt="Quality Ranking">
+    </div>
+
+
+    <div class="summary">
+        <h2>Statistical Analysis</h2>
+        <p><strong>Friedman Test:</strong> No significant differences (p = 0.4159)</p>
+    </div>
+
+    <div class="summary">
+        <h2>📚 Appendix: Metrics and Statistical Tests</h2>
+
+        <h3>Convergence Detection</h3>
+        <p><strong>What it means:</strong> Convergence indicates that an algorithm has learned enough to make stable, consistent decisions. A converged algorithm is no longer significantly improving its strategy.</p>
+        <p><strong>How we detect it:</strong> We use slope-based analysis on smoothed learning curves. An algorithm is considered converged when the slope of its quality improvement falls below 10% (nearly flat learning curve), indicating minimal further learning.</p>
+        <ul>
+            <li><strong>Converged (✓):</strong> Algorithm has stabilized and learned an effective strategy</li>
+            <li><strong>Not Converged (✗):</strong> Algorithm is still learning or hasn't seen enough data</li>
+        </ul>
+
+        <h3>Pareto Frontier (Optimal Trade-offs)</h3>
+        <p><strong>What it means:</strong> The Pareto frontier identifies algorithms that achieve optimal cost-quality trade-offs. An algorithm is Pareto optimal if no other algorithm has both lower cost AND higher quality.</p>
+        <p><strong>Interpretation:</strong></p>
+        <ul>
+            <li>Algorithms on the Pareto frontier represent the best choices at different points on the cost-quality spectrum</li>
+            <li>Lower-cost Pareto algorithms prioritize efficiency</li>
+            <li>Higher-quality Pareto algorithms prioritize performance</li>
+            <li>Non-Pareto algorithms are dominated by at least one other algorithm in both cost and quality</li>
+        </ul>
+
+        <h3>Friedman Test (Statistical Significance)</h3>
+        <p><strong>What it tests:</strong> The Friedman test determines if there are statistically significant differences in performance across multiple algorithms tested on the same dataset.</p>
+        <p><strong>Interpretation:</strong></p>
+        <ul>
+            <li><strong>Significant (p < 0.05):</strong> Strong evidence that algorithms perform differently. Quality differences are unlikely due to random chance.</li>
+            <li><strong>Not Significant (p ≥ 0.05):</strong> Insufficient evidence of meaningful differences. Observed variations may be due to random chance.</li>
+            <li><strong>p-value:</strong> Probability of seeing these results if all algorithms were equally good. Lower values indicate stronger evidence of real differences.</li>
+        </ul>
+
+        <h3>Metric Definitions</h3>
+        <ul>
+            <li><strong>Quality Score:</strong> Fraction of queries answered correctly (0.0 = all wrong, 1.0 = all correct)</li>
+            <li><strong>Total Cost:</strong> Sum of API costs across all queries (in USD)</li>
+            <li><strong>95% CI (Confidence Interval):</strong> Range where we're 95% confident the true average quality lies. Narrower intervals indicate more reliable estimates.</li>
+            <li><strong>Cumulative Cost:</strong> Running total of costs as queries are processed, used to track spending over time</li>
+            <li><strong>Convergence Point:</strong> Query number where the algorithm's learning curve stabilized</li>
+        </ul>
+
+        <h3>Algorithm Types</h3>
+        <ul>
+            <li><strong>Thompson Sampling:</strong> Bayesian approach that balances exploration and exploitation probabilistically</li>
+            <li><strong>UCB1:</strong> Optimistic algorithm that favors options with high uncertainty</li>
+            <li><strong>Epsilon-Greedy:</strong> Simple strategy that explores randomly ε% of the time</li>
+            <li><strong>Random:</strong> Baseline that selects models uniformly at random</li>
+            <li><strong>Always Best:</strong> Oracle that always selects the highest-quality model</li>
+            <li><strong>Always Cheapest:</strong> Baseline that always selects the lowest-cost model</li>
+        </ul>
+    </div>
+
+    <footer style="margin-top: 40px; padding: 20px; text-align: center; color: #7f8c8d; border-top: 1px solid #ddd;">
+        <p>Generated by Conduit-Bench</p>
+    </footer>
+</body>
+</html>

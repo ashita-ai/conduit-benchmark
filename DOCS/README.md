@@ -13,6 +13,7 @@ All synthetic datasets in this directory were generated using the standardized p
 3. **Filename Convention**: `synthetic_{model_name}.jsonl` where model name indicates the generator
 4. **Quality Control**: Generated datasets follow strict schema and validation requirements
 5. **Quality Validation**: Datasets with vague or placeholder queries are rejected
+6. **Incremental Generation**: Script writes entries 1:1 as they're generated and resumes from last entry if interrupted
 
 ### Dataset Schema
 
@@ -60,8 +61,12 @@ Each entry in the JSONL files contains:
 | `synthetic_claude_opus_4_5.jsonl` | Claude Opus 4.5 | 100 | ✅ Complete |
 | `synthetic_grok-2.jsonl` | Grok-2 | 100 | ✅ Complete |
 | `synthetic_auto.jsonl` | Auto-generated | 100 | ✅ Complete |
+| `synthetic_gpt-4o-mini.jsonl` | GPT-4o mini | TBD | 🔄 In progress |
+| `synthetic_gemini-1.5-pro.jsonl` | Gemini 1.5 Pro | TBD | 🔄 In progress |
 | `synthetic_composer_example.jsonl` | Reference examples | 2 | Reference only |
 | ~~`synthetic_composer_1.jsonl`~~ | Composer | ❌ Rejected | 84% vague/placeholder queries |
+| ~~`synthetic_gpt-5-mini.jsonl`~~ | GPT-5 mini | ❌ Failed | Generation errors after 20 entries |
+| ~~`synthetic_gemini-2.5-pro.jsonl`~~ | Gemini 2.5 Pro | ❌ Failed | Safety filter blocks programming challenges |
 
 ## Usage
 

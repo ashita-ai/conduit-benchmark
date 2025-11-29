@@ -45,12 +45,12 @@ htmlcov/
 *.cover
 .hypothesis/
 
-# Benchmarking data and results
-results/
+# Database files
 *.db
 *.sqlite
 
-# Benchmark result files (root directory test artifacts)
+# Benchmark result files (root directory test artifacts only)
+# Note: results/ and charts/ directories are now tracked
 gsm8k_*.json
 mmlu_*.json
 humaneval_*.json
@@ -81,6 +81,4 @@ claudedocs/
 .DS_Store
 .AppleDouble
 .LSOverride
-analysis/
-charts/
 out.jsonl

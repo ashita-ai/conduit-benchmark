@@ -1,0 +1,1272 @@
+{
+  "benchmark_id": "2f4f1f82-486c-45ce-b598-8868fe5d90b2",
+  "dataset_size": 10,
+  "algorithms": [
+    {
+      "algorithm_name": "thompson_sampling",
+      "run_id": "8b0e33ad-585e-4075-bf6a-a2102346e571",
+      "total_queries": 10,
+      "total_cost": 0.048128449999999996,
+      "average_quality": 0.7,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "gsm8k_test_1",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_2",
+          "gpt-5"
+        ],
+        [
+          "gsm8k_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_4",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_5",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_6",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_7",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_8",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "gsm8k_test_9",
+          "claude-sonnet-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to find Allen's age 10 years from now, given that Darrell and Allen's ages are in the ratio 7:11 and their total age is 162.\n\n**Step 1: Set up the ratio**\nLet Darrell's age = 7x\nLet Allen's age = 11x\n\nwhere x is a common factor.\n\n**Step 2: Use the total age information**\nDarrell's age + Allen's age = 162\n\n7x + 11x = 162\n\n**Step 3: Solve for x**\n18x = 162\n\nx = 162 ÷ 18\n\nx = 9\n\n**Step 4: Find Allen's current age**\nAllen's age = 11x = 11 × 9 = 99\n\n**Step 5: Find Allen's age 10 years from now**\nAllen's age in 10 years = 99 + 10 = 109\n\n**Verification:**\n- Darrell's current age = 7 × 9 = 63\n- Allen's current age = 99\n- Total = 63 + 99 = 162 ✓\n- Ratio = 63:99 = 7:11 ✓\n\n#### 109",
+          "quality_score": 1.0,
+          "cost": 0.004620000000000001,
+          "latency": 6.083954334259033,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "o4-mini",
+          "response_text": "Let's break down Lorraine's sticker and button trading step by step.\n\n1. **Initial Inventory**:\n   - Small stickers: 30\n   - Large stickers: 40\n\n2. **Trading Small Stickers for Large Buttons**:\n   - Lorraine trades 90% of her small stickers:\n     \\[\n     \\text{Small stickers traded} = 0.90 \\times 30 = 27\n     \\]\n   - Each large sticker is worth **1 large button** or **3 small buttons**, therefore 27 small stickers can be converted into:\n     \\[\n     \\text{Large buttons from small stickers} = \\frac{27}{3} = 9\n     \\]\n   - After trading, Lorraine has:\n     - Small stickers left: \n       \\[\n       30 - 27 = 3\n       \\]\n     - Large buttons from the trade: 9\n\n3. **Trading Large Stickers for Large Buttons**:\n   - Lorraine trades 50% of her large stickers:\n     \\[\n     \\text{Large stickers traded} = 0.50 \\times 40 = 20\n     \\]\n   - These large stickers can be converted into large buttons:\n     \\[\n     \\text{Large buttons from large stickers} = 20\n     \\]\n   - After this trade, Lorraine has:\n     - Large stickers left:\n       \\[\n       40 - 20 = 20\n       \\]\n     - Total large buttons from both trades:\n       \\[\n       9 + 20 = 29\n       \\]\n\n4. **Trading Remaining Large Stickers for Small Buttons**:\n   - Lorraine trades the remaining 20 large stickers for small buttons. Since each large button is worth **3 small stickers**, she can trade:\n     \\[\n     \\text{Small buttons from large stickers} = 20 \\times 3 = 60\n     \\]\n   - At the end of this trade, Lorraine has:\n     - Large stickers: 0\n     - Small buttons from conversion: 60\n\n5. **Final Inventory of Buttons**:\n   - Now, let's count all the buttons Lorraine has:\n     - Large buttons: 29\n     - Small buttons: 60\n\n6. **Calculating the Total Number of Buttons**:\n   \\[\n   \\text{Total buttons} = 29 \\text{ (large buttons)} + 60 \\text{ (small buttons)} = 89\n   \\]\n\nLorraine ends up with a total of 89 buttons.\n\nThe final answer is: \n#### 89",
+          "quality_score": 1.0,
+          "cost": 0.0024860000000000004,
+          "latency": 10.033164024353027,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "gpt-5",
+          "response_text": "To solve the problem, we need to determine the number of letters in Indras' sister's name and then sum both names' letter counts.\n\n1. **Determine the number of letters in Indras' name:**\n   - Indras has 6 letters in her name.\n\n2. **Calculate half of the letters in Indras' name:**\n   - Half of 6 is calculated as follows:\n     \\[\n     \\frac{6}{2} = 3\n     \\]\n\n3. **Determine the number of letters in Indras' sister's name:**\n   - Her sister's name has \"4 more letters than half of the letters in Indras' name.\"\n   - We add 4 to the half calculated in step 2:\n     \\[\n     3 + 4 = 7\n     \\]\n\n4. **Sum the number of letters in both names:**\n   - Indras' name has 6 letters, and her sister's name has 7 letters.\n   - Total letters are calculated by adding these two counts together:\n     \\[\n     6 + 7 = 13\n     \\]\n\nSo, the total number of letters in Indras and her sister's names is \\(\\boxed{13}\\).",
+          "quality_score": 0.0,
+          "cost": 0.00266375,
+          "latency": 4.048305988311768,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many more laps Bethany can run compared to Quinn.\n\n**Step 1: Find Bethany's laps**\nBethany can run 10 laps in one hour.\n\n**Step 2: Find Trey's laps**\nTrey can run 4 more laps than Bethany.\nTrey = 10 + 4 = 14 laps\n\n**Step 3: Find Shaelyn's laps**\nShaelyn can run half as many laps as Trey.\nShaelyn = 14 ÷ 2 = 7 laps\n\n**Step 4: Find Quinn's laps**\nQuinn can run 2 fewer laps than Shaelyn.\nQuinn = 7 - 2 = 5 laps\n\n**Step 5: Find the difference between Bethany and Quinn**\nBethany - Quinn = 10 - 5 = 5 laps\n\n#### 5",
+          "quality_score": 1.0,
+          "cost": 0.00817,
+          "latency": 3.9182510375976562,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "o4-mini",
+          "response_text": "Let's solve the problem step by step.\n\n1. **Initial number of children**: At the start, there are 5 children following the truck.\n\n   \\[\n   \\text{Children after first street} = 5\n   \\]\n\n2. **On the second street**: Each of the 5 children is joined by another child. So, the number of children doubles.\n\n   \\[\n   \\text{Children after second street} = 5 + 5 = 10\n   \\]\n\n3. **On the third street**: Each of the children in the group is joined by another 2 children. There are now 10 children, so each of these 10 children is getting 2 additional children.\n\n   \\[\n   \\text{Additional children} = 10 \\times 2 = 20\n   \\]\n\n   Thus, the total number of children after the third street is:\n\n   \\[\n   \\text{Children after third street} = 10 + 20 = 30\n   \\]\n\n4. **Original group leaving**: Then, the original 5 children leave the group.\n\n   \\[\n   \\text{Children remaining} = 30 - 5 = 25\n   \\]\n\nNow, let's summarize what we've done:\n\n- After the first street: 5 children.\n- After the second street: 10 children.\n- After the third street: 30 children.\n- After the original group of 5 leaves: 25 children remaining.\n\nThus, the final answer is:\n\n\\[\n\\text{Final number of children} = 25\n\\]\n\nThe format requested is: #### [answer]\n\nSo the final answer is:\n\n#### [25]",
+          "quality_score": 0.0,
+          "cost": 0.0016808,
+          "latency": 7.073819160461426,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_5",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many minutes Kim actually slept in her bed that day.\n\n## Step 1: Determine her sleep schedule that day\n\n- Kim went to sleep at: 10 p.m.\n- Kim usually wakes up at: 6 a.m.\n- That day she woke up 5 minutes earlier: 5:55 a.m.\n\n## Step 2: Calculate total time in bed\n\nFrom 10 p.m. to 5:55 a.m.:\n- 10 p.m. to 6 a.m. = 8 hours = 480 minutes\n- She woke up 5 minutes earlier, so: 480 - 5 = 475 minutes total time in bed\n\n## Step 3: Calculate sleepwalking time\n\nSleepwalking from 2:15 a.m. to 2:38 a.m.:\n- 2:38 - 2:15 = 23 minutes\n\nDuring sleepwalking, she was not sleeping in her bed.\n\n## Step 4: Calculate actual sleeping time in bed\n\nTotal time in bed - Sleepwalking time:\n475 - 23 = 452 minutes\n\n#### 452",
+          "quality_score": 1.0,
+          "cost": 0.01021,
+          "latency": 5.4748289585113525,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_6",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of bananas in Gunther's pile through each event.\n\n**Starting amount:**\nGunther has 48 bananas.\n\n**Day 1 - Arnold steals half:**\nArnold steals half of 48 bananas.\nHalf of 48 = 48 ÷ 2 = 24 bananas stolen\nRemaining: 48 - 24 = 24 bananas\n\n**Day 2 - Gunther adds 25 bananas:**\n24 + 25 = 49 bananas\n\n**Day 2 evening - Arnold steals 12 bananas:**\n49 - 12 = 37 bananas\n\n**Day 3 - Gunther adds 6 bananas:**\n37 + 6 = 43 bananas\n\n**Final count:**\nWhen Gunther counts his bananas, he finds 43 bananas.\n\n#### 43",
+          "quality_score": 1.0,
+          "cost": 0.00823,
+          "latency": 5.834125995635986,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_7",
+          "model_id": "o4-mini",
+          "response_text": "To determine the total number of utensils Jonathan has remaining, we will follow these steps:\n\n1. **Determine the number of measuring cups Jonathan has:**\n   Jonathan has two dozen measuring cups. Since one dozen equals 12, two dozen is:\n   \\[\n   2 \\times 12 = 24 \\text{ measuring cups}\n   \\]\n\n2. **Calculate the number of measuring spoons he has:**\n   Jonathan has \\( \\frac{2}{3} \\) as many measuring spoons as measuring cups. Therefore, we need to calculate:\n   \\[\n   \\text{Number of measuring spoons} = \\frac{2}{3} \\times \\text{Number of measuring cups} = \\frac{2}{3} \\times 24\n   \\]\n   Calculating this value gives:\n   \\[\n   \\frac{2 \\times 24}{3} = \\frac{48}{3} = 16 \\text{ measuring spoons}\n   \\]\n\n3. **Calculate the total number of utensils originally:**\n   The total number of utensils (measuring cups and measuring spoons) is:\n   \\[\n   \\text{Total utensils} = \\text{Number of measuring cups} + \\text{Number of measuring spoons} = 24 + 16 = 40 \n   \\]\n\n4. **Account for the measuring spoons gifted to Pedro:**\n   Jonathan gifts Pedro 6 measuring spoons. We need to subtract these from the total number of measuring spoons:\n   \\[\n   \\text{Remaining measuring spoons} = \\text{Number of measuring spoons} - 6 = 16 - 6 = 10\n   \\]\n\n5. **Calculate the new total number of utensils:**\n   Now we need to calculate the total number of utensils remaining after the gift:\n   \\[\n   \\text{Total remaining utensils} = \\text{Number of measuring cups} + \\text{Remaining measuring spoons} = 24 + 10 = 34\n   \\]\n\nThus, the total number of utensils Jonathan has remaining is:\n\\[\n\\text{Final answer: } 034 [34]\n\\]",
+          "quality_score": 0.0,
+          "cost": 0.0020669,
+          "latency": 10.535615921020508,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_8",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to find how far Martha's turtle can crawl in 40 seconds.\n\n**Step 1: Find the turtle's speed**\n\nI know that:\n- The cat is 5 times faster than the turtle\n- The cat can run 15 feet/second\n\nIf the cat is 5 times faster than the turtle, then:\n- Cat's speed = 5 × Turtle's speed\n- 15 feet/second = 5 × Turtle's speed\n- Turtle's speed = 15 ÷ 5 = 3 feet/second\n\n**Step 2: Calculate how far the turtle crawls in 40 seconds**\n\nDistance = Speed × Time\nDistance = 3 feet/second × 40 seconds\nDistance = 120 feet\n\n#### 120",
+          "quality_score": 1.0,
+          "cost": 0.0029909999999999997,
+          "latency": 4.205336809158325,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_9",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to find how many flights to France the first plane takes in one day.\n\n**Step 1: Find the total number of trips the first plane makes.**\n\nThe second plane makes 44 trips to Poland, and this represents half the number of trips the first plane makes.\n\nIf 44 = (1/2) × (first plane's trips)\n\nThen: First plane's trips = 44 × 2 = 88 trips\n\n**Step 2: Determine how flights are distributed for the first plane.**\n\n- Three-quarters of flights go to Greece: (3/4) × 88 = 66 flights to Greece\n- The remaining flights are split equally between France and Germany\n\n**Step 3: Calculate the remaining flights.**\n\nRemaining flights = Total flights - Greece flights\nRemaining flights = 88 - 66 = 22 flights\n\n**Step 4: Split the remaining flights equally between France and Germany.**\n\nFlights to France = 22 ÷ 2 = 11 flights\nFlights to Germany = 22 ÷ 2 = 11 flights\n\n**Verification:**\n- Greece: 66 flights\n- France: 11 flights  \n- Germany: 11 flights\n- Total: 66 + 11 + 11 = 88 ✓\n\n#### 11",
+          "quality_score": 1.0,
+          "cost": 0.00501,
+          "latency": 7.0768961906433105,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.004620000000000001,
+        0.007106000000000001,
+        0.00976975,
+        0.01793975,
+        0.01962055,
+        0.02983055,
+        0.03806055,
+        0.040127449999999995,
+        0.043118449999999996,
+        0.048128449999999996
+      ],
+      "started_at": "2025-11-28T16:56:04.891171Z",
+      "completed_at": "2025-11-28T16:57:15.566474Z",
+      "metadata": {
+        "name": "thompson_sampling",
+        "total_queries": 10,
+        "n_arms": 6,
+        "prior_alpha": 1.0,
+        "prior_beta": 1.0,
+        "arm_pulls": {
+          "o4-mini": 3,
+          "gpt-5": 1,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 3,
+          "claude-opus-4.5": 3,
+          "gemini-2.5-pro": 0
+        },
+        "arm_successes": {
+          "o4-mini": 0,
+          "gpt-5": 0,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 0,
+          "gemini-2.5-pro": 0
+        },
+        "arm_success_rates": {
+          "o4-mini": 0.0,
+          "gpt-5": 0.0,
+          "gpt-5.1": 0.0,
+          "claude-sonnet-4.5": 0.0,
+          "claude-opus-4.5": 0.0,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_distributions": {
+          "o4-mini": {
+            "alpha": 2.2240511594496444,
+            "beta": 2.7759488405503556,
+            "mean": 0.44481023188992885
+          },
+          "gpt-5": {
+            "alpha": 1.2489902277398262,
+            "beta": 1.7510097722601738,
+            "mean": 0.41633007591327537
+          },
+          "gpt-5.1": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "claude-sonnet-4.5": {
+            "alpha": 3.3617579676324265,
+            "beta": 1.6382420323675735,
+            "mean": 0.6723515935264853
+          },
+          "claude-opus-4.5": {
+            "alpha": 3.3707485742866248,
+            "beta": 1.6292514257133752,
+            "mean": 0.674149714857325
+          },
+          "gemini-2.5-pro": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          }
+        }
+      }
+    },
+    {
+      "algorithm_name": "ucb1",
+      "run_id": "ef656a69-20ca-4f3e-b822-f8a929c723a3",
+      "total_queries": 10,
+      "total_cost": 0.05647429999999999,
+      "average_quality": 0.8,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_1",
+          "gpt-5"
+        ],
+        [
+          "gsm8k_test_2",
+          "gpt-5.1"
+        ],
+        [
+          "gsm8k_test_3",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "gsm8k_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_5",
+          "gemini-2.5-pro"
+        ],
+        [
+          "gsm8k_test_6",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_7",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_8",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "gsm8k_test_9",
+          "gpt-5.1"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "o4-mini",
+          "response_text": "To solve the problem, we start by defining Darrell and Allen's ages based on the given ratio of 7:11.\n\nLet Darrell's age be \\( 7x \\) and Allen's age be \\( 11x \\), where \\( x \\) is a common multiplier. \n\nNext, we can set up an equation based on their total age:\n\n\\[\n7x + 11x = 162\n\\]\n\nCombining the terms on the left-hand side:\n\n\\[\n18x = 162\n\\]\n\nTo find \\( x \\), we divide both sides by 18:\n\n\\[\nx = \\frac{162}{18} = 9\n\\]\n\nNow, we can determine the actual ages of Darrell and Allen by substituting \\( x \\):\n\n- Darrell's age: \n\\[\n7x = 7 \\times 9 = 63\n\\]\n\n- Allen's age: \n\\[\n11x = 11 \\times 9 = 99\n\\]\n\nNow that we know their current ages, we want to find Allen's age 10 years from now. \n\nWe will add 10 years to Allen's current age:\n\n\\[\n\\text{Allen's age in 10 years} = 99 + 10 = 109\n\\]\n\nFinally, the answer is:\n\n\\[\n\\text{Final answer: } 0109\n\\] \n\nSo the final answer is:\n\n```\n#### 109\n```",
+          "quality_score": 1.0,
+          "cost": 0.0014025,
+          "latency": 5.643654823303223,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "gpt-5",
+          "response_text": "Let's start by calculating how many small stickers Lorraine trades for large buttons and how many buttons she receives in return.\n\n1. **Small Stickers for Large Buttons**:\n   - Lorraine has 30 small stickers initially.\n   - She trades 90% of her small stickers for large buttons.\n   - Number of small stickers traded: \\( 0.9 \\times 30 = 27 \\) small stickers.\n\n   Since one large button is worth three small stickers, she receives:\n   - Large buttons received: \\( \\frac{27}{3} = 9 \\) large buttons.\n\n2. **Large Stickers for Buttons**:\n   - Lorraine has 40 large stickers initially.\n\n   a. She trades 50% of her large stickers for large buttons:\n   - Number of large stickers traded: \\( 0.5 \\times 40 = 20 \\) large stickers.\n\n   Each large sticker is worth one large button, so she receives:\n   - Large buttons received from trading these large stickers: \\( 20 \\) large buttons.\n\n   b. She trades the remaining 50% of her large stickers for small buttons:\n   - Number of remaining large stickers: \\( 40 - 20 = 20 \\) large stickers.\n\n   Each large sticker can be traded for three small buttons, so she receives:\n   - Small buttons received: \\( 20 \\times 3 = 60 \\) small buttons.\n\nNow, let's determine Lorraine's total number of buttons at the end:\n\n3. **Total Buttons**:\n   - Large buttons: \\( 9 \\) (from small stickers) + \\( 20 \\) (from large stickers) = \\( 29 \\) large buttons.\n   - Small buttons: \\( 60 \\) small buttons (from large stickers).\n\nEach large button is worth three small buttons, so we convert large buttons to small buttons:\n   - Small button equivalent of large buttons: \\( 29 \\times 3 = 87 \\) small buttons.\n\nAdding up all small buttons:\n   - Total small buttons = \\( 87 + 60 = 147 \\).\n\nTherefore, Lorraine has a total of:\n\n\\[ \\boxed{147} \\] small buttons by the end.",
+          "quality_score": 0.0,
+          "cost": 0.0046749999999999995,
+          "latency": 17.866669178009033,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "gpt-5.1",
+          "response_text": "We start by determining the number of letters in Indras' name:\nIndras = 6 letters\n\nNext, we find half of the number of letters in Indras' name:\n\\[ \\frac{6}{2} = 3 \\]\nIndras' name divided by 2 is 3 letters.\n\nAccording to the problem, Indras' sister's name has 4 more letters than half of the letters in Indras' name. Thus, we add 4 to the half of Indras' name:\n\\[ 3 + 4 = 7 \\]\nIndras' sister's name is 7 letters long.\n\nNow, we add the number of letters in both names together to find the total:\n\\[ 6 + 7 = 13 \\]\n\nTherefore, the total number of letters in Indras' and her sister's names is:\n#### 13 [letters]",
+          "quality_score": 1.0,
+          "cost": 0.00190375,
+          "latency": 6.207683801651001,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to find how many laps each person can run, then compare Bethany's laps to Quinn's laps.\n\n**Step 1: Find how many laps Bethany can run**\n- Bethany can run 10 laps in one hour\n\n**Step 2: Find how many laps Trey can run**\n- Trey can run 4 more laps than Bethany\n- Trey's laps = 10 + 4 = 14 laps\n\n**Step 3: Find how many laps Shaelyn can run**\n- Shaelyn can run half as many laps as Trey\n- Shaelyn's laps = 14 ÷ 2 = 7 laps\n\n**Step 4: Find how many laps Quinn can run**\n- Quinn can run 2 fewer laps than Shaelyn\n- Quinn's laps = 7 - 2 = 5 laps\n\n**Step 5: Find the difference between Bethany's and Quinn's laps**\n- Difference = Bethany's laps - Quinn's laps\n- Difference = 10 - 5 = 5 laps\n\nTherefore, Bethany can run 5 more laps than Quinn.\n\n#### 5",
+          "quality_score": 1.0,
+          "cost": 0.004869,
+          "latency": 5.559599876403809,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of children following the truck through each street.\n\n## Step-by-Step Solution\n\n**After the first street:**\n- 5 children are following the truck\n\n**After the second street:**\n- \"Each child is joined by another child\" means each of the 5 children is joined by 1 more child\n- Additional children: 5 × 1 = 5\n- Total children: 5 + 5 = 10 children\n\n**After the third street:**\n- \"Each child in the existing group is joined by another 2 children\" means each of the 10 children is joined by 2 more children\n- Additional children: 10 × 2 = 20\n- Total children: 10 + 20 = 30 children\n\n**After the original 5 children leave:**\n- The original 5 children give up and leave\n- Remaining children: 30 - 5 = 25 children\n\n#### 25",
+          "quality_score": 1.0,
+          "cost": 0.00819,
+          "latency": 4.528612852096558,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_5",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "Here is the step-by-step solution:\n\n**Step 1: Calculate the total time Kim was in bed.**\n\n*   Kim's usual sleep schedule is from 10 p.m. to 6 a.m. This is a total of 8 hours.\n*   Convert the total usual time to minutes: 8 hours * 60 minutes/hour = 480 minutes.\n*   On this specific day, she woke up 5 minutes earlier.\n*   Total time in bed = 480 minutes - 5 minutes = 475 minutes.\n\n**Step 2: Calculate the duration of her sleepwalking.**\n\n*   Kim was sleepwalking from 2:15 a.m. to 2:38 a.m.\n*   To find the duration, subtract the start time from the end time: 2:38 - 2:15 = 23 minutes.\n*   During this time, she was not sleeping in her bed.\n\n**Step 3: Calculate the total minutes she slept in her bed.**\n\n*   Subtract the time she spent sleepwalking from the total time she was in bed.\n*   Total sleep time = (Total time in bed) - (Time spent sleepwalking)\n*   Total sleep time = 475 minutes - 23 minutes = 452 minutes.\n\n#### 452",
+          "quality_score": 1.0,
+          "cost": 0.0194225,
+          "latency": 19.7305269241333,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_6",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of bananas in Gunther's pile through each event.\n\n**Starting amount:**\nGunther has 48 bananas.\n\n**Day 1 - Arnold steals half:**\nArnold steals half of 48 bananas.\nHalf of 48 = 48 ÷ 2 = 24 bananas stolen\nRemaining bananas = 48 - 24 = 24 bananas\n\n**Day 2 - Gunther adds 25 bananas:**\n24 + 25 = 49 bananas\n\n**Day 2 evening - Arnold steals 12 bananas:**\n49 - 12 = 37 bananas\n\n**Day 3 - Gunther adds 6 bananas:**\n37 + 6 = 43 bananas\n\n**Final count:**\nWhen Gunther counts his bananas, he finds 43 bananas.\n\n#### 43",
+          "quality_score": 1.0,
+          "cost": 0.00829,
+          "latency": 4.718216896057129,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_7",
+          "model_id": "o4-mini",
+          "response_text": "To determine the total number of utensils Jonathan has remaining after gifting some measuring spoons, let’s go through the problem step by step.\n\n**Step 1:** Identify the number of measuring cups.\n\nJonathan has two dozen measuring cups. A dozen is 12, so:\n\\[\n2 \\text{ dozen cups} = 2 \\times 12 = 24 \\text{ cups}\n\\]\n\n**Step 2:** Calculate the number of measuring spoons.\n\nAccording to the problem, Jonathan has \\( \\frac{2}{3} \\) as many measuring spoons as he has measuring cups. Let \\( S \\) be the number of measuring spoons. Thus, we can write the following equation:\n\\[\nS = \\frac{2}{3} \\times \\text{(the number of cups)} = \\frac{2}{3} \\times 24\n\\]\n\nCalculating \\( S \\):\n\\[\nS = \\frac{2}{3} \\times 24 = \\frac{48}{3} = 16 \\text{ spoons}\n\\]\n\n**Step 3:** Calculate the total number of utensils before gifting.\n\nTotal utensils consist of the number of measuring cups and measuring spoons:\n\\[\n\\text{Total utensils} = \\text{number of cups} + \\text{number of spoons} = 24 + 16 = 40\n\\]\n\n**Step 4:** Subtract the number of measuring spoons gifted to Pedro.\n\nJonathan gifts Pedro 6 measuring spoons. So we subtract this from the total number of spoons:\n\\[\n\\text{Remaining spoons} = \\text{original spoons} - \\text{gifted spoons} = 16 - 6 = 10 \\text{ spoons}\n\\]\n\n**Step 5:** Calculate the total number of utensils remaining after the gift.\n\nThe total number of utensils remaining is the remaining number of spoons plus the number of cups:\n\\[\n\\text{Total remaining utensils} = \\text{number of cups} + \\text{remaining spoons} = 24 + 10 = 34\n\\]\n\n**Final Answer:**\nThe total number of utensils Jonathan has remaining is 34. Hence, the answer format requested is:\n```\n#### 34\n```",
+          "quality_score": 1.0,
+          "cost": 0.0021593,
+          "latency": 9.92427110671997,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_8",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to find how far Martha's turtle can crawl in 40 seconds.\n\n**Step 1: Find the turtle's speed.**\n\nI'm told that Martha's cat is 5 times faster than her turtle, and the cat can run 15 feet/second.\n\nIf the cat is 5 times faster than the turtle, then:\n- Cat's speed = 5 × Turtle's speed\n- 15 feet/second = 5 × Turtle's speed\n- Turtle's speed = 15 ÷ 5 = 3 feet/second\n\n**Step 2: Calculate how far the turtle crawls in 40 seconds.**\n\nDistance = Speed × Time\nDistance = 3 feet/second × 40 seconds\nDistance = 120 feet\n\n#### 120",
+          "quality_score": 1.0,
+          "cost": 0.0029909999999999997,
+          "latency": 3.923492908477783,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_9",
+          "model_id": "gpt-5.1",
+          "response_text": "Let's define the number of flights the first plane makes each day as \\(f\\).\n\nAccording to the problem, the second plane makes 44 trips, and those trips account for only half of what the first plane makes. This can be represented mathematically as:\n\\[\nf = 2 \\times 44 = 88\n\\]\n\nNow that we know \\(f = 88\\), we can figure out the distribution of these 88 flights for the first plane. Three-quarters of these flights go to Greece, so the number of flights to Greece is:\n\\[\n\\frac{3}{4} \\times 88 = 66\n\\]\n\nThe remaining flights are split equally between France and Germany. First, calculate the number of remaining flights after those going to Greece:\n\\[\n88 - 66 = 22\n\\]\n\nThese 22 flights are equally divided between France and Germany, which means:\n\\[\n\\text{Flights to France} = \\text{Flights to Germany} = \\frac{22}{2} = 11\n\\]\n\nThus, the number of flights to France the first plane makes in one day is:\n**11 [answer]**",
+          "quality_score": 0.0,
+          "cost": 0.0025712499999999998,
+          "latency": 7.44116997718811,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.0014025,
+        0.0060775,
+        0.007981249999999999,
+        0.012850249999999999,
+        0.021040249999999996,
+        0.04046274999999999,
+        0.04875274999999999,
+        0.05091204999999999,
+        0.053903049999999994,
+        0.05647429999999999
+      ],
+      "started_at": "2025-11-28T16:56:04.891625Z",
+      "completed_at": "2025-11-28T16:57:37.166679Z",
+      "metadata": {
+        "name": "ucb1",
+        "total_queries": 10,
+        "n_arms": 6,
+        "c": 1.5,
+        "arm_pulls": {
+          "o4-mini": 2,
+          "gpt-5": 1,
+          "gpt-5.1": 2,
+          "claude-sonnet-4.5": 2,
+          "claude-opus-4.5": 2,
+          "gemini-2.5-pro": 1
+        },
+        "arm_mean_reward": {
+          "o4-mini": 0.9117474240766283,
+          "gpt-5": 0.20436970343644018,
+          "gpt-5.1": 0.5624139119500646,
+          "claude-sonnet-4.5": 0.9169950592134177,
+          "claude-opus-4.5": 0.9161533134296905,
+          "gemini-2.5-pro": 0.9010133133192364
+        },
+        "arm_sum_reward": {
+          "o4-mini": 1.8234948481532567,
+          "gpt-5": 0.20436970343644018,
+          "gpt-5.1": 1.1248278239001293,
+          "claude-sonnet-4.5": 1.8339901184268355,
+          "claude-opus-4.5": 1.832306626859381,
+          "gemini-2.5-pro": 0.9010133133192364
+        },
+        "arm_ucb_values": {
+          "o4-mini": 2.5212219437936385,
+          "gpt-5": 2.4805103975141596,
+          "gpt-5.1": 2.171888431667075,
+          "claude-sonnet-4.5": 2.526469578930428,
+          "claude-opus-4.5": 2.525627833146701,
+          "gemini-2.5-pro": 3.1771540073969557
+        },
+        "arm_successes": {
+          "o4-mini": 2,
+          "gpt-5": 0,
+          "gpt-5.1": 1,
+          "claude-sonnet-4.5": 2,
+          "claude-opus-4.5": 2,
+          "gemini-2.5-pro": 1
+        },
+        "arm_success_rates": {
+          "o4-mini": 1.0,
+          "gpt-5": 0.0,
+          "gpt-5.1": 0.5,
+          "claude-sonnet-4.5": 1.0,
+          "claude-opus-4.5": 1.0,
+          "gemini-2.5-pro": 1.0
+        }
+      }
+    },
+    {
+      "algorithm_name": "epsilon_greedy",
+      "run_id": "fa0b81f6-63dd-440b-8928-deae080d3139",
+      "total_queries": 10,
+      "total_cost": 0.07519275,
+      "average_quality": 0.9,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_1",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_2",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_5",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_6",
+          "claude-sonnet-4.5"
+        ],
+        [
+          "gsm8k_test_7",
+          "gpt-5"
+        ],
+        [
+          "gsm8k_test_8",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_9",
+          "claude-opus-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find Allen's age 10 years from now, given the ratio of Darrell and Allen's ages and their total age.\n\n## Step 1: Set up the ratio equation\n\nLet Darrell's age = 7x and Allen's age = 11x (where x is a common multiplier)\n\nThis maintains the ratio of 7:11.\n\n## Step 2: Use the total age to find x\n\nThe total of their ages is 162:\n$$7x + 11x = 162$$\n\n$$18x = 162$$\n\n$$x = \\frac{162}{18} = 9$$\n\n## Step 3: Find Allen's current age\n\nAllen's age = 11x = 11 × 9 = 99 years\n\n## Step 4: Find Allen's age 10 years from now\n\nAllen's age 10 years from now = 99 + 10 = 109 years\n\n#### 109",
+          "quality_score": 1.0,
+          "cost": 0.007259999999999999,
+          "latency": 4.2998948097229,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many buttons Lorraine has after all her trades.\n\n## Setting Up the Exchange Rates\n\nLet me establish the values:\n- 1 large sticker = 1 large button = 3 small buttons\n- 1 small sticker = 1 small button\n- 1 large button = 3 small stickers\n\n## Lorraine's Starting Inventory\n- 30 small stickers\n- 40 large stickers\n\n## Trade 1: 90% of small stickers for large buttons\n\nSmall stickers traded: 90% × 30 = 27 small stickers\n\nSince 1 large button = 3 small stickers:\n- 27 small stickers = 27 ÷ 3 = **9 large buttons**\n\n## Trade 2: 50% of large stickers for large buttons\n\nLarge stickers traded: 50% × 40 = 20 large stickers\n\nSince 1 large sticker = 1 large button:\n- 20 large stickers = **20 large buttons**\n\n## Trade 3: Remaining 50% of large stickers for small buttons\n\nLarge stickers traded: 50% × 40 = 20 large stickers\n\nSince 1 large sticker = 3 small buttons:\n- 20 large stickers = 20 × 3 = **60 small buttons**\n\n## Total Buttons\n\n- Large buttons: 9 + 20 = 29 large buttons\n- Small buttons: 60 small buttons\n- **Total buttons: 29 + 60 = 89 buttons**\n\n#### 89",
+          "quality_score": 1.0,
+          "cost": 0.01298,
+          "latency": 6.212520122528076,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find the total number of letters in both Indras' name and her sister's name.\n\n## Step 1: Find the number of letters in Indras' name\nIndras has 6 letters.\n\n## Step 2: Find half of the letters in Indras' name\nHalf of 6 = 6 ÷ 2 = 3 letters\n\n## Step 3: Find the number of letters in her sister's name\nHer sister's name has 4 more letters than half of Indras' name.\nSister's name = 3 + 4 = 7 letters\n\n## Step 4: Find the total number of letters in both names\nTotal = Indras' letters + Sister's letters\nTotal = 6 + 7 = 13 letters\n\n#### 13",
+          "quality_score": 1.0,
+          "cost": 0.00656,
+          "latency": 3.6622750759124756,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many more laps Bethany can run compared to Quinn.\n\n**Step 1: Find Bethany's laps**\nBethany can run 10 laps in one hour.\n\n**Step 2: Find Trey's laps**\nTrey can run 4 more laps than Bethany.\nTrey = 10 + 4 = 14 laps\n\n**Step 3: Find Shaelyn's laps**\nShaelyn can run half as many laps as Trey.\nShaelyn = 14 ÷ 2 = 7 laps\n\n**Step 4: Find Quinn's laps**\nQuinn can run 2 fewer laps than Shaelyn.\nQuinn = 7 - 2 = 5 laps\n\n**Step 5: Find how many more laps Bethany can run compared to Quinn**\nDifference = Bethany - Quinn = 10 - 5 = 5 laps\n\n#### 5",
+          "quality_score": 1.0,
+          "cost": 0.00841,
+          "latency": 3.906002998352051,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of children following the truck through each street.\n\n## Step 1: End of the first street\nChildren following the truck: **5 children**\n\n## Step 2: On the second street\n\"Each child is joined by another child\" means each of the 5 children is joined by 1 more child.\n\nAdditional children: 5 × 1 = 5 children\n\nTotal after second street: 5 + 5 = **10 children**\n\n## Step 3: On the third street\n\"Each child in the existing group is joined by another 2 children\" means each of the 10 children is joined by 2 more children.\n\nAdditional children: 10 × 2 = 20 children\n\nTotal after third street: 10 + 20 = **30 children**\n\n## Step 4: Original children leave\nThe original 5 children give up and leave the group.\n\nFinal total: 30 - 5 = **25 children**\n\n#### 25",
+          "quality_score": 1.0,
+          "cost": 0.00843,
+          "latency": 4.593613147735596,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_5",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many minutes Kim slept in her bed that day.\n\n## Step 1: Determine Kim's sleep and wake times\n\n- Kim went to sleep at: 10 p.m.\n- Kim usually wakes up at: 6 a.m.\n- That day she woke up 5 minutes earlier: 5:55 a.m.\n\n## Step 2: Calculate total time in bed\n\nFrom 10 p.m. to 5:55 a.m.:\n- 10 p.m. to 6 a.m. = 8 hours = 480 minutes\n- She woke up 5 minutes earlier, so: 480 - 5 = 475 minutes\n\n## Step 3: Subtract sleepwalking time\n\nShe was sleepwalking from 2:15 a.m. to 2:38 a.m.\n- Sleepwalking duration: 2:38 - 2:15 = 23 minutes\n\n## Step 4: Calculate actual sleeping time in bed\n\nTotal sleep time = Time in bed - Sleepwalking time\nTotal sleep time = 475 - 23 = 452 minutes\n\n#### 452",
+          "quality_score": 1.0,
+          "cost": 0.010119999999999999,
+          "latency": 5.315879821777344,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_6",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to track the number of bananas in Gunther's pile through each event.\n\n**Starting amount:**\n- Gunther had 48 bananas\n\n**Day 1 - Arnold steals half:**\n- Arnold stole half of 48 bananas\n- Half of 48 = 48 ÷ 2 = 24 bananas stolen\n- Remaining: 48 - 24 = 24 bananas\n\n**Day 2 - Gunther adds, then Arnold steals:**\n- Gunther added 25 bananas\n- New total: 24 + 25 = 49 bananas\n- Arnold stole 12 bananas\n- Remaining: 49 - 12 = 37 bananas\n\n**Day 3 - Gunther adds more:**\n- Gunther added 6 bananas\n- Final total: 37 + 6 = 43 bananas\n\nWhen Gunther counted his bananas, he found 43 bananas in the pile.\n\n#### 43",
+          "quality_score": 1.0,
+          "cost": 0.004179,
+          "latency": 5.2281200885772705,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_7",
+          "model_id": "gpt-5",
+          "response_text": "To solve the problem, follow these steps:\n\n1. **Determine the number of measuring spoons Jonathan originally has:**\n\n   Jonathan has 2/3 as many measuring spoons as measuring cups. We know he has two dozen cups, which is 24 cups.\n\n   \\[\n   \\text{Number of measuring spoons} = \\frac{2}{3} \\times \\text{Number of measuring cups} = \\frac{2}{3} \\times 24\n   \\]\n\n   Calculate:\n\n   \\[\n   \\frac{2}{3} \\times 24 = \\frac{48}{3} = 16\n   \\]\n\n   Jonathan originally has 16 measuring spoons.\n\n2. **Calculate the number of measuring spoons remaining after the gift:**\n\n   Jonathan gifts Pedro 6 measuring spoons. So, subtract those from the original number of spoons:\n\n   \\[\n   \\text{Remaining measuring spoons} = 16 - 6 = 10\n   \\]\n\n3. **Calculate the total number of utensils remaining:**\n\n   Add the remaining number of measuring spoons to the number of measuring cups:\n\n   \\[\n   \\text{Total number of utensils} = \\text{Number of remaining measuring spoons} + \\text{Number of measuring cups}\n   \\]\n\n   Substitute the known values:\n\n   \\[\n   \\text{Total number of utensils} = 10 + 24 = 34\n   \\]\n\nSo, the total number of utensils Jonathan has remaining is: \n\n\\[\n\\boxed{34}\n\\]",
+          "quality_score": 0.0,
+          "cost": 0.00333375,
+          "latency": 8.27259612083435,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_8",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how far Martha's turtle can crawl in 40 seconds.\n\n## Step 1: Find the turtle's speed\n\nThe cat is 5 times faster than the turtle, and the cat can run 15 feet/second.\n\nIf the cat is 5 times faster than the turtle, then:\n- Turtle's speed = Cat's speed ÷ 5\n- Turtle's speed = 15 ÷ 5 = 3 feet/second\n\n## Step 2: Calculate the distance the turtle crawls in 40 seconds\n\nDistance = Speed × Time\nDistance = 3 feet/second × 40 seconds = 120 feet\n\n#### 120",
+          "quality_score": 1.0,
+          "cost": 0.00557,
+          "latency": 3.3818371295928955,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_9",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find the number of flights to France that the first plane makes in one day.\n\n## Step 1: Find the total number of flights for the first plane\n\nThe second plane makes 44 trips to Poland, and this is half the number of trips the first plane makes.\n\nLet me call the first plane's total flights = F\n\nSo: 44 = F/2\n\nTherefore: F = 44 × 2 = 88 flights\n\n## Step 2: Break down the first plane's flights by destination\n\nThe first plane's flights are distributed as follows:\n- Three-quarters go to Greece\n- The remaining flights are split equally between France and Germany\n\nFlights to Greece = (3/4) × 88 = 66 flights\n\nRemaining flights = 88 - 66 = 22 flights\n\n## Step 3: Calculate flights to France\n\nThe remaining 22 flights are split equally between France and Germany.\n\nFlights to France = 22 ÷ 2 = 11 flights\n\n#### 11",
+          "quality_score": 1.0,
+          "cost": 0.00835,
+          "latency": 6.032790899276733,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.007259999999999999,
+        0.02024,
+        0.0268,
+        0.035210000000000005,
+        0.043640000000000005,
+        0.05376,
+        0.057939000000000004,
+        0.06127275,
+        0.06684275,
+        0.07519275
+      ],
+      "started_at": "2025-11-28T16:56:04.892287Z",
+      "completed_at": "2025-11-28T16:57:03.691214Z",
+      "metadata": {
+        "name": "epsilon_greedy",
+        "total_queries": 10,
+        "n_arms": 6,
+        "initial_epsilon": 0.1,
+        "current_epsilon": 0.1,
+        "decay": 1.0,
+        "min_epsilon": 0.01,
+        "exploration_count": 2,
+        "exploitation_count": 8,
+        "exploration_ratio": 0.2,
+        "arm_pulls": {
+          "o4-mini": 0,
+          "gpt-5": 1,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 1,
+          "claude-opus-4.5": 8,
+          "gemini-2.5-pro": 0
+        },
+        "arm_mean_reward": {
+          "o4-mini": 0.0,
+          "gpt-5": 0.21011993165141335,
+          "gpt-5.1": 0.0,
+          "claude-sonnet-4.5": 0.9152238876226377,
+          "claude-opus-4.5": 0.9164876161245877,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_sum_reward": {
+          "o4-mini": 0.0,
+          "gpt-5": 0.21011993165141335,
+          "gpt-5.1": 0.0,
+          "claude-sonnet-4.5": 0.9152238876226377,
+          "claude-opus-4.5": 7.331900928996702,
+          "gemini-2.5-pro": 0.0
+        },
+        "arm_successes": {
+          "o4-mini": 0,
+          "gpt-5": 0,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 1,
+          "claude-opus-4.5": 8,
+          "gemini-2.5-pro": 0
+        },
+        "arm_success_rates": {
+          "o4-mini": 0.0,
+          "gpt-5": 0.0,
+          "gpt-5.1": 0.0,
+          "claude-sonnet-4.5": 1.0,
+          "claude-opus-4.5": 1.0,
+          "gemini-2.5-pro": 0.0
+        }
+      }
+    },
+    {
+      "algorithm_name": "random",
+      "run_id": "97a43bd8-6cd7-4a75-ab4d-0497aef0c311",
+      "total_queries": 10,
+      "total_cost": 0.06312694999999999,
+      "average_quality": 0.7,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_1",
+          "gpt-5"
+        ],
+        [
+          "gsm8k_test_2",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_3",
+          "gpt-5"
+        ],
+        [
+          "gsm8k_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_5",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_6",
+          "gemini-2.5-pro"
+        ],
+        [
+          "gsm8k_test_7",
+          "gemini-2.5-pro"
+        ],
+        [
+          "gsm8k_test_8",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_9",
+          "claude-sonnet-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "o4-mini",
+          "response_text": "To find Allen's age 10 years from now, we will follow these steps:\n\n1. **Set up the ratio equation**: \n   The ratio of Darrell's age (D) to Allen's age (A) is given as 7:11. This can be expressed as:\n   \\[\n   \\frac{D}{A} = \\frac{7}{11}\n   \\]\n   We can express Darrell's age in terms of Allen's age:\n   \\[\n   D = \\frac{7}{11}A\n   \\]\n\n2. **Set up the total age equation**:\n   We know that the total age of Darrell and Allen combined is 162:\n   \\[\n   D + A = 162\n   \\]\n\n3. **Substitute Darrell's age into the total age equation**:\n   Substitute \\(D\\) from the first step into the second equation:\n   \\[\n   \\frac{7}{11}A + A = 162\n   \\]\n\n4. **Combine like terms**:\n   To combine the terms, we need a common denominator. The equation becomes:\n   \\[\n   \\frac{7A}{11} + \\frac{11A}{11} = 162\n   \\]\n   \\[\n   \\frac{7A + 11A}{11} = 162\n   \\]\n   \\[\n   \\frac{18A}{11} = 162\n   \\]\n\n5. **Multiply both sides by 11** to eliminate the fraction:\n   \\[\n   18A = 162 \\times 11\n   \\]\n   \\[\n   18A = 1782\n   \\]\n\n6. **Solve for A** by dividing both sides by 18:\n   \\[\n   A = \\frac{1782}{18}\n   \\]\n   \\[\n   A = 99\n   \\]\n\n7. **Calculate Darrell's age** using \\(D = \\frac{7}{11}A\\):\n   \\[\n   D = \\frac{7}{11} \\times 99\n   \\]\n   \\[\n   D = 63\n   \\]\n\n8. **Verify the total**: \n   \\(D + A = 63 + 99 = 162\\), which is correct.\n\n9. **Calculate Allen's age 10 years from now**:\n   Allen's current age is 99, so in 10 years:\n   \\[\n   A + 10 = 99 + 10 = 109\n   \\]\n\nThe final answer, therefore, is:\n109 [answer]",
+          "quality_score": 0.0,
+          "cost": 0.0024673,
+          "latency": 10.627405881881714,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "gpt-5",
+          "response_text": "To determine how many buttons Lorraine ends up with, we can follow these steps:\n\n1. **Trading Small Stickers for Large Buttons:**\n\n   - Lorraine starts with 30 small stickers.\n   - She trades 90% of these small stickers for large buttons.\n   - \\(90\\% \\times 30 = 0.9 \\times 30 = 27\\) small stickers are traded.\n   - Since each large button is equivalent to 3 small stickers, she gets:\n     \\[\n     \\text{Number of large buttons from small stickers} = \\frac{27}{3} = 9 \\text{ large buttons}\n     \\]\n\n2. **Trading Large Stickers for Large and Small Buttons:**\n\n   - Lorraine starts with 40 large stickers.\n   - She trades 50% of these large stickers for large buttons.\n   - \\(50\\% \\times 40 = 0.5 \\times 40 = 20\\) large stickers are traded for large buttons.\n   - Each large sticker is worth 1 large button, so she gets 20 large buttons from these trades.\n   \n   Now, she trades the remaining large stickers (40 - 20 = 20 large stickers) for small buttons.\n   - Each large sticker is worth 3 small buttons, so she gets:\n     \\[\n     \\text{Number of small buttons from remaining large stickers} = 20 \\times 3 = 60 \\text{ small buttons}\n     \\]\n\n3. **Adding Up All the Buttons Lorraine Has:**\n\n   - **Large buttons**: From step 1, she has 9 large buttons. From step 2, she has 20 large buttons. Therefore, she has:\n     \\[\n     9 + 20 = 29 \\text{ large buttons}\n     \\]\n\n   - Now let's convert these large buttons to small buttons:\n     \\[\n     \\text{Total small buttons from large buttons} = 29 \\times 3 = 87 \\text{ small buttons}\n     \\]\n\n   - **Small buttons**: From the trading of large stickers, she received 60 small buttons.\n\n   - Adding the small buttons from the large buttons and the ones directly received:\n     \\[\n     87 + 60 = 147 \\text{ small buttons}\n     \\]\n\nSo, in total, Lorraine has 147 small buttons by the end of her trades.\n\n\\[\n\\boxed{147}\n\\]",
+          "quality_score": 0.0,
+          "cost": 0.0052049999999999996,
+          "latency": 21.142839193344116,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "o4-mini",
+          "response_text": "To solve the problem, we will follow these steps:\n\n1. **Identify the number of letters in Indras' name**: \n   Indras has 6 letters in her name. \n\n2. **Determine how many letters her sister's name has**: \n   According to the problem, her sister's name has 4 more letters than half of the letters in Indras' name.\n\n   First, we need to calculate half of the letters in Indras' name:\n   \\[\n   \\text{Half of Indras' letters} = \\frac{6}{2} = 3\n   \\]\n\n   Next, we add 4 to this amount to find the number of letters in her sister's name:\n   \\[\n   \\text{Sister's letters} = 3 + 4 = 7\n   \\]\n\n3. **Combine the results**: \n   - The number of letters in Indras' name is 6.\n   - The number of letters in her sister's name is 7.\n\nThus, to summarize: Indras has 6 letters and her sister has 7 letters.\n\nThe final answer format requested is: #### [answer]\n\nCombining these values, the final answer is:\n#### [6, 7]",
+          "quality_score": 0.0,
+          "cost": 0.0012309000000000003,
+          "latency": 4.638612985610962,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "gpt-5",
+          "response_text": "To solve this problem, we will find out how many laps each person can run and compare Bethany's laps to Quinn's laps.\n\n1. **Bethany's Laps**:\n   - Bethany can run 10 laps in one hour.\n\n2. **Trey's Laps**:\n   - Trey can run 4 more laps than Bethany.\n   - Trey’s laps = Bethany’s laps + 4 = 10 + 4 = 14 laps.\n\n3. **Shaelyn's Laps**:\n   - Shaelyn can run half as many laps as Trey.\n   - Shaelyn's laps = \\(\\frac{1}{2} \\times \\) Trey's laps = \\(\\frac{1}{2} \\times 14 = 7\\) laps.\n\n4. **Quinn's Laps**:\n   - Quinn can run 2 fewer laps than Shaelyn.\n   - Quinn's laps = Shaelyn's laps - 2 = 7 - 2 = 5 laps.\n\n5. **Comparison Between Bethany and Quinn**:\n   - Bethany can run 10 laps, and Quinn can run 5 laps.\n   - The difference in the laps they can run = Bethany's laps - Quinn's laps = 10 - 5 = 5 laps.\n\nThus, Bethany can run 5 more laps than Quinn.\n\nFinal answer:\n#### 5",
+          "quality_score": 1.0,
+          "cost": 0.0029987499999999997,
+          "latency": 6.139160871505737,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of children following the truck through each street.\n\n**End of First Street:**\n- 5 children are following the truck\n\n**Second Street:**\n- Each child is joined by another child\n- This means each of the 5 children has 1 more child join them\n- New children added: 5 × 1 = 5\n- Total children: 5 + 5 = 10 children\n\n**Third Street:**\n- Each child in the existing group is joined by another 2 children\n- This means each of the 10 children has 2 more children join them\n- New children added: 10 × 2 = 20\n- Total children: 10 + 20 = 30 children\n\n**Original 5 children leave:**\n- The original 5 children give up and leave\n- Remaining children: 30 - 5 = 25 children\n\n#### 25",
+          "quality_score": 1.0,
+          "cost": 0.00789,
+          "latency": 3.9110283851623535,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_5",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many minutes Kim actually slept in her bed that day.\n\n## Step 1: Determine Kim's sleep period that day\n\n- Kim went to sleep at: 10 p.m.\n- Kim usually wakes up at: 6 a.m.\n- But that day she woke up 5 minutes earlier: 5:55 a.m.\n\n## Step 2: Calculate total time in bed\n\nFrom 10 p.m. to 5:55 a.m.:\n- 10 p.m. to midnight = 2 hours\n- Midnight to 5:55 a.m. = 5 hours 55 minutes\n- Total time in bed = 7 hours 55 minutes = 475 minutes\n\n## Step 3: Calculate sleepwalking time\n\nSleepwalking from 2:15 a.m. to 2:38 a.m.:\n- 2:38 - 2:15 = 23 minutes\n\n## Step 4: Calculate actual sleeping time\n\nDuring sleepwalking, she was not sleeping in her bed.\n\nActual sleep time = Total time in bed - Sleepwalking time\nActual sleep time = 475 minutes - 23 minutes = 452 minutes\n\n#### 452",
+          "quality_score": 1.0,
+          "cost": 0.010629999999999999,
+          "latency": 6.006453037261963,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_6",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "Here is the step-by-step solution:\n\n**Step 1: Start with the initial number of bananas.**\nGunther begins with 48 bananas.\n*   **Starting total: 48**\n\n**Step 2: Arnold steals half of the bananas.**\nWe calculate half of 48.\n*   48 / 2 = 24\n*   **Bananas remaining: 24**\n\n**Step 3: Gunther adds 25 more bananas.**\nGunther adds 25 to the pile he has left.\n*   24 + 25 = 49\n*   **New total: 49**\n\n**Step 4: Arnold steals another 12 bananas.**\nArnold takes 12 bananas from the new pile.\n*   49 - 12 = 37\n*   **Bananas remaining: 37**\n\n**Step 5: Gunther adds 6 more bananas.**\nOn the third day, Gunther adds a final 6 bananas to his pile.\n*   37 + 6 = 43\n*   **Final total: 43**\n\nWhen Gunther counted the bananas, he found there were 43 in the pile.\n\n#### 43",
+          "quality_score": 1.0,
+          "cost": 0.012153750000000001,
+          "latency": 10.500207901000977,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_7",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "Here is the step-by-step solution:\n\n**Step 1: Calculate the number of measuring cups Jonathan has.**\nA dozen is equal to 12. Jonathan has two dozen cups.\n2 dozen * 12 cups/dozen = 24 measuring cups.\n\n**Step 2: Calculate the initial number of measuring spoons Jonathan has.**\nJonathan has 2/3 as many spoons as cups.\n(2/3) * 24 cups = 16 measuring spoons.\n\n**Step 3: Calculate the number of measuring spoons remaining.**\nJonathan gives 6 measuring spoons to Pedro.\n16 spoons - 6 spoons = 10 measuring spoons.\n\n**Step 4: Calculate the total number of utensils Jonathan has remaining.**\nThis is the sum of the remaining measuring spoons and the measuring cups.\n24 cups + 10 spoons = 34 utensils.\n\n#### 34",
+          "quality_score": 1.0,
+          "cost": 0.01003125,
+          "latency": 9.349432229995728,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_8",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many feet Martha's turtle can crawl in 40 seconds.\n\n## Step 1: Find the turtle's speed\n\nThe cat is 5 times faster than the turtle, and the cat runs 15 feet/second.\n\nIf the cat is 5 times faster than the turtle, then:\n- Turtle's speed = Cat's speed ÷ 5\n- Turtle's speed = 15 ÷ 5 = 3 feet/second\n\n## Step 2: Calculate how far the turtle crawls in 40 seconds\n\nDistance = Speed × Time\nDistance = 3 feet/second × 40 seconds = 120 feet\n\n#### 120",
+          "quality_score": 1.0,
+          "cost": 0.00557,
+          "latency": 4.362102031707764,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_9",
+          "model_id": "claude-sonnet-4.5",
+          "response_text": "I need to find how many flights to France the first plane takes in one day.\n\n**Step 1: Find the total number of flights the first plane makes.**\n\nI'm told that the second plane makes 44 trips to Poland, and this equals half the number of trips the first plane makes.\n\nIf 44 = (1/2) × (first plane's trips), then:\n- First plane's trips = 44 × 2 = 88 trips\n\n**Step 2: Find how many flights are NOT to Greece.**\n\nThe first plane goes to Greece for three-quarters of its flights:\n- Flights to Greece = (3/4) × 88 = 66 flights\n\nThe remaining flights are:\n- Remaining flights = 88 - 66 = 22 flights\n\n**Step 3: Find the flights to France.**\n\nThe remaining flights are split equally between France and Germany:\n- Flights to France = 22 ÷ 2 = 11 flights\n- Flights to Germany = 22 ÷ 2 = 11 flights\n\n**Verification:**\n- Greece: 66 flights\n- France: 11 flights  \n- Germany: 11 flights\n- Total: 66 + 11 + 11 = 88 ✓\n\n#### 11",
+          "quality_score": 1.0,
+          "cost": 0.0049499999999999995,
+          "latency": 5.974501848220825,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.0024673,
+        0.0076723,
+        0.0089032,
+        0.01190195,
+        0.01979195,
+        0.030421949999999996,
+        0.042575699999999994,
+        0.05260694999999999,
+        0.05817694999999999,
+        0.06312694999999999
+      ],
+      "started_at": "2025-11-28T16:56:04.893854Z",
+      "completed_at": "2025-11-28T16:57:35.154987Z",
+      "metadata": {
+        "name": "random",
+        "total_queries": 10,
+        "n_arms": 6,
+        "arm_pulls": {
+          "o4-mini": 2,
+          "gpt-5": 2,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 1,
+          "claude-opus-4.5": 3,
+          "gemini-2.5-pro": 2
+        }
+      }
+    },
+    {
+      "algorithm_name": "always_best",
+      "run_id": "2a7ee2ea-9ae7-421a-9117-adcd89067e14",
+      "total_queries": 10,
+      "total_cost": 0.08159,
+      "average_quality": 1.0,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_1",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_2",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_3",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_4",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_5",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_6",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_7",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_8",
+          "claude-opus-4.5"
+        ],
+        [
+          "gsm8k_test_9",
+          "claude-opus-4.5"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find Allen's age 10 years from now, given the ratio of Darrell and Allen's ages and their total age.\n\n## Step 1: Set up the ratio equation\n\nDarrell and Allen's ages are in the ratio 7:11.\n\nLet Darrell's age = 7x\nLet Allen's age = 11x\n\n## Step 2: Use the total age to find x\n\nTheir total age is 162, so:\n$$7x + 11x = 162$$\n$$18x = 162$$\n$$x = 9$$\n\n## Step 3: Find Allen's current age\n\nAllen's current age = 11x = 11 × 9 = 99\n\n## Step 4: Find Allen's age 10 years from now\n\nAllen's age 10 years from now = 99 + 10 = 109\n\n#### 109",
+          "quality_score": 1.0,
+          "cost": 0.00684,
+          "latency": 4.400343894958496,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track Lorraine's trades step by step.\n\n## Initial Inventory\n- 30 small stickers\n- 40 large stickers\n\n## Trade 1: 90% of small stickers for large buttons\n\n90% of 30 small stickers = 27 small stickers\n\nFrom the problem: \"A large button is worth three small stickers\"\n\nSo 27 small stickers = 27 ÷ 3 = **9 large buttons**\n\n## Trade 2: 50% of large stickers for large buttons\n\n50% of 40 large stickers = 20 large stickers\n\nFrom the problem: \"Each large sticker is worth a large button\"\n\nSo 20 large stickers = **20 large buttons**\n\n## Trade 3: Remaining large stickers for small buttons\n\nRemaining large stickers = 40 - 20 = 20 large stickers\n\nFrom the problem: \"Each large sticker is worth... three small buttons\"\n\nSo 20 large stickers = 20 × 3 = **60 small buttons**\n\n## Total Buttons\n\nLarge buttons: 9 + 20 = 29 large buttons\nSmall buttons: 60 small buttons\n\nTotal buttons = 29 + 60 = **89 buttons**\n\n#### 89",
+          "quality_score": 1.0,
+          "cost": 0.01061,
+          "latency": 5.276963949203491,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find the total number of letters in both Indras' name and her sister's name.\n\n## Step 1: Find the number of letters in Indras' name\nIndras has 6 letters in her name.\n\n## Step 2: Find half of the letters in Indras' name\nHalf of 6 = 6 ÷ 2 = 3 letters\n\n## Step 3: Find the number of letters in her sister's name\nHer sister's name has 4 more letters than half of Indras' name.\nSister's name = 3 + 4 = 7 letters\n\n## Step 4: Find the total number of letters in both names\nTotal = Indras' letters + Sister's letters\nTotal = 6 + 7 = 13 letters\n\n#### 13",
+          "quality_score": 1.0,
+          "cost": 0.00665,
+          "latency": 3.776757001876831,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many more laps Bethany can run compared to Quinn.\n\n**Step 1: Find Bethany's laps**\nBethany can run 10 laps in one hour.\n\n**Step 2: Find Trey's laps**\nTrey can run 4 more laps than Bethany.\nTrey = 10 + 4 = 14 laps\n\n**Step 3: Find Shaelyn's laps**\nShaelyn can run half as many laps as Trey.\nShaelyn = 14 ÷ 2 = 7 laps\n\n**Step 4: Find Quinn's laps**\nQuinn can run 2 fewer laps than Shaelyn.\nQuinn = 7 - 2 = 5 laps\n\n**Step 5: Find the difference between Bethany and Quinn**\nBethany - Quinn = 10 - 5 = 5 laps\n\n#### 5",
+          "quality_score": 1.0,
+          "cost": 0.00817,
+          "latency": 5.944800853729248,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of children following the truck through each street.\n\n## Step-by-Step Solution\n\n**After the first street:**\n- 5 children are following the truck\n\n**After the second street:**\n- Each child is joined by another child\n- This means each of the 5 children has 1 more child join them\n- New children added: 5 × 1 = 5\n- Total: 5 + 5 = 10 children\n\n**After the third street:**\n- Each child in the existing group is joined by another 2 children\n- There are 10 children, and each is joined by 2 more\n- New children added: 10 × 2 = 20\n- Total: 10 + 20 = 30 children\n\n**After the original 5 children leave:**\n- The original 5 children give up and leave\n- Total: 30 - 5 = 25 children\n\n#### 25",
+          "quality_score": 1.0,
+          "cost": 0.008159999999999999,
+          "latency": 4.932574033737183,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_5",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many minutes Kim actually slept in her bed that day.\n\n## Step 1: Determine Kim's sleep and wake times\n\n- Kim went to sleep at: 10 p.m.\n- Kim usually wakes up at: 6 a.m.\n- That day she woke up 5 minutes earlier: 5:55 a.m.\n\n## Step 2: Calculate total time in bed\n\nFrom 10 p.m. to 5:55 a.m.:\n- 10 p.m. to midnight = 2 hours\n- Midnight to 5:55 a.m. = 5 hours 55 minutes\n- Total time from going to bed to waking up = 7 hours 55 minutes\n\nConverting to minutes: 7 × 60 + 55 = 420 + 55 = **475 minutes**\n\n## Step 3: Calculate sleepwalking time\n\nSleepwalking from 2:15 a.m. to 2:38 a.m.:\n- 2:38 - 2:15 = **23 minutes**\n\n## Step 4: Calculate actual sleep time in bed\n\nDuring sleepwalking, Kim was not sleeping in her bed, so I subtract this time:\n\n475 - 23 = **452 minutes**\n\n#### 452",
+          "quality_score": 1.0,
+          "cost": 0.01108,
+          "latency": 6.172159910202026,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_6",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to track the number of bananas in Gunther's pile through each event.\n\n**Starting amount:**\nGunther starts with 48 bananas.\n\n**Day 1 - Arnold steals half:**\nArnold steals half of 48 bananas.\nHalf of 48 = 48 ÷ 2 = 24 bananas stolen\nRemaining bananas: 48 - 24 = 24 bananas\n\n**Day 2 - Gunther adds 25 bananas:**\n24 + 25 = 49 bananas\n\n**Day 2 evening - Arnold steals 12 bananas:**\n49 - 12 = 37 bananas\n\n**Day 3 - Gunther adds 6 bananas:**\n37 + 6 = 43 bananas\n\n**Final count:**\nGunther finds 43 bananas in the pile.\n\n#### 43",
+          "quality_score": 1.0,
+          "cost": 0.0082,
+          "latency": 4.840089797973633,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_7",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find the total number of utensils Jonathan has remaining after gifting some measuring spoons.\n\n## Step 1: Find the number of measuring cups Jonathan has\nJonathan has two dozen cups.\n- 2 dozen = 2 × 12 = 24 measuring cups\n\n## Step 2: Find the original number of measuring spoons\nJonathan has 2/3 as many measuring spoons as measuring cups.\n- Measuring spoons = (2/3) × 24 = 48/3 = 16 measuring spoons\n\n## Step 3: Calculate measuring spoons after gifting\nJonathan gifts Pedro 6 measuring spoons.\n- Remaining measuring spoons = 16 - 6 = 10 measuring spoons\n\n## Step 4: Calculate total remaining utensils\n- Measuring cups: 24 (unchanged)\n- Measuring spoons: 10\n\nTotal utensils = 24 + 10 = 34\n\n#### 34",
+          "quality_score": 1.0,
+          "cost": 0.0076,
+          "latency": 5.157968282699585,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_8",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find how many feet Martha's turtle can crawl in 40 seconds.\n\n## Step 1: Find the turtle's speed\n\nThe cat is 5 times faster than the turtle, and the cat runs 15 feet/second.\n\nSo the turtle's speed = Cat's speed ÷ 5\nTurtle's speed = 15 ÷ 5 = 3 feet/second\n\n## Step 2: Calculate how far the turtle crawls in 40 seconds\n\nDistance = Speed × Time\nDistance = 3 feet/second × 40 seconds = 120 feet\n\n#### 120",
+          "quality_score": 1.0,
+          "cost": 0.00506,
+          "latency": 3.594282865524292,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_9",
+          "model_id": "claude-opus-4.5",
+          "response_text": "I need to find the number of flights to France that the first plane makes in one day.\n\n## Step 1: Find the number of trips the first plane makes each day.\n\nThe second plane makes 44 trips per day, and this is half the number of trips the first plane makes.\n\nLet me denote the first plane's trips as T.\n\n$$44 = \\frac{1}{2} \\times T$$\n\n$$T = 44 \\times 2 = 88$$\n\nSo the first plane makes 88 trips per day.\n\n## Step 2: Find how the first plane's flights are distributed.\n\n- Three-quarters of flights go to Greece: $\\frac{3}{4} \\times 88 = 66$ flights\n- The remaining flights are split equally between France and Germany\n\n## Step 3: Find the remaining flights after Greece.\n\n$$88 - 66 = 22 \\text{ flights}$$\n\nThese 22 flights are split equally between France and Germany.\n\n## Step 4: Find flights to France.\n\n$$\\frac{22}{2} = 11 \\text{ flights to France}$$\n\n#### 11",
+          "quality_score": 1.0,
+          "cost": 0.009219999999999999,
+          "latency": 5.752942800521851,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.00684,
+        0.01745,
+        0.0241,
+        0.03227,
+        0.04043,
+        0.05151,
+        0.05971,
+        0.06731,
+        0.07236999999999999,
+        0.08159
+      ],
+      "started_at": "2025-11-28T16:56:04.898340Z",
+      "completed_at": "2025-11-28T16:57:02.897845Z",
+      "metadata": {
+        "name": "always_best",
+        "total_queries": 10,
+        "n_arms": 6,
+        "best_arm": "claude-opus-4.5",
+        "best_arm_quality": 0.92,
+        "arm_pulls": {
+          "o4-mini": 0,
+          "gpt-5": 0,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 10,
+          "gemini-2.5-pro": 0
+        }
+      }
+    },
+    {
+      "algorithm_name": "always_cheapest",
+      "run_id": "0f4d7ad3-773a-4216-a4e2-b274be1f8352",
+      "total_queries": 10,
+      "total_cost": 0.018412900000000003,
+      "average_quality": 0.4,
+      "selections": [
+        [
+          "gsm8k_test_0",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_1",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_2",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_3",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_4",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_5",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_6",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_7",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_8",
+          "o4-mini"
+        ],
+        [
+          "gsm8k_test_9",
+          "o4-mini"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "gsm8k_test_0",
+          "model_id": "o4-mini",
+          "response_text": "Let's denote Darrell's age as \\( D \\) and Allen's age as \\( A \\). Given that the ratio of their ages is \\( 7:11 \\), we can express their ages in terms of a common variable \\( x \\):\n\n\\[\nD = 7x \\quad \\text{(Darrell's age)}\n\\]\n\\[\nA = 11x \\quad \\text{(Allen's age)}\n\\]\n\nAccording to the problem, their total age is 162:\n\n\\[\nD + A = 162\n\\]\n\nSubstituting the expressions for \\( D \\) and \\( A \\):\n\n\\[\n7x + 11x = 162\n\\]\n\nCombining like terms:\n\n\\[\n18x = 162\n\\]\n\nNow, we can solve for \\( x \\):\n\n\\[\nx = \\frac{162}{18} = 9\n\\]\n\nUsing the value of \\( x \\), we can calculate Darrell's age and Allen's age:\n\n\\[\nD = 7x = 7 \\cdot 9 = 63\n\\]\n\\[\nA = 11x = 11 \\cdot 9 = 99\n\\]\n\nNow, we want to find Allen's age 10 years from now:\n\n\\[\nA + 10 = 99 + 10 = 109\n\\]\n\nThus, Allen's age 10 years from now will be:\n\n\\[\n\\boxed{109}\n\\] \n\nFinally, we provide the answer in the requested format:\n\n#### 109",
+          "quality_score": 1.0,
+          "cost": 0.0014685000000000002,
+          "latency": 6.703739881515503,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_1",
+          "model_id": "o4-mini",
+          "response_text": "Let's break down Lorraine's trades step by step.\n\n**Step 1: Initial Count of Stickers**\n- Lorraine starts with:\n  - Small Stickers: 30\n  - Large Stickers: 40\n\n**Step 2: Trading Small Stickers for Large Buttons**\n- Lorraine trades 90% of her small stickers.\n- 90% of 30 small stickers = 0.9 * 30 = 27 small stickers.\n- Each small sticker is worth 1 small button, so 27 small stickers can be traded for 27 small buttons (1 sticker = 1 button).\n  \nNow let's convert the value of these small buttons into large buttons:\n- 3 small buttons = 1 large button\n- Therefore, 27 small buttons can be converted to:\n  \\[\n  \\frac{27 \\text{ small buttons}}{3 \\text{ small buttons/large button}} = 9 \\text{ large buttons}\n  \\]\n\nNow after the trade:\n- Small stickers left: 30 - 27 = 3 small stickers\n- Large buttons obtained: 9 large buttons\n\n**Step 3: Trading Large Stickers**\n- Lorraine has 40 large stickers and trades 50% of them.\n- 50% of 40 large stickers: 0.5 * 40 = 20 large stickers.\n- Each large sticker can be traded for 1 large button, therefore:\n  \nShe trades 20 large stickers for 20 large buttons.\n\nNow she has:\n- Large stickers left: 40 - 20 = 20 large stickers\n- Large buttons obtained: 20 large buttons\n\n**Step 4: Trading the remaining Large Stickers for Small Buttons**\n- Lorraine trades the remaining 20 large stickers for small buttons. \n- Each large button is worth 3 small stickers, so:\n  \\[\n  20 \\text{ large stickers} \\text{ can be traded for: } 20 \\text{ large buttons}\n  \\]\n  \\[\n  20 \\text{ large buttons} \\text{ = } 20 \\times 3 = 60 \\text{ small buttons}\n  \\]\n\n**Step 5: Calculate Total Buttons**\n- Now to sum up the buttons she has:\n  - Small buttons from trading small stickers: 27\n  - Small buttons from trading large stickers: 60\n  - Large buttons from trading large stickers: 20\n  - Total buttons = small buttons + large buttons:\n  \\[\n  Total = 27 \\text{ (small buttons)} + 60 \\text{ (small buttons)} + 20 \\text{ (large buttons)}\n  \\]\n  \\[\n  Total = 27 + 60 + 20 = 107 \\text{ buttons}\n  \\]\n\n**Final Answer**: \n107 [107]",
+          "quality_score": 0.0,
+          "cost": 0.0027148000000000003,
+          "latency": 11.003604888916016,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_2",
+          "model_id": "o4-mini",
+          "response_text": "To determine how many letters are in Indras and her sister's names, we can follow these steps:\n\n1. **Identify the number of letters in Indras's name.**\n   Indras has 6 letters.\n\n2. **Calculate half of the letters in Indras's name.**\n   Half of 6 letters is:\n   \\[\n   \\text{Half of letters in Indras} = \\frac{6}{2} = 3\n   \\]\n\n3. **Determine the number of letters in her sister's name.**\n   The question states that her sister's name has 4 more letters than half of the letters in Indras's name. Therefore, we add 4 to the result from the previous step:\n   \\[\n   \\text{Letters in sister's name} = 3 + 4 = 7\n   \\]\n\n4. **Summarize the results.**\n   - Indras' name has 6 letters.\n   - Her sister's name has 7 letters.\n\n5. **Final answer format.**\n   The final answer is:\n   \\[\n   6 \\text{ (letters in Indras)} + 7 \\text{ (letters in sister)} = 13\n   \\]\n\nTherefore, the final answer is:\n\\[\n\\text{#### 13}\n\\]",
+          "quality_score": 1.0,
+          "cost": 0.0012925000000000002,
+          "latency": 5.888006925582886,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_3",
+          "model_id": "o4-mini",
+          "response_text": "To solve the problem step by step, we start with the information given about each runner's laps.\n\n1. **Bethany's laps**: \n   - Bethany can run 10 laps in one hour.\n   - Therefore, **Bethany's laps = 10**.\n\n2. **Trey's laps**: \n   - Trey can run 4 more laps than Bethany.\n   - Therefore, Trey's laps = Bethany's laps + 4 = 10 + 4 = 14.\n   - Hence, **Trey's laps = 14**.\n\n3. **Shaelyn's laps**: \n   - Shaelyn can run half as many laps as Trey.\n   - Therefore, Shaelyn's laps = Trey's laps / 2 = 14 / 2 = 7.\n   - Hence, **Shaelyn's laps = 7**.\n\n4. **Quinn's laps**: \n   - Quinn can run 2 fewer laps than Shaelyn.\n   - Therefore, Quinn's laps = Shaelyn's laps - 2 = 7 - 2 = 5.\n   - Hence, **Quinn's laps = 5**.\n\n5. **Calculate the difference between Bethany's and Quinn's laps**: \n   - The difference = Bethany's laps - Quinn's laps = 10 - 5 = 5.\n\nFinally, we conclude how many more laps Bethany can run compared to Quinn.\n\nThe final answer is: 0005 [5]",
+          "quality_score": 0.0,
+          "cost": 0.0014773000000000002,
+          "latency": 6.543438911437988,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_4",
+          "model_id": "o4-mini",
+          "response_text": "Let's go through the problem step by step.\n\n1. **Starting Point:**\n   At the end of the first street, the ice cream truck has **5 children** following it.\n\n   \\[\n   \\text{Children at end of first street} = 5\n   \\]\n\n2. **On the Second Street:**\n   Each of the 5 children is joined by another child. This means that the total number of children doubles:\n\n   \\[\n   \\text{New children on second street} = 5 \\text{ (existing children)} + 5 \\text{ (new children)} = 10\n   \\]\n\n3. **On the Third Street:**\n   Each child in the existing group (which is now 10) is joined by another 2 children. Therefore, the number of new children added on the third street can be calculated as follows:\n\n   Each of the 10 existing children gets 2 additional children:\n\n   \\[\n   \\text{Number of new children on third street} = 10 \\text{ (existing children)} \\times 2 = 20\n   \\]\n\n   Now, we add these new children to the previous total:\n\n   \\[\n   \\text{Total children after third street} = 10 \\text{ (existing)} + 20 \\text{ (new)} = 30\n   \\]\n\n4. **Original Children Leave:**\n   The original 5 children who started following the truck leave the group. Thus, we subtract them from the total:\n\n   \\[\n   \\text{Total children after original children leave} = 30 - 5 = 25\n   \\]\n\n5. **Final Count:**\n   The total number of children following the truck at the end is:\n\n   \\[\n   \\text{Final number of children} = 25\n   \\]\n\nThus, the final answer is:\n\n\\[\n#### 25\n\\]",
+          "quality_score": 1.0,
+          "cost": 0.0018832,
+          "latency": 9.171732902526855,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_5",
+          "model_id": "o4-mini",
+          "response_text": "To determine how many minutes Kim slept in her bed that day, we'll need to break things down step by step.\n\n1. **Determine the usual sleep duration:**\n   - Kim usually goes to sleep at **10 p.m.** and wakes up at **6 a.m.**.\n   - The total sleep duration is from 10 p.m. to 6 a.m. which is **8 hours**.\n\n2. **Convert the hours into minutes:**\n   - 8 hours = \\(8 \\times 60 = 480\\) minutes.\n\n3. **Determine the early waking time:**\n   - On that day, Kim woke up **5 minutes earlier than usual**.\n   - Usual waking time is 6 a.m., so:\n     \\[\n     6:00 \\text{ a.m.} - 5 \\text{ minutes} = 5:55 \\text{ a.m.}\n     \\]\n\n4. **Calculate total sleep time that day:**\n   - Kim went to sleep at 10 p.m. and woke up at 5:55 a.m.\n   - We need to calculate the duration from 10:00 p.m. to 5:55 a.m.\n   - The time from 10 p.m. to midnight (12 a.m.) is:\n     \\[\n     2 \\text{ hours} = 120 \\text{ minutes}.\n     \\]\n   - From midnight to 5:55 a.m. is:\n     \\[\n     5 \\text{ hours} + 55 \\text{ minutes} = 5 \\times 60 + 55 = 300 + 55 = 355 \\text{ minutes}.\n     \\]\n   - Now, add the two durations together:\n     \\[\n     120 \\text{ minutes} + 355 \\text{ minutes} = 475 \\text{ minutes}.\n     \\]\n\n5. **Account for the sleepwalking incident:**\n   - Kim was sleepwalking from **2:15 to 2:38 a.m.**:\n   - Calculate how long she was sleepwalking:\n     \\[\n     2:38 - 2:15 = 23 \\text{ minutes}.\n     \\]\n\n6. **Total time spent in bed:**\n   - She was not asleep during those 23 minutes while sleepwalking, but since we are already including her total sleep time, we don’t need to subtract sleepwalking time from her total sleep hours.\n   - Therefore, she actually got **475 minutes** of rest.\n\nFinal answer:\n\\[\n\\text{Total sleep time} = 475 \\text{ minutes} \\Rightarrow 475 [minutes]\n\\] \nThus the final answer is **475** minutes. \n\nFinal answer: #### 475",
+          "quality_score": 0.0,
+          "cost": 0.0026719,
+          "latency": 10.397693157196045,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_6",
+          "model_id": "o4-mini",
+          "response_text": "Let's go through the problem step by step.\n\n1. **Initial number of bananas**:\n   Gunther starts with 48 bananas.\n\n2. **Arnold steals half of the bananas**:\n   Half of 48 is \\( \\frac{48}{2} = 24 \\). \n   So Arnold steals 24 bananas, leaving Gunther with:\n   \\[\n   48 - 24 = 24 \\text{ bananas}\n   \\]\n\n3. **Gunther adds 25 bananas the next day**:\n   Gunther adds 25 bananas to his pile:\n   \\[\n   24 + 25 = 49 \\text{ bananas}\n   \\]\n\n4. **Arnold steals 12 more bananas**:\n   Arnold then steals 12 bananas from Gunther:\n   \\[\n   49 - 12 = 37 \\text{ bananas}\n   \\]\n\n5. **Gunther adds 6 bananas on the third day**:\n   Finally, on the third day, Gunther adds 6 more bananas:\n   \\[\n   37 + 6 = 43 \\text{ bananas}\n   \\]\n\nAfter all these steps, Gunther finds that he has 43 bananas in his pile.\n\nThus, the final answer is:\n```\n#### 43\n```",
+          "quality_score": 1.0,
+          "cost": 0.0013156,
+          "latency": 5.721383810043335,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_7",
+          "model_id": "o4-mini",
+          "response_text": "To solve the problem, we'll go through the following steps:\n\n1. **Determine the Number of Measuring Cups**:\n    Jonathan has 2 dozen cups. \n    Since 1 dozen equals 12, we can calculate the number of measuring cups:\n    \\[\n    \\text{Number of measuring cups} = 2 \\times 12 = 24\n    \\]\n\n2. **Calculate the Number of Measuring Spoons**:\n    Jonathan has \\( \\frac{2}{3} \\) as many measuring spoons as measuring cups. So, we can calculate the number of measuring spoons as follows:\n    \\[\n    \\text{Number of measuring spoons} = \\frac{2}{3} \\times \\text{Number of measuring cups} = \\frac{2}{3} \\times 24\n    \\]\n    Performing the multiplication:\n    \\[\n    \\text{Number of measuring spoons} = \\frac{2 \\times 24}{3} = \\frac{48}{3} = 16\n    \\]\n\n3. **Gift 6 Measuring Spoons to Pedro**:\n    Jonathan gifts Pedro 6 measuring spoons. We'll calculate how many measuring spoons Jonathan has left:\n    \\[\n    \\text{Remaining measuring spoons} = \\text{Original number of spoons} - \\text{Gifts} = 16 - 6 = 10\n    \\]\n\n4. **Calculate Total Number of Utensils Remaining**:\n    Now we need to find the total number of utensils remaining:\n    - Remaining measuring cups (still 24, as they were not given away)\n    - Remaining measuring spoons (calculated to be 10)\n\n    Therefore, the total number of utensils remaining is:\n    \\[\n    \\text{Total remaining utensils} = \\text{Remaining measuring cups} + \\text{Remaining measuring spoons} = 24 + 10 = 34\n    \\]\n\nFinally, we write the answer in the required format:\n\\[\n\\text{Final answer: } 34 [answer]\n\\]",
+          "quality_score": 0.0,
+          "cost": 0.0019745,
+          "latency": 9.564623832702637,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_8",
+          "model_id": "o4-mini",
+          "response_text": "To solve the problem, we will follow these steps:\n\n1. **Determine the speed of the turtle**:\n   We know that the cat is 5 times faster than the turtle. Given that the cat runs at a speed of 15 feet/second, we can find the speed of the turtle by dividing the cat's speed by 5.\n\n   \\[\n   \\text{Turtle speed} = \\frac{\\text{Cat speed}}{5} = \\frac{15 \\text{ feet/second}}{5} = 3 \\text{ feet/second}\n   \\]\n\n2. **Calculate the distance the turtle crawls in 40 seconds**:\n   Now that we have the turtle's speed, we can calculate how far the turtle crawls in 40 seconds using the formula:\n\n   \\[\n   \\text{Distance} = \\text{Speed} \\times \\text{Time}\n   \\]\n\n   Substituting in the values we have:\n\n   \\[\n   \\text{Distance} = 3 \\text{ feet/second} \\times 40 \\text{ seconds} = 120 \\text{ feet}\n   \\]\n\n3. **Conclusion**:\n   Thus, the turtle crawls a total of 120 feet in 40 seconds.\n\nThe final answer is:\n120 [feet]",
+          "quality_score": 0.0,
+          "cost": 0.001276,
+          "latency": 5.346347093582153,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        },
+        {
+          "query_id": "gsm8k_test_9",
+          "model_id": "o4-mini",
+          "response_text": "To determine how many flights the first plane takes to France in one day, we will follow these steps:\n\n1. **Define the variables**:\n   - Let \\( x \\) be the total number of flights the first plane makes in one day.\n\n2. **Identify the flights to Greece**:\n   - According to the information given, the first plane goes to Greece for three-quarters of its flights. This means the number of flights to Greece is:\n   \\[\n   \\text{Flights to Greece} = \\frac{3}{4} x\n   \\]\n\n3. **Identify the remaining flights**:\n   - The remaining flights amount to:\n   \\[\n   \\text{Remaining flights} = x - \\frac{3}{4} x = \\frac{1}{4} x\n   \\]\n   These remaining flights are split equally between France and Germany.\n\n4. **Calculate flights to France**:\n   - Since the remaining flights (which total \\( \\frac{1}{4} x \\)) are divided equally between France and Germany, the number of flights to France is:\n   \\[\n   \\text{Flights to France} = \\frac{1}{2} \\times \\frac{1}{4} x = \\frac{1}{8} x\n   \\]\n\n5. **Examine the second plane's trips**:\n   - The second plane flies exclusively to Poland and makes 44 trips a day. We know that this is half the number of trips the first plane makes:\n   \\[\n   44 = \\frac{1}{2} x\n   \\]\n\n6. **Solve for \\( x \\)**:\n   - To find \\( x \\), we can multiply both sides of the equation by 2:\n   \\[\n   x = 44 \\times 2 = 88\n   \\]\n\n7. **Calculate flights to France again**:\n   - Now that we have \\( x = 88 \\), we can find the number of flights to France:\n   \\[\n   \\text{Flights to France} = \\frac{1}{8} x = \\frac{1}{8} \\times 88 = 11\n   \\]\n\nThus, the number of flights to France that the first plane takes in one day is:\n\n\\[\n\\text{Final answer:} \\quad 11 [answer]\n\\] \n\nSo the final answer is:\n\n**11 [answer]**",
+          "quality_score": 0.0,
+          "cost": 0.0023386,
+          "latency": 9.94175386428833,
+          "success": true,
+          "error": null,
+          "metadata": {}
+        }
+      ],
+      "cumulative_cost": [
+        0.0014685000000000002,
+        0.004183300000000001,
+        0.005475800000000001,
+        0.006953100000000001,
+        0.008836300000000002,
+        0.011508200000000001,
+        0.012823800000000002,
+        0.014798300000000002,
+        0.016074300000000003,
+        0.018412900000000003
+      ],
+      "started_at": "2025-11-28T16:56:04.901845Z",
+      "completed_at": "2025-11-28T16:57:35.372525Z",
+      "metadata": {
+        "name": "always_cheapest",
+        "total_queries": 10,
+        "n_arms": 6,
+        "cheapest_arm": "o4-mini",
+        "cheapest_arm_avg_cost": 2.75e-6,
+        "arm_pulls": {
+          "o4-mini": 10,
+          "gpt-5": 0,
+          "gpt-5.1": 0,
+          "claude-sonnet-4.5": 0,
+          "claude-opus-4.5": 0,
+          "gemini-2.5-pro": 0
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-11-28T16:57:37.427019Z",
+  "metadata": {}
+}

@@ -143,6 +143,23 @@ def calculate_convergence(
             threshold=threshold,
         )
 
+    # Check for fixed baselines (always_best, always_cheapest, oracle)
+    # These have very low variance from the start and should be marked as converged at query 1
+    early_window = min(20, len(metric_history) // 4)
+    if early_window >= 10:
+        early_data = metric_history[:early_window]
+        early_cv = np.std(early_data) / np.mean(early_data) if np.mean(early_data) > 0 else 0
+
+        # If coefficient of variation < 0.01 (1% variance) early on, it's a fixed baseline
+        if early_cv < 0.01:
+            return ConvergenceMetrics(
+                converged=True,
+                convergence_point=1,  # Fixed from the start
+                coefficient_of_variation=early_cv,
+                window_size=window,
+                threshold=threshold,
+            )
+
     # Calculate moving average to smooth out noise
     window_size = min(50, window // 2)
     smoothed = np.convolve(metric_history, np.ones(window_size)/window_size, mode='valid')
@@ -163,15 +180,45 @@ def calculate_convergence(
     else:
         normalized_slope = float("inf")
 
+    # Check if this is a random/noisy algorithm (high variance, no learning)
+    # Use SMOOTHED data for CV to avoid penalizing learning algorithms with exploration
+    smoothed_cv = np.std(smoothed) / np.mean(smoothed) if np.mean(smoothed) > 0 else float("inf")
+
+    # If CV > 0.20 (20% variance) even in smoothed data, check for learning
+    # This catches "random" baseline which has high variance and no learning
+    if smoothed_cv > 0.20:
+        # Check if there's actual learning trend (not just mean improvement)
+        # Fit linear trend to smoothed data
+        if len(smoothed) >= 20:
+            x_trend = np.arange(len(smoothed))
+            trend_slope = np.polyfit(x_trend, smoothed, 1)[0]
+            mean_smoothed = np.mean(smoothed)
+            normalized_trend = trend_slope / mean_smoothed if mean_smoothed > 0 else 0
+
+            # If slope is nearly flat or negative (< 0.001 improvement per query) and high variance,
+            # it's a random algorithm with no learning
+            if normalized_trend < 0.001:
+                return ConvergenceMetrics(
+                    converged=False,
+                    convergence_point=None,
+                    coefficient_of_variation=smoothed_cv,
+                    window_size=window,
+                    threshold=threshold,
+                )
+
     # Converged if slope is nearly flat (< threshold change per query)
     converged = normalized_slope < threshold
 
     # Find convergence point (when slope first dropped below threshold)
     convergence_point = None
     if converged:
-        # Search backwards to find when it first converged
-        for i in range(window, len(metric_history)):
-            segment = smoothed[max(0, i-window):i]
+        # Search forward to find when it first converged
+        # Check smaller windows starting from min_samples to find earliest convergence
+        min_window_for_convergence = min(window, 20)  # At least 20 points to detect convergence
+
+        for i in range(min_window_for_convergence, len(smoothed)):
+            # Use a sliding window to detect when slope first becomes small
+            segment = smoothed[max(0, i-min_window_for_convergence):i]
             if len(segment) > 1:
                 x_seg = np.arange(len(segment))
                 seg_slope = np.polyfit(x_seg, segment, 1)[0]
@@ -574,6 +621,8 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
 
     # Build analysis dictionary with expected structure
     analysis = {
+        "benchmark_id": benchmark_result.get("benchmark_id", "N/A"),
+        "dataset_size": benchmark_result.get("dataset_size", 0),
         "summary": {
             "num_algorithms": len(individual_metrics),
             "best_quality_algorithm": quality_rankings[0] if quality_rankings else None,

@@ -16,6 +16,10 @@ import numpy as np
 import seaborn as sns
 from matplotlib.figure import Figure
 
+# Set seaborn style for modern, clean visualizations
+sns.set_theme(style="whitegrid", context="talk", font="Inter", palette="deep")
+sns.set_context("talk", rc={"font.family": "sans-serif", "font.sans-serif": ["Inter", "Arial", "Helvetica"]})
+
 # Set publication-quality defaults
 plt.rcParams.update(
     {
@@ -259,6 +263,16 @@ def plot_convergence_comparison(
         convergence_points.append(conv_point if conv_point else 0)
         converged_flags.append(converged)
 
+    # Check if all convergence points are identical
+    valid_points = [p for p in convergence_points if p > 0]
+    all_identical = len(set(valid_points)) == 1 if valid_points else False
+
+    # Skip chart if all algorithms converged at the same point (no differentiation)
+    if all_identical and len(valid_points) >= 3:
+        plt.close(fig)
+        print(f"  ⊘ Convergence chart skipped: all algorithms converged at same point (Query #{int(valid_points[0])})")
+        return None
+
     # Plot bars
     colors = ["green" if c else "red" for c in converged_flags]
     bars = ax.bar(algo_names, convergence_points, color=colors, alpha=0.7, edgecolor="black")
@@ -269,25 +283,39 @@ def plot_convergence_comparison(
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 bar.get_height() + 5,
-                f"{int(point)}",
+                f"Query #{int(point)}",
                 ha="center",
                 va="bottom",
                 fontweight="bold",
+                fontsize=11,
+                bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="gray", alpha=0.8),
             )
         else:
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 5,
-                "Not Converged",
+                "Never Converged",
                 ha="center",
                 va="bottom",
-                fontsize=9,
+                fontsize=10,
+                fontweight="bold",
                 style="italic",
+                color="darkred",
             )
 
     ax.set_ylabel("Convergence Point (Query #)", fontsize=14, fontweight="bold")
+
+    # Adjust title based on whether points are identical
+    if all_identical and valid_points:
+        title_text = (
+            f"Algorithm Convergence Speed\n"
+            f"(All algorithms converged at query #{int(valid_points[0])})"
+        )
+    else:
+        title_text = "Algorithm Convergence Speed\n(Lower is Faster)"
+
     ax.set_title(
-        "Algorithm Convergence Speed\n(Lower is Faster)",
+        title_text,
         fontsize=16,
         fontweight="bold",
         pad=20,
@@ -398,8 +426,8 @@ def generate_html_report(
 
     # Extract data
     algorithms = analysis.get("algorithms", {})
-    comparative = analysis.get("comparative_analysis", {})
-    friedman = comparative.get("friedman_test", {})
+    statistical_tests = analysis.get("statistical_tests", {})
+    friedman = statistical_tests.get("friedman", {})
     pareto = analysis.get("pareto_frontier", [])
 
     # Build HTML
@@ -412,11 +440,12 @@ def generate_html_report(
     <title>Conduit Benchmark Report</title>
     <style>
         body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background: #f5f5f5;
+            background: #fafafa;
+            line-height: 1.6;
         }}
         h1 {{
             color: #2c3e50;
@@ -597,8 +626,58 @@ def generate_html_report(
     html += """</p>
     </div>
 
+    <div class="summary">
+        <h2>📚 Appendix: Metrics and Statistical Tests</h2>
+
+        <h3>Convergence Detection</h3>
+        <p><strong>What it means:</strong> Convergence indicates that an algorithm has learned enough to make stable, consistent decisions. A converged algorithm is no longer significantly improving its strategy.</p>
+        <p><strong>How we detect it:</strong> We use slope-based analysis on smoothed learning curves. An algorithm is considered converged when the slope of its quality improvement falls below 10% (nearly flat learning curve), indicating minimal further learning.</p>
+        <ul>
+            <li><strong>Converged (✓):</strong> Algorithm has stabilized and learned an effective strategy</li>
+            <li><strong>Not Converged (✗):</strong> Algorithm is still learning or hasn't seen enough data</li>
+        </ul>
+
+        <h3>Pareto Frontier (Optimal Trade-offs)</h3>
+        <p><strong>What it means:</strong> The Pareto frontier identifies algorithms that achieve optimal cost-quality trade-offs. An algorithm is Pareto optimal if no other algorithm has both lower cost AND higher quality.</p>
+        <p><strong>Interpretation:</strong></p>
+        <ul>
+            <li>Algorithms on the Pareto frontier represent the best choices at different points on the cost-quality spectrum</li>
+            <li>Lower-cost Pareto algorithms prioritize efficiency</li>
+            <li>Higher-quality Pareto algorithms prioritize performance</li>
+            <li>Non-Pareto algorithms are dominated by at least one other algorithm in both cost and quality</li>
+        </ul>
+
+        <h3>Friedman Test (Statistical Significance)</h3>
+        <p><strong>What it tests:</strong> The Friedman test determines if there are statistically significant differences in performance across multiple algorithms tested on the same dataset.</p>
+        <p><strong>Interpretation:</strong></p>
+        <ul>
+            <li><strong>Significant (p < 0.05):</strong> Strong evidence that algorithms perform differently. Quality differences are unlikely due to random chance.</li>
+            <li><strong>Not Significant (p ≥ 0.05):</strong> Insufficient evidence of meaningful differences. Observed variations may be due to random chance.</li>
+            <li><strong>p-value:</strong> Probability of seeing these results if all algorithms were equally good. Lower values indicate stronger evidence of real differences.</li>
+        </ul>
+
+        <h3>Metric Definitions</h3>
+        <ul>
+            <li><strong>Quality Score:</strong> Fraction of queries answered correctly (0.0 = all wrong, 1.0 = all correct)</li>
+            <li><strong>Total Cost:</strong> Sum of API costs across all queries (in USD)</li>
+            <li><strong>95% CI (Confidence Interval):</strong> Range where we're 95% confident the true average quality lies. Narrower intervals indicate more reliable estimates.</li>
+            <li><strong>Cumulative Cost:</strong> Running total of costs as queries are processed, used to track spending over time</li>
+            <li><strong>Convergence Point:</strong> Query number where the algorithm's learning curve stabilized</li>
+        </ul>
+
+        <h3>Algorithm Types</h3>
+        <ul>
+            <li><strong>Thompson Sampling:</strong> Bayesian approach that balances exploration and exploitation probabilistically</li>
+            <li><strong>UCB1:</strong> Optimistic algorithm that favors options with high uncertainty</li>
+            <li><strong>Epsilon-Greedy:</strong> Simple strategy that explores randomly ε% of the time</li>
+            <li><strong>Random:</strong> Baseline that selects models uniformly at random</li>
+            <li><strong>Always Best:</strong> Oracle that always selects the highest-quality model</li>
+            <li><strong>Always Cheapest:</strong> Baseline that always selects the lowest-cost model</li>
+        </ul>
+    </div>
+
     <footer style="margin-top: 40px; padding: 20px; text-align: center; color: #7f8c8d; border-top: 1px solid #ddd;">
-        <p>Generated by Conduit-Bench | 🤖 <a href="https://claude.com/claude-code">Claude Code</a></p>
+        <p>Generated by Conduit-Bench</p>
     </footer>
 </body>
 </html>
@@ -633,7 +712,6 @@ def create_all_visualizations(
 
     # Extract algorithm data
     algorithms = analysis.get("algorithms", {})
-    comparative = analysis.get("comparative_analysis", {})
 
     # 1. Cost curves (skip if no time series data)
     if benchmark_data:
@@ -642,15 +720,16 @@ def create_all_visualizations(
         chart_paths["Cumulative Cost Curves"] = cost_path
 
     # 2. Cost-quality scatter
-    pareto_optimal = comparative.get("pareto_optimal", [])
+    pareto_optimal = analysis.get("pareto_frontier", [])
     cost_quality_path = output_dir / "cost_quality_scatter.png"
     plot_cost_quality_scatter(algorithms, pareto_optimal, output_path=cost_quality_path)
     chart_paths["Cost-Quality Trade-off"] = cost_quality_path
 
-    # 3. Convergence comparison
+    # 3. Convergence comparison (skip if all converged at same point)
     convergence_path = output_dir / "convergence_comparison.png"
-    plot_convergence_comparison(algorithms, output_path=convergence_path)
-    chart_paths["Convergence Speed"] = convergence_path
+    convergence_fig = plot_convergence_comparison(algorithms, output_path=convergence_path)
+    if convergence_fig is not None:
+        chart_paths["Convergence Speed"] = convergence_path
 
     # 4. Quality ranking
     quality_path = output_dir / "quality_ranking.png"
