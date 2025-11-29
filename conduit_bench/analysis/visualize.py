@@ -263,15 +263,9 @@ def plot_convergence_comparison(
         convergence_points.append(conv_point if conv_point else 0)
         converged_flags.append(converged)
 
-    # Check if all convergence points are identical
+    # Check if all convergence points are identical (for title customization)
     valid_points = [p for p in convergence_points if p > 0]
     all_identical = len(set(valid_points)) == 1 if valid_points else False
-
-    # Skip chart if all algorithms converged at the same point (no differentiation)
-    if all_identical and len(valid_points) >= 3:
-        plt.close(fig)
-        print(f"  ⊘ Convergence chart skipped: all algorithms converged at same point (Query #{int(valid_points[0])})")
-        return None
 
     # Plot bars
     colors = ["green" if c else "red" for c in converged_flags]
@@ -573,10 +567,17 @@ def generate_html_report(
         # Handle both nested and flat convergence structures
         convergence = data.get("convergence", {})
         if isinstance(convergence, dict):
+            conv_point = convergence.get("convergence_point")
             converged = convergence.get("converged", False)
         else:
+            conv_point = data.get("convergence_point")
             converged = data.get("converged", False)
-        converged_str = "✓" if converged else "✗"
+
+        # Show actual convergence point (query number) instead of checkmark
+        if converged and conv_point:
+            converged_str = f"Query #{int(conv_point)}"
+        else:
+            converged_str = "Never"
 
         # Handle both tuple and separate CI fields
         quality_ci = data.get("quality_ci")
@@ -725,11 +726,10 @@ def create_all_visualizations(
     plot_cost_quality_scatter(algorithms, pareto_optimal, output_path=cost_quality_path)
     chart_paths["Cost-Quality Trade-off"] = cost_quality_path
 
-    # 3. Convergence comparison (skip if all converged at same point)
+    # 3. Convergence comparison
     convergence_path = output_dir / "convergence_comparison.png"
-    convergence_fig = plot_convergence_comparison(algorithms, output_path=convergence_path)
-    if convergence_fig is not None:
-        chart_paths["Convergence Speed"] = convergence_path
+    plot_convergence_comparison(algorithms, output_path=convergence_path)
+    chart_paths["Convergence Speed"] = convergence_path
 
     # 4. Quality ranking
     quality_path = output_dir / "quality_ranking.png"
