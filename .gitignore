@@ -40,6 +40,8 @@ env/
 
 # Testing
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 *.cover
@@ -63,10 +65,16 @@ humaneval_*.json
 *.log
 logs/
 
+# Development and debug scripts (root directory)
+debug_*.py
+test_param_*.py
+
 # Temporary files
 tmp/
 temp/
 *.tmp
+results/test_*.json
+results/*_fix_*.json
 
 # Jupyter
 .ipynb_checkpoints/
