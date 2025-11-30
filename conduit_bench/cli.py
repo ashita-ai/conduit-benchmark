@@ -715,7 +715,38 @@ def analyze(results: Path, output: Path) -> None:
     Example:
         conduit-bench analyze --results results/benchmark.json
     """
+    from dataclasses import asdict, is_dataclass
     from conduit_bench.analysis.metrics import analyze_benchmark_results
+
+    def convert_to_dict(obj):
+        """Recursively convert dataclasses to dicts for JSON serialization."""
+        import numpy as np
+
+        # Handle numpy types
+        if isinstance(obj, (np.integer, np.floating)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        # Handle dataclasses
+        elif is_dataclass(obj) and not isinstance(obj, type):
+            return {k: convert_to_dict(v) for k, v in asdict(obj).items()}
+        # Handle dictionaries
+        elif isinstance(obj, dict):
+            return {k: convert_to_dict(v) for k, v in obj.items()}
+        # Handle lists and tuples
+        elif isinstance(obj, (list, tuple)):
+            return [convert_to_dict(item) for item in obj]
+        # Handle booleans explicitly
+        elif isinstance(obj, bool):
+            return obj
+        # Handle None, strings, numbers
+        elif obj is None or isinstance(obj, (str, int, float)):
+            return obj
+        # For anything else, try to convert to a string
+        else:
+            return str(obj)
 
     console.print("\n[bold cyan]Analyzing benchmark results...[/bold cyan]")
 
@@ -732,9 +763,12 @@ def analyze(results: Path, output: Path) -> None:
     # Ensure output directory exists
     output.parent.mkdir(parents=True, exist_ok=True)
 
+    # Convert dataclasses to dicts for JSON serialization
+    analysis_dict = convert_to_dict(analysis)
+
     # Save metrics
     with open(output, "w") as f:
-        json.dump(analysis, f, indent=2)
+        json.dump(analysis_dict, f, indent=2)
 
     console.print(f"[bold green]✓ Comprehensive metrics saved to {output}[/bold green]\n")
 

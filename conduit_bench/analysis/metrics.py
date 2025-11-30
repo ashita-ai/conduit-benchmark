@@ -105,36 +105,163 @@ def calculate_convergence(
     window: int | None = None,
     threshold: float = 0.10,
     min_samples: int | None = None,
+    algorithm_name: str | None = None,
+    algorithm_state_history: list[dict[str, Any]] | None = None,
 ) -> ConvergenceMetrics:
-    """Detect convergence in algorithm performance (learning curve stabilization).
+    """Detect convergence in algorithm performance using internal parameters.
 
-    An algorithm is considered converged when the trend in the learning curve
-    flattens (slope near zero) over a sliding window, indicating the algorithm
-    has stopped meaningfully improving.
+    Uses algorithm internal state (alpha/beta, mean rewards, etc.) when available,
+    falling back to quality scores for backward compatibility.
 
-    Adaptive defaults based on dataset size:
-    - min_samples: max(100, 20% of dataset)
-    - window: max(50, 10% of dataset)
+    For learning algorithms, convergence is detected when internal parameters
+    (e.g., Thompson Sampling alpha/beta, UCB1 mean rewards) stabilize.
 
     Args:
-        metric_history: Time series of metric values (e.g., quality scores)
+        metric_history: Time series of quality scores (fallback if no state history)
         window: Sliding window size for convergence detection (default: adaptive)
-        threshold: Slope threshold for convergence (default: 0.10, i.e., <10% change)
+        threshold: Stability threshold for parameter changes (default: 0.10 = 10% CV)
         min_samples: Minimum samples before checking convergence (default: adaptive)
+        algorithm_name: Algorithm name for type-specific convergence logic
+        algorithm_state_history: List of algorithm internal states from get_stats()
 
     Returns:
         ConvergenceMetrics with convergence status and point
     """
     dataset_size = len(metric_history)
 
-    # Adaptive defaults based on dataset size
+    # Adaptive defaults
     if min_samples is None:
-        min_samples = max(100, int(dataset_size * 0.2))  # 20% of dataset, min 100
-
+        min_samples = min(15, max(10, int(dataset_size * 0.05)))
     if window is None:
-        window = max(50, int(dataset_size * 0.1))  # 10% of dataset, min 50
+        window = min(20, max(10, int(dataset_size * 0.10)))
 
-    if dataset_size < min_samples:
+    # Fixed strategies converge immediately (always_best, always_cheapest, oracle)
+    if algorithm_name and any(name in algorithm_name.lower() for name in ['always_best', 'always_cheapest', 'oracle', 'always_']):
+        return ConvergenceMetrics(
+            converged=True,
+            convergence_point=1,
+            coefficient_of_variation=0.0,
+            window_size=window,
+            threshold=threshold,
+        )
+
+    # If we have algorithm state history, use parameter-based convergence
+    if algorithm_state_history and len(algorithm_state_history) >= min_samples:
+        return _detect_parameter_convergence(
+            algorithm_state_history=algorithm_state_history,
+            algorithm_name=algorithm_name,
+            window=window,
+            threshold=threshold,
+            min_samples=min_samples,
+        )
+
+    # Fallback to quality score-based detection (legacy)
+    return _detect_quality_convergence(
+        metric_history=metric_history,
+        window=window,
+        threshold=threshold,
+        min_samples=min_samples,
+        algorithm_name=algorithm_name,
+    )
+
+
+def _detect_parameter_convergence(
+    algorithm_state_history: list[dict[str, Any]],
+    algorithm_name: str | None,
+    window: int,
+    threshold: float,
+    min_samples: int,
+) -> ConvergenceMetrics:
+    """Detect convergence using internal algorithm parameters."""
+
+    # Random baseline: no learning, high variance
+    if algorithm_name and 'random' in algorithm_name.lower():
+        return ConvergenceMetrics(
+            converged=False,
+            convergence_point=None,
+            coefficient_of_variation=float('inf'),
+            window_size=window,
+            threshold=threshold,
+        )
+
+    # Extract representative metric from algorithm state
+    param_values = []
+
+    for state in algorithm_state_history:
+        if not state:
+            continue
+
+        # Thompson Sampling: track mean rewards (alpha/(alpha+beta)) averaged across arms
+        if 'arm_distributions' in state and state['arm_distributions']:
+            means = [dist.get('mean', 0.0) for dist in state['arm_distributions'].values()]
+            if means:
+                param_values.append(np.mean(means))
+
+        # UCB1, Epsilon Greedy: track mean rewards averaged across arms
+        elif 'arm_mean_reward' in state and state['arm_mean_reward']:
+            means = list(state['arm_mean_reward'].values())
+            if means:
+                param_values.append(np.mean(means))
+
+        # LinUCB or others: use success rates if available
+        elif 'arm_success_rates' in state and state['arm_success_rates']:
+            rates = list(state['arm_success_rates'].values())
+            if rates:
+                param_values.append(np.mean(rates))
+
+    # Need sufficient data
+    if len(param_values) < min_samples:
+        return ConvergenceMetrics(
+            converged=False,
+            convergence_point=None,
+            coefficient_of_variation=float('inf'),
+            window_size=window,
+            threshold=threshold,
+        )
+
+    # Detect convergence: when coefficient of variation drops below threshold
+    convergence_point = None
+
+    for i in range(min_samples, len(param_values)):
+        # Calculate CV over sliding window
+        window_start = max(0, i - window)
+        window_data = param_values[window_start:i]
+
+        if len(window_data) >= window // 2:  # At least half window size
+            mean_val = np.mean(window_data)
+            std_val = np.std(window_data)
+            cv = std_val / mean_val if mean_val > 0 else float('inf')
+
+            # Converged when CV drops below threshold
+            if cv < threshold:
+                convergence_point = i + 1  # 1-indexed for query number
+                break
+
+    # Calculate final CV
+    recent_window = param_values[-window:] if len(param_values) >= window else param_values
+    mean_recent = np.mean(recent_window)
+    std_recent = np.std(recent_window)
+    final_cv = std_recent / mean_recent if mean_recent > 0 else float('inf')
+
+    return ConvergenceMetrics(
+        converged=convergence_point is not None,
+        convergence_point=convergence_point,
+        coefficient_of_variation=final_cv,
+        window_size=window,
+        threshold=threshold,
+    )
+
+
+def _detect_quality_convergence(
+    metric_history: list[float],
+    window: int,
+    threshold: float,
+    min_samples: int,
+    algorithm_name: str | None,
+) -> ConvergenceMetrics:
+    """Fallback: detect convergence using quality scores (legacy method)."""
+
+    if len(metric_history) < min_samples:
         return ConvergenceMetrics(
             converged=False,
             convergence_point=None,
@@ -143,99 +270,39 @@ def calculate_convergence(
             threshold=threshold,
         )
 
-    # Check for fixed baselines (always_best, always_cheapest, oracle)
-    # These have very low variance from the start and should be marked as converged at query 1
-    early_window = min(20, len(metric_history) // 4)
-    if early_window >= 10:
-        early_data = metric_history[:early_window]
-        early_cv = np.std(early_data) / np.mean(early_data) if np.mean(early_data) > 0 else 0
-
-        # If coefficient of variation < 0.01 (1% variance) early on, it's a fixed baseline
-        if early_cv < 0.01:
-            return ConvergenceMetrics(
-                converged=True,
-                convergence_point=1,  # Fixed from the start
-                coefficient_of_variation=early_cv,
-                window_size=window,
-                threshold=threshold,
-            )
-
-    # Calculate moving average to smooth out noise
-    window_size = min(50, window // 2)
-    smoothed = np.convolve(metric_history, np.ones(window_size)/window_size, mode='valid')
-
-    # Calculate slope of the last window of smoothed data
-    if len(smoothed) < window:
-        recent_smoothed = smoothed
+    # Smooth the curve
+    smoothing_window = min(10, max(3, window // 3))
+    if len(metric_history) >= smoothing_window:
+        smoothed = np.convolve(metric_history, np.ones(smoothing_window)/smoothing_window, mode='valid')
     else:
-        recent_smoothed = smoothed[-window:]
+        smoothed = np.array(metric_history)
 
-    # Fit linear regression to detect trend
-    x = np.arange(len(recent_smoothed))
-    if len(x) > 1:
-        slope = np.polyfit(x, recent_smoothed, 1)[0]
-        # Normalize slope by mean to get percentage change per query
-        mean_recent = np.mean(recent_smoothed)
-        normalized_slope = abs(slope / mean_recent) if mean_recent > 0 else float("inf")
-    else:
-        normalized_slope = float("inf")
-
-    # Check if this is a random/noisy algorithm (high variance, no learning)
-    # Use SMOOTHED data for CV to avoid penalizing learning algorithms with exploration
-    smoothed_cv = np.std(smoothed) / np.mean(smoothed) if np.mean(smoothed) > 0 else float("inf")
-
-    # If CV > 0.20 (20% variance) even in smoothed data, check for learning
-    # This catches "random" baseline which has high variance and no learning
-    if smoothed_cv > 0.20:
-        # Check if there's actual learning trend (not just mean improvement)
-        # Fit linear trend to smoothed data
-        if len(smoothed) >= 20:
-            x_trend = np.arange(len(smoothed))
-            trend_slope = np.polyfit(x_trend, smoothed, 1)[0]
-            mean_smoothed = np.mean(smoothed)
-            normalized_trend = trend_slope / mean_smoothed if mean_smoothed > 0 else 0
-
-            # If slope is nearly flat or negative (< 0.001 improvement per query) and high variance,
-            # it's a random algorithm with no learning
-            if normalized_trend < 0.001:
-                return ConvergenceMetrics(
-                    converged=False,
-                    convergence_point=None,
-                    coefficient_of_variation=smoothed_cv,
-                    window_size=window,
-                    threshold=threshold,
-                )
-
-    # Converged if slope is nearly flat (< threshold change per query)
-    converged = normalized_slope < threshold
-
-    # Find convergence point (when slope first dropped below threshold)
+    # Find convergence point using slope detection
     convergence_point = None
-    if converged:
-        # Search forward to find when it first converged
-        # Check smaller windows starting from min_samples to find earliest convergence
-        min_window_for_convergence = min(window, 20)  # At least 20 points to detect convergence
 
-        for i in range(min_window_for_convergence, len(smoothed)):
-            # Use a sliding window to detect when slope first becomes small
-            segment = smoothed[max(0, i-min_window_for_convergence):i]
-            if len(segment) > 1:
-                x_seg = np.arange(len(segment))
-                seg_slope = np.polyfit(x_seg, segment, 1)[0]
-                seg_mean = np.mean(segment)
-                seg_norm_slope = abs(seg_slope / seg_mean) if seg_mean > 0 else float("inf")
-                if seg_norm_slope < threshold:
-                    convergence_point = i
-                    break
+    for i in range(min_samples, len(smoothed)):
+        # Calculate slope over window
+        window_start = max(0, i - window)
+        segment = smoothed[window_start:i]
 
-    # Still compute CV for informational purposes
-    recent_metric = metric_history[-window:]
-    mean_recent = np.mean(recent_metric)
-    std_recent = np.std(recent_metric, ddof=1)
+        if len(segment) > 1:
+            x = np.arange(len(segment))
+            slope = np.polyfit(x, segment, 1)[0]
+            mean_val = np.mean(segment)
+            normalized_slope = abs(slope / mean_val) if mean_val > 0 else float("inf")
+
+            if normalized_slope < threshold:
+                convergence_point = i + 1  # 1-indexed
+                break
+
+    # Calculate CV
+    recent = metric_history[-window:] if len(metric_history) >= window else metric_history
+    mean_recent = np.mean(recent)
+    std_recent = np.std(recent, ddof=1)
     cv = std_recent / mean_recent if mean_recent > 0 else float("inf")
 
     return ConvergenceMetrics(
-        converged=converged,
+        converged=convergence_point is not None,
         convergence_point=convergence_point,
         coefficient_of_variation=cv,
         window_size=window,
@@ -419,6 +486,7 @@ def calculate_algorithm_metrics(
     total_queries: int,
     quality_scores: list[float],
     cost_history: list[float],
+    algorithm_state_history: list[dict[str, Any]] | None = None,
 ) -> AlgorithmMetrics:
     """Calculate comprehensive metrics for a single algorithm run.
 
@@ -429,6 +497,7 @@ def calculate_algorithm_metrics(
         total_queries: Number of queries processed
         quality_scores: List of quality scores over time
         cost_history: Cumulative cost history over time
+        algorithm_state_history: List of algorithm internal states (from get_stats())
 
     Returns:
         AlgorithmMetrics with all calculated metrics
@@ -440,8 +509,12 @@ def calculate_algorithm_metrics(
     normalized_cost = cumulative_cost / total_queries if total_queries > 0 else 0.0
     cost_per_query = total_cost / total_queries if total_queries > 0 else 0.0
 
-    # Convergence detection
-    convergence = calculate_convergence(quality_scores)
+    # Convergence detection using algorithm parameters if available
+    convergence = calculate_convergence(
+        metric_history=quality_scores,
+        algorithm_name=algorithm_name,
+        algorithm_state_history=algorithm_state_history,
+    )
 
     # Confidence intervals
     quality_ci = bootstrap_ci(quality_scores)
@@ -486,14 +559,22 @@ def calculate_comparative_metrics(
             quality_results[metrics.algorithm_name] = [metrics.average_quality]
         friedman = friedman_test(quality_results)
 
-    # Pairwise effect sizes
+    # Pairwise effect sizes - use full quality histories if available
     pairwise_comparisons = {}
     for i, metrics1 in enumerate(algorithm_metrics):
         for metrics2 in algorithm_metrics[i + 1 :]:
             key = (metrics1.algorithm_name, metrics2.algorithm_name)
-            effect = calculate_cohens_d(
-                [metrics1.average_quality], [metrics2.average_quality]
-            )
+
+            # Use full quality histories for more accurate effect size if available
+            if quality_score_histories:
+                group1 = quality_score_histories.get(metrics1.algorithm_name, [metrics1.average_quality])
+                group2 = quality_score_histories.get(metrics2.algorithm_name, [metrics2.average_quality])
+            else:
+                # Fallback to single averaged values
+                group1 = [metrics1.average_quality]
+                group2 = [metrics2.average_quality]
+
+            effect = calculate_cohens_d(group1, group2)
             pairwise_comparisons[key] = effect
 
     # Rankings
@@ -576,12 +657,20 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
                 # Use avg_quality as single score
                 quality_scores = [algo.get("avg_quality", 0.0)]
 
+            # Extract algorithm state history from feedback metadata
+            algorithm_state_history = []
+            for eval_data in algo.get("feedback", []):
+                metadata = eval_data.get("metadata", {})
+                if metadata and "algorithm_state" in metadata:
+                    algorithm_state_history.append(metadata["algorithm_state"])
+
             normalized_algos.append({
                 "name": algo["algorithm_name"],
                 "quality_scores": quality_scores,
                 "total_cost": algo["total_cost"],
                 "total_queries": algo.get("total_queries", len(quality_scores)),
                 "cumulative_cost": algo.get("cumulative_cost", []),
+                "algorithm_state_history": algorithm_state_history if algorithm_state_history else None,
             })
     else:
         # Dict-of-algorithms format (algorithm_name -> metrics dict)
@@ -597,12 +686,14 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
             if isinstance(cost_history, (int, float)):
                 cost_history = [cost_history]
 
+            # Algorithm state history not available in dict format
             normalized_algos.append({
                 "name": algo_name,
                 "quality_scores": quality_scores,
                 "total_cost": algo_data.get("total_cost", 0.0),
                 "total_queries": len(quality_scores),
                 "cumulative_cost": cost_history,
+                "algorithm_state_history": None,
             })
 
     # Calculate individual algorithm metrics
@@ -616,6 +707,7 @@ def analyze_benchmark_results(benchmark_result: dict[str, Any]) -> dict[str, Any
             total_queries=algo["total_queries"],
             quality_scores=algo["quality_scores"],
             cost_history=algo["cumulative_cost"],
+            algorithm_state_history=algo.get("algorithm_state_history"),
         )
         individual_metrics.append(metrics)
         quality_score_histories[algo["name"]] = algo["quality_scores"]

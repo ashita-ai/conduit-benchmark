@@ -350,7 +350,33 @@ class BenchmarkRunner:
             else:
                 quality_score = 0.0  # Failed execution = zero quality
 
-            # Create evaluation record (all queries now evaluated)
+            # Update algorithm with feedback FIRST - penalize failures, reward success
+            if execution_result.was_fallback and execution_result.failed_models:
+                # Penalize all failed models with quality=0.0
+                for failed_model_id in execution_result.failed_models:
+                    failed_feedback = BanditFeedback(
+                        model_id=failed_model_id,
+                        cost=0.0,
+                        quality_score=0.0,
+                        latency=0.0,
+                        success=False,
+                    )
+                    await algorithm.update(failed_feedback, features)
+
+            # Reward the successful model (or penalize if all failed)
+            bandit_feedback = BanditFeedback(
+                model_id=execution_result.model_id,
+                cost=execution_result.cost,
+                quality_score=quality_score,
+                latency=execution_result.latency,
+                success=execution_result.success,
+            )
+            await algorithm.update(bandit_feedback, features)
+
+            # Capture algorithm internal state AFTER update for convergence detection
+            algorithm_state = algorithm.get_stats()
+
+            # Create evaluation record with algorithm state
             evaluation = QueryEvaluation(
                 query_id=query.query_id,
                 model_id=selected_arm.model_id,
@@ -360,6 +386,9 @@ class BenchmarkRunner:
                 latency=execution_result.latency,
                 success=execution_result.success,
                 error=execution_result.error,
+                metadata={
+                    "algorithm_state": algorithm_state,  # Internal algorithm parameters for convergence
+                },
             )
             feedback_list.append(evaluation)
 
@@ -383,33 +412,11 @@ class BenchmarkRunner:
                             "failed_models": execution_result.failed_models,
                             "error_details": execution_result.error,  # Error messages from failed models
                             "query_text": execution_result.query_text,  # For debugging
+                            "algorithm_state": algorithm_state,  # Store algorithm state in DB too
                         },
                     )
                 except Exception as e:
                     console.print(f"[yellow]Warning: Failed to write query evaluation: {e}[/yellow]")
-
-            # Update algorithm with feedback - penalize failures, reward success
-            if execution_result.was_fallback and execution_result.failed_models:
-                # Penalize all failed models with quality=0.0
-                for failed_model_id in execution_result.failed_models:
-                    failed_feedback = BanditFeedback(
-                        model_id=failed_model_id,
-                        cost=0.0,
-                        quality_score=0.0,
-                        latency=0.0,
-                        success=False,
-                    )
-                    await algorithm.update(failed_feedback, features)
-
-            # Reward the successful model (or penalize if all failed)
-            bandit_feedback = BanditFeedback(
-                model_id=execution_result.model_id,
-                cost=execution_result.cost,
-                quality_score=quality_score,
-                latency=execution_result.latency,
-                success=execution_result.success,
-            )
-            await algorithm.update(bandit_feedback, features)
 
             # Track cumulative metrics
             total_quality += quality_score

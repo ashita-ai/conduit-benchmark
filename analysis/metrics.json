@@ -1,448 +1,47 @@
 {
-  "benchmark_id": "4b24693f-be7f-4244-9f77-816988fdeb7b",
-  "dataset_size": 50,
+  "benchmark_id": "53a9319b-3c4c-40c3-a0ce-5f1c990c022e",
+  "dataset_size": 1000,
   "summary": {
     "num_algorithms": 11,
-    "best_quality_algorithm": "thompson_sampling",
-    "best_cost_algorithm": "linucb",
+    "best_quality_algorithm": "dueling_bandit",
+    "best_cost_algorithm": "always_cheapest",
     "quality_rankings": [
-      "thompson_sampling",
-      "epsilon_greedy",
+      "dueling_bandit",
       "hybrid_thompson_linucb",
-      "hybrid_ucb1_linucb",
+      "epsilon_greedy",
+      "thompson_sampling",
       "ucb1",
       "contextual_thompson_sampling",
       "random",
-      "always_cheapest",
+      "hybrid_ucb1_linucb",
       "linucb",
-      "dueling_bandit",
-      "always_best"
+      "always_best",
+      "always_cheapest"
     ],
     "cost_rankings": [
-      "linucb",
       "always_cheapest",
+      "linucb",
       "always_best",
-      "contextual_thompson_sampling",
-      "epsilon_greedy",
-      "ucb1",
-      "dueling_bandit",
       "hybrid_ucb1_linucb",
-      "random",
       "hybrid_thompson_linucb",
-      "thompson_sampling"
+      "dueling_bandit",
+      "contextual_thompson_sampling",
+      "thompson_sampling",
+      "random",
+      "ucb1",
+      "epsilon_greedy"
     ]
   },
   "algorithms": {
     "thompson_sampling": {
-      "total_cost": 0.26998049999999996,
-      "average_quality": 0.9,
+      "total_cost": 2.302739899999998,
+      "average_quality": 0.882,
       "quality_ci": [
-        0.82,
-        0.98
+        0.862,
+        0.901
       ],
-      "cumulative_cost": 0.26998049999999996,
-      "normalized_cost": 0.005399609999999999,
-      "cost_per_query": 0.005399609999999999,
+      "cumulative_cost": 2.302739899999998,
+      "normalized_cost": 0.002302739899999998,
+      "cost_per_query": 0.002302739899999998,
       "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "ucb1": {
-      "total_cost": 0.09280734999999998,
-      "average_quality": 0.86,
-      "quality_ci": [
-        0.76,
-        0.94
-      ],
-      "cumulative_cost": 0.09280734999999998,
-      "normalized_cost": 0.0018561469999999996,
-      "cost_per_query": 0.0018561469999999996,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "epsilon_greedy": {
-      "total_cost": 0.07761090000000001,
-      "average_quality": 0.88,
-      "quality_ci": [
-        0.78,
-        0.96
-      ],
-      "cumulative_cost": 0.07761090000000001,
-      "normalized_cost": 0.0015522180000000002,
-      "cost_per_query": 0.0015522180000000002,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "linucb": {
-      "total_cost": 0.0092312,
-      "average_quality": 0.84,
-      "quality_ci": [
-        0.74,
-        0.94
-      ],
-      "cumulative_cost": 0.0092312,
-      "normalized_cost": 0.000184624,
-      "cost_per_query": 0.000184624,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "contextual_thompson_sampling": {
-      "total_cost": 0.053194149999999996,
-      "average_quality": 0.86,
-      "quality_ci": [
-        0.76,
-        0.94
-      ],
-      "cumulative_cost": 0.053194149999999996,
-      "normalized_cost": 0.0010638829999999998,
-      "cost_per_query": 0.0010638829999999998,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "dueling_bandit": {
-      "total_cost": 0.15067575,
-      "average_quality": 0.84,
-      "quality_ci": [
-        0.74,
-        0.94
-      ],
-      "cumulative_cost": 0.15067575,
-      "normalized_cost": 0.003013515,
-      "cost_per_query": 0.003013515,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "hybrid_thompson_linucb": {
-      "total_cost": 0.19449110000000003,
-      "average_quality": 0.88,
-      "quality_ci": [
-        0.78,
-        0.96
-      ],
-      "cumulative_cost": 0.19449110000000003,
-      "normalized_cost": 0.0038898220000000007,
-      "cost_per_query": 0.0038898220000000007,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "hybrid_ucb1_linucb": {
-      "total_cost": 0.1509569,
-      "average_quality": 0.88,
-      "quality_ci": [
-        0.78,
-        0.96
-      ],
-      "cumulative_cost": 0.1509569,
-      "normalized_cost": 0.003019138,
-      "cost_per_query": 0.003019138,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "random": {
-      "total_cost": 0.16207960000000002,
-      "average_quality": 0.86,
-      "quality_ci": [
-        0.76,
-        0.94
-      ],
-      "cumulative_cost": 0.16207960000000002,
-      "normalized_cost": 0.003241592,
-      "cost_per_query": 0.003241592,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "always_best": {
-      "total_cost": 0.010878750000000001,
-      "average_quality": 0.78,
-      "quality_ci": [
-        0.66,
-        0.88
-      ],
-      "cumulative_cost": 0.010878750000000001,
-      "normalized_cost": 0.00021757500000000002,
-      "cost_per_query": 0.00021757500000000002,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    },
-    "always_cheapest": {
-      "total_cost": 0.010663,
-      "average_quality": 0.86,
-      "quality_ci": [
-        0.76,
-        0.94
-      ],
-      "cumulative_cost": 0.010663,
-      "normalized_cost": 0.00021326,
-      "cost_per_query": 0.00021326,
-      "convergence": {
-        "converged": false,
-        "convergence_point": null,
-        "coefficient_of_variation": Infinity
-      }
-    }
-  },
-  "statistical_tests": {
-    "friedman": {
-      "statistic": 11.138211382112933,
-      "p_value": 0.34685198412781004,
-      "significant": false
-    },
-    "pairwise_effect_sizes": {
-      "thompson_sampling_vs_ucb1": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_epsilon_greedy": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_contextual_thompson_sampling": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_dueling_bandit": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_hybrid_thompson_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "thompson_sampling_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_epsilon_greedy": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_contextual_thompson_sampling": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_dueling_bandit": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_hybrid_thompson_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "ucb1_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_contextual_thompson_sampling": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_dueling_bandit": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_hybrid_thompson_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "epsilon_greedy_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_contextual_thompson_sampling": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_dueling_bandit": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_hybrid_thompson_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "linucb_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "contextual_thompson_sampling_vs_dueling_bandit": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "contextual_thompson_sampling_vs_hybrid_thompson_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "contextual_thompson_sampling_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "contextual_thompson_sampling_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "contextual_thompson_sampling_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "contextual_thompson_sampling_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "dueling_bandit_vs_hybrid_thompson_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "dueling_bandit_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "dueling_bandit_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "dueling_bandit_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "dueling_bandit_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_thompson_linucb_vs_hybrid_ucb1_linucb": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_thompson_linucb_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_thompson_linucb_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_thompson_linucb_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_ucb1_linucb_vs_random": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_ucb1_linucb_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "hybrid_ucb1_linucb_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "random_vs_always_best": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "random_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      },
-      "always_best_vs_always_cheapest": {
-        "cohens_d": 0.0,
-        "interpretation": "negligible"
-      }
-    }
-  },
-  "pareto_frontier": [
-    "thompson_sampling",
-    "epsilon_greedy",
-    "linucb",
-    "always_cheapest"
-  ]
-}
+        "converged": 
