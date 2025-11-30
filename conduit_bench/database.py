@@ -7,7 +7,6 @@ import asyncio
 import json
 import math
 import os
-import uuid
 from datetime import datetime
 from typing import Any, Callable, TypeVar
 
@@ -247,18 +246,15 @@ class BenchmarkDatabase:
         if not self.pool:
             raise RuntimeError("Database not connected. Call connect() first.")
 
-        evaluation_id = str(uuid.uuid4())
-
         async def _write():
             await self.pool.execute(
                 """
                 INSERT INTO query_evaluations (
-                    evaluation_id, run_id, query_id, model_id,
+                    run_id, query_id, model_id,
                     quality_score, cost, latency, success, metadata
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
                 """,
-                evaluation_id,
                 run_id,
                 query_id,
                 model_id,
