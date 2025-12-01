@@ -254,6 +254,7 @@ class BenchmarkDatabase:
                     quality_score, cost, latency, success, metadata
                 )
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+                ON CONFLICT (run_id, query_id) DO NOTHING
                 """,
                 run_id,
                 query_id,
