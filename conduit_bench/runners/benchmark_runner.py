@@ -238,7 +238,9 @@ class BenchmarkRunner:
                     metadata=algorithm.get_stats(),
                 )
             except Exception as e:
-                console.print(f"[yellow]Warning: Failed to create algorithm run: {e}[/yellow]")
+                console.print(f"[red bold]✗ FATAL: Database write failed - aborting benchmark[/red bold]")
+                console.print(f"[red]Error: {e}[/red]")
+                raise RuntimeError(f"Database write failed for algorithm run {algorithm.name}") from e
 
         # Process queries sequentially (bandit algorithms need feedback before next selection)
         iterator = tqdm_asyncio(dataset, desc=algorithm.name, disable=not show_progress)
@@ -323,6 +325,13 @@ class BenchmarkRunner:
                     query_text=query.query_text,
                     system_prompt="You are a helpful assistant.",
                 )
+
+            # Abort if LLM execution failed completely (all models including fallbacks failed)
+            if not execution_result.success:
+                console.print(f"[red bold]✗ FATAL: LLM execution failed completely - aborting benchmark[/red bold]")
+                console.print(f"[red]Query {query.query_id}: All models failed (primary + fallbacks)[/red]")
+                console.print(f"[red]Error: {execution_result.error}[/red]")
+                raise RuntimeError(f"LLM execution failed for query {query.query_id}: {execution_result.error}")
 
             # Evaluate quality using pluggable evaluator or Arbiter (legacy)
             has_reference = bool(query.reference_answer)
@@ -416,7 +425,9 @@ class BenchmarkRunner:
                         },
                     )
                 except Exception as e:
-                    console.print(f"[yellow]Warning: Failed to write query evaluation: {e}[/yellow]")
+                    console.print(f"[red bold]✗ FATAL: Database write failed - aborting benchmark[/red bold]")
+                    console.print(f"[red]Error writing query {query.query_id}: {e}[/red]")
+                    raise RuntimeError(f"Database write failed for query {query.query_id}") from e
 
             # Track cumulative metrics
             total_quality += quality_score

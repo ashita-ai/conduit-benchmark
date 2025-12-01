@@ -137,8 +137,8 @@ class BenchmarkDatabase:
         self.pool = await asyncpg.create_pool(
             self.database_url,
             min_size=2,
-            max_size=10,
-            command_timeout=60,
+            max_size=15,  # Support 11 parallel algorithms + overhead
+            command_timeout=120,  # Increase for network latency
             statement_cache_size=0,  # Required for Supabase/pgbouncer
         )
 
