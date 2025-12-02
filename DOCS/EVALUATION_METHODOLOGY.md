@@ -217,6 +217,31 @@ async def evaluate_arbiter(
 - ⚠️ **API reliability dependency** (timeouts possible)
 - ⚠️ Non-deterministic (small variance in scores)
 
+**Configuration Settings** (`conduit.yaml`):
+
+```yaml
+arbiter:
+  sample_rate: 0.1                # Evaluate 10% of responses (cost control)
+  daily_budget: 10.0              # Maximum $10/day on evaluations
+  model: "o4-mini"                # Judge model (gpt-4o-mini)
+  evaluators:                     # Active evaluator types
+    - semantic                    # Query-response alignment
+    - factuality                  # Ground truth accuracy
+```
+
+**Rationale for Configuration**:
+- **`model: o4-mini`**: Cost-effective judge model (~$0.15/1M input tokens, ~$0.60/1M output tokens)
+- **`evaluators: [semantic, factuality]`**: Dual-judge approach balances reasoning quality and correctness
+- **`sample_rate: 0.1`**: Budget-conscious setting (not used in benchmarks - we evaluate 100%)
+- **`daily_budget: 10.0`**: Safety limit to prevent runaway costs
+
+**Judge Model Selection**:
+| Model | Cost (per eval) | Speed | Quality | Choice |
+|-------|----------------|-------|---------|--------|
+| gpt-4o | ~$0.005 | 5-10s | Excellent | Too expensive |
+| **o4-mini** | **~$0.001** | **5-10s** | **Very Good** | ✅ **Optimal** |
+| gemini-flash | ~$0.0005 | 3-5s | Good | Faster but less reliable |
+
 ---
 
 ### 3. Code Execution Evaluator
