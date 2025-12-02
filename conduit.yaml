@@ -237,7 +237,7 @@ hybrid_routing:
 arbiter:
   sample_rate: 0.1                # Evaluate 10% of responses (cost control)
   daily_budget: 10.0              # Maximum $10/day on evaluations
-  model: "gpt-5"                  # Judge model for evaluation
+  model: "gpt-5.1"                # Judge model for evaluation
   evaluators:                     # Active evaluator types
     - semantic
     - factuality

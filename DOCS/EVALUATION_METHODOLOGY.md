@@ -223,14 +223,14 @@ async def evaluate_arbiter(
 arbiter:
   sample_rate: 0.1                # Evaluate 10% of responses (cost control)
   daily_budget: 10.0              # Maximum $10/day on evaluations
-  model: "gpt-5"                  # Judge model for evaluation
+  model: "gpt-5.1"                # Judge model for evaluation
   evaluators:                     # Active evaluator types
     - semantic                    # Query-response alignment
     - factuality                  # Ground truth accuracy
 ```
 
 **Rationale for Configuration**:
-- **`model: gpt-5`**: High-quality judge model for accurate evaluations
+- **`model: gpt-5.1`**: Premium judge model for highest-quality evaluations
 - **`evaluators: [semantic, factuality]`**: Dual-judge approach balances reasoning quality and correctness
 - **`sample_rate: 0.1`**: Budget-conscious setting (not used in benchmarks - we evaluate 100%)
 - **`daily_budget: 10.0`**: Safety limit to prevent runaway costs
@@ -238,9 +238,9 @@ arbiter:
 **Judge Model Selection**:
 | Model | Cost (per eval) | Speed | Quality | Choice |
 |-------|----------------|-------|---------|--------|
-| gpt-5.1 | ~$0.005 | 5-10s | Excellent | Premium option |
-| **gpt-5** | **~$0.002** | **5-10s** | **Excellent** | ✅ **Selected** |
-| gpt-5-mini | ~$0.001 | 3-5s | Very Good | Faster alternative |
+| **gpt-5.1** | **~$0.005** | **5-10s** | **Excellent** | ✅ **Selected** |
+| gpt-5 | ~$0.002 | 5-10s | Excellent | Good alternative |
+| gpt-5-mini | ~$0.001 | 3-5s | Very Good | Budget option |
 
 ---
 
