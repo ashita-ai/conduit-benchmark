@@ -143,7 +143,7 @@ embeddings:
   #                      192 components → 85% variance, ~1900 queries
   #   Cohere (1024-dim): 96 components → 80% variance, ~1000 queries
   pca:
-    enabled: true                 # Enable PCA compression
+    enabled: false                # Enable PCA compression (default: false)
     components: 128               # Number of principal components (provider-dependent, see above)
     auto_retrain: true            # Retrain PCA on your workload during UCB1 phase
     retrain_threshold: 150        # Minimum queries before auto-retraining
