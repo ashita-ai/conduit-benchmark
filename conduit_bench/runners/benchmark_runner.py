@@ -161,12 +161,30 @@ class BenchmarkRunner:
 
             # Run algorithms in parallel or sequentially
             if parallel:
-                # Run all algorithms concurrently
+                # Run all algorithms concurrently with error handling
                 import asyncio
 
                 console.print("[yellow]Starting all algorithms in parallel...[/yellow]\n")
                 tasks = [self._run_algorithm(algo, dataset, show_progress, _benchmark_id) for algo in self.algorithms]
-                algorithm_runs = await asyncio.gather(*tasks)
+                # Use return_exceptions=True to prevent one failure from canceling all others
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                # Process results, separating successful runs from failures
+                algorithm_runs = []
+                failures = []
+                for i, result in enumerate(results):
+                    if isinstance(result, Exception):
+                        failures.append((self.algorithms[i].name, result))
+                    else:
+                        algorithm_runs.append(result)
+
+                # Report failures but don't abort if some algorithms succeeded
+                if failures:
+                    console.print(f"\n[red bold]Warning: {len(failures)} algorithm(s) failed:[/red bold]")
+                    for algo_name, error in failures:
+                        console.print(f"[red]  - {algo_name}: {error}[/red]")
+                    if not algorithm_runs:
+                        raise RuntimeError(f"All algorithms failed. First error: {failures[0][1]}")
 
                 # Print completion summary
                 for run in algorithm_runs:
@@ -313,10 +331,16 @@ class BenchmarkRunner:
                 selected_arm = await algorithm.select_arm(features)
                 selections.append((query.query_id, selected_arm.model_id))
 
-                # Get fallback chain from algorithm if supported
+                # Get fallback chain from algorithm if supported, otherwise use default
                 fallback_arms = []
                 if hasattr(algorithm, 'get_fallback_chain'):
                     fallback_arms = algorithm.get_fallback_chain(features, exclude=selected_arm, max_fallbacks=3)
+                else:
+                    # Default fallback: try all other arms in order (sorted by expected quality descending)
+                    # This ensures benchmark continues even if selected model refuses
+                    other_arms = [arm for arm in algorithm.arm_list if arm.model_id != selected_arm.model_id]
+                    # Sort by expected quality (highest first) as a simple heuristic
+                    fallback_arms = sorted(other_arms, key=lambda a: a.expected_quality, reverse=True)[:3]
 
                 # Execute query with fallback support
                 execution_result = await self.executor.execute_with_fallback(
@@ -325,6 +349,15 @@ class BenchmarkRunner:
                     query_text=query.query_text,
                     system_prompt="You are a helpful assistant.",
                 )
+
+            # Log fallback usage (useful for debugging model refusals)
+            if execution_result.was_fallback and execution_result.success:
+                console.print(
+                    f"[yellow]⚠ {query.query_id}: Primary model {execution_result.primary_model} failed, "
+                    f"used fallback {execution_result.model_id}[/yellow]"
+                )
+                if execution_result.failed_models:
+                    console.print(f"[yellow]  Failed models: {execution_result.failed_models}[/yellow]")
 
             # Abort if LLM execution failed completely (all models including fallbacks failed)
             if not execution_result.success:

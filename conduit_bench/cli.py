@@ -537,6 +537,13 @@ def run(
 
         console.print(f"Algorithms: {', '.join(algo_names)}\n")
 
+        # Create QueryAnalyzer to get the correct feature dimension for contextual bandits
+        # The analyzer's feature_dim depends on the embedding provider (OpenAI=1538, FastEmbed=386)
+        from conduit.engines.analyzer import QueryAnalyzer
+        analyzer = QueryAnalyzer()
+        feature_dim = analyzer.feature_dim
+        console.print(f"[cyan]Feature dimension: {feature_dim}[/cyan]")
+
         # Create algorithm instances
         # HybridRouter takes model names (API names like "gpt-4o-mini", not conduit IDs like "o4-mini")
         # This is needed because HybridRouter._infer_provider() pattern-matches on the model name
@@ -550,6 +557,7 @@ def run(
                     switch_threshold=50,
                     phase1_algorithm="thompson_sampling",
                     phase2_algorithm="linucb",
+                    feature_dim=feature_dim,  # Pass correct feature dimension
                 )
             ),
             # UCB1 → LinUCB (fast convergence)
@@ -559,18 +567,19 @@ def run(
                     switch_threshold=50,
                     phase1_algorithm="ucb1",
                     phase2_algorithm="linucb",
+                    feature_dim=feature_dim,  # Pass correct feature dimension
                 )
             ),
             # Standard (non-contextual) bandits
             "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
             "epsilon": EpsilonGreedyBandit(DEFAULT_ARMS, epsilon=0.1),
-            # Contextual bandits (feature_dim auto-detected from QueryAnalyzer)
-            "linucb": LinUCBBandit(DEFAULT_ARMS, alpha=1.0),
+            # Contextual bandits - use feature_dim from QueryAnalyzer
+            "linucb": LinUCBBandit(DEFAULT_ARMS, alpha=1.0, feature_dim=feature_dim),
             "contextual_thompson": ContextualThompsonSamplingBandit(
-                DEFAULT_ARMS, lambda_reg=1.0
+                DEFAULT_ARMS, lambda_reg=1.0, feature_dim=feature_dim
             ),
-            "dueling": DuelingBandit(DEFAULT_ARMS),
+            "dueling": DuelingBandit(DEFAULT_ARMS, feature_dim=feature_dim),
             # Baselines
             "random": RandomBaseline(DEFAULT_ARMS, random_seed=42),
             "oracle": OracleBaseline(DEFAULT_ARMS),
@@ -597,6 +606,7 @@ def run(
             arbiter_model="gpt-4o-mini",
             max_concurrency=max_concurrency,
             evaluator=selected_evaluator,  # Pluggable evaluator (None = Arbiter)
+            analyzer=analyzer,  # Use the same analyzer for consistent feature dimensions
         )
 
         # Store oracle reference path if provided

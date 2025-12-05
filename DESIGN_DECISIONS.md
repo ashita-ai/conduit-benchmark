@@ -442,6 +442,83 @@ reward = 1.0 if result.returncode == 0 else 0.0
 
 ---
 
+## Model Failure Handling
+
+### Decision: Automatic Fallback on Model Refusal/Failure
+
+**Date**: 2025-12-04
+
+**Context**: Some LLM models may refuse certain queries (e.g., sensitive topics, safety guardrails) or fail due to validation errors. This can cause benchmark runs to abort.
+
+**Problem discovered**: Query `mmlu_test_5` (about biological weapons weaponization) caused `claude-opus-4-5-20251101` to fail with `UnexpectedModelBehavior: Exceeded maximum retries for output validation`. Algorithms that happened to select this model for this query failed entirely.
+
+**Decision**: Implement **automatic fallback chain** when primary model fails
+
+**Behavior**:
+1. Execute query against bandit-selected model (primary)
+2. If primary fails (refusal, validation error, timeout), try fallback models
+3. Fallback order: sorted by expected quality descending (top 3 alternatives)
+4. Log all failures and successful fallback for analysis
+5. Penalize failed models with quality=0.0 in bandit feedback
+6. Only abort if ALL models (primary + 3 fallbacks) fail
+
+**Implementation**:
+```python
+# Default fallback when algorithm doesn't provide get_fallback_chain()
+other_arms = [arm for arm in algorithm.arm_list if arm.model_id != selected_arm.model_id]
+fallback_arms = sorted(other_arms, key=lambda a: a.expected_quality, reverse=True)[:3]
+
+# Execute with fallback support
+execution_result = await executor.execute_with_fallback(
+    primary_arm=selected_arm,
+    fallback_arms=fallback_arms,  # Now populated, not empty
+    query_text=query.query_text,
+)
+
+# Log fallback usage
+if execution_result.was_fallback and execution_result.success:
+    console.print(f"⚠ Primary model {execution_result.primary_model} failed, used {execution_result.model_id}")
+```
+
+**Rationale**:
+
+#### Why Fallback (Not Abort)
+
+**Problems with abort-on-failure**:
+- Single model refusal kills entire benchmark run
+- Wastes compute time and API costs from completed queries
+- Different algorithms affected by luck of model selection
+- Unfair comparison (some algorithms hit problematic queries, others don't)
+
+**Advantages of fallback**:
+- Benchmark continues despite individual model issues
+- All algorithms evaluated on same query set
+- Failed models still penalized (quality=0.0 feedback)
+- Refusal patterns captured in logs for analysis
+
+#### Why Penalize Failed Models
+
+**When primary model fails**:
+- Record `quality_score=0.0` for the failed model
+- Bandit algorithm learns to avoid that model for similar queries
+- Successful fallback model gets actual quality score
+
+**This is fair because**:
+- A model that refuses to answer IS worse than one that answers
+- Production routing should avoid unreliable models
+- Captures real-world model behavior differences
+
+#### Known Sensitive Query Patterns
+
+Based on benchmark runs, these query types trigger model refusals:
+- **MMLU security_studies**: Questions about weapons, biological agents, military strategy
+- **Code generation**: Potentially harmful code (exploits, malware patterns)
+- **Medical/legal advice**: Queries that could be interpreted as professional advice
+
+**Mitigation**: Fallback chain ensures benchmark continues; logs capture patterns for analysis.
+
+---
+
 ## Production Concerns (Conduit Library)
 
 ### PCA Persistence Architecture Issue
@@ -542,6 +619,9 @@ reward = 1.0 if result.returncode == 0 else 0.0
 
 ## Change Log
 
+- **2025-12-04**: Implemented automatic fallback chain for model refusals/failures
+- **2025-12-04**: Fixed parallel execution to use `return_exceptions=True` for resilience
+- **2025-12-04**: Fixed LinUCB feature dimension mismatch (1538 vs 386) by passing QueryAnalyzer feature_dim
 - **2025-11-28**: Documented reward weights configuration (`user_facing` preset)
 - **2025-11-28**: Added future research area: multi-preset benchmarking
 - **2025-11-27**: Documented dueling bandits support and exclusion rationale

@@ -73,6 +73,11 @@ class HybridRouterBanditAdapter:
         """Expose arms from underlying router."""
         return self._router.phase1_bandit.arms
 
+    @property
+    def arm_list(self) -> list[Any]:
+        """Expose arm_list from underlying router (for fallback chain)."""
+        return self._router.phase1_bandit.arm_list
+
     async def select_arm(self, features: QueryFeatures) -> ModelArm:
         """Select an arm using the current phase's bandit.
 

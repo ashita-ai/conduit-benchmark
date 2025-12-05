@@ -411,7 +411,7 @@ class TestGenerateHTMLReport:
         # Verify HTML content
         html_content = report_path.read_text()
         assert "<!DOCTYPE html>" in html_content
-        assert "Conduit Benchmark Report" in html_content
+        assert "Conduit Benchmark Analysis Report" in html_content
         assert "thompson" in html_content
         assert "ucb1" in html_content
 
@@ -466,25 +466,28 @@ class TestGenerateHTMLReport:
     def test_generate_html_report_statistical_section(
         self, sample_analysis: dict[str, any], temp_output_dir: Path
     ) -> None:
-        """Test HTML report includes statistical analysis."""
+        """Test HTML report includes executive summary section."""
         report_path = generate_html_report(sample_analysis, temp_output_dir)
         html_content = report_path.read_text()
 
-        assert "Statistical Analysis" in html_content
-        assert "Friedman Test" in html_content
+        # Enhanced report uses "Executive Summary" section
+        assert "Executive Summary" in html_content
+        # Check for summary cards
+        assert "summary-card" in html_content
 
     def test_generate_html_report_algorithm_table(
         self, sample_analysis: dict[str, any], temp_output_dir: Path
     ) -> None:
-        """Test HTML report includes algorithm performance table."""
+        """Test HTML report includes Pareto frontier section."""
         report_path = generate_html_report(sample_analysis, temp_output_dir)
         html_content = report_path.read_text()
 
-        assert "Algorithm Performance" in html_content
-        assert "<table>" in html_content
-        assert "Avg Quality" in html_content
-        assert "Total Cost" in html_content
-        assert "Converged" in html_content
+        # Enhanced report has Pareto frontier analysis section
+        assert "Pareto Frontier Analysis" in html_content
+        # Check for algorithm names in the pareto list
+        assert "pareto-item" in html_content or "pareto-list" in html_content
+        # Check for insight box with key findings
+        assert "insight-box" in html_content
 
 
 class TestVisualizationEdgeCases:

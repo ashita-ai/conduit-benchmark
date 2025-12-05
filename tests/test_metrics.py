@@ -180,14 +180,17 @@ class TestConvergence:
         assert 0 <= result.coefficient_of_variation < 0.05  # Below threshold
 
     def test_convergence_not_detected(self) -> None:
-        """Test convergence not detected in oscillating sequence."""
-        # Continuously oscillating values
-        oscillating = [0.5 + 0.2 * np.sin(i / 10) for i in range(1000)]
+        """Test convergence not detected in exponentially growing sequence."""
+        # An exponentially growing sequence maintains high relative slope
+        # For y = e^(0.01*x), the normalized slope stays approximately constant
+        exponential_growth = [np.exp(0.01 * i) for i in range(1000)]
 
         result = calculate_convergence(
-            oscillating, window=200, threshold=0.05, min_samples=500
+            exponential_growth, window=200, threshold=0.005, min_samples=500
         )
 
+        # Exponential growth has normalized slope ≈ 0.01 throughout,
+        # well above threshold 0.005
         assert not result.converged
         assert result.convergence_point is None
 

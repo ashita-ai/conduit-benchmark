@@ -88,8 +88,12 @@ async def test_benchmark_runner_mocked(
         input_tokens=10,
         output_tokens=5,
         success=True,
+        was_fallback=False,
+        primary_model=None,
+        failed_models=[],
     )
     mock_executor.execute = AsyncMock(return_value=mock_result)
+    mock_executor.execute_with_fallback = AsyncMock(return_value=mock_result)
 
     runner = BenchmarkRunner(algorithms=algorithms, executor=mock_executor)
 
@@ -192,8 +196,12 @@ async def test_multiple_algorithms(
         input_tokens=10,
         output_tokens=5,
         success=True,
+        was_fallback=False,
+        primary_model=None,
+        failed_models=[],
     )
     mock_executor.execute = AsyncMock(return_value=mock_result)
+    mock_executor.execute_with_fallback = AsyncMock(return_value=mock_result)
 
     runner = BenchmarkRunner(algorithms=algorithms, executor=mock_executor)
 
