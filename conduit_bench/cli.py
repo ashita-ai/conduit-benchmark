@@ -18,7 +18,6 @@ from rich.console import Console
 from rich.table import Table
 
 from conduit.core.config import load_context_priors, settings as conduit_settings
-from conduit.core.pricing_manager import PricingManager
 from conduit.engines.bandits import (
     ContextualThompsonSamplingBandit,
     DuelingBandit,
@@ -112,17 +111,23 @@ _QUALITY_CONTEXT = os.getenv("CONDUIT_QUALITY_CONTEXT", "general")
 _QUALITY_PRIORS = _load_quality_priors(_QUALITY_CONTEXT)
 
 
-async def _load_pricing_from_conduit():
-    """Load pricing from Conduit's PricingManager.
+def _load_pricing_from_litellm() -> dict[str, dict[str, float]]:
+    """Load pricing directly from LiteLLM's bundled database.
 
     Returns dict mapping model_id to pricing info with keys:
     - input_cost_per_1m: Input cost per 1M tokens
     - output_cost_per_1m: Output cost per 1M tokens
-    """
-    pricing_manager = PricingManager(database=None)  # Use cache-only mode
-    pricing_data = await pricing_manager.get_pricing()
 
-    # Convert ModelPricing objects to dict format needed by get_default_arms()
+    Benefits over PricingManager:
+    - No async/await needed (synchronous)
+    - No database connection required
+    - Exact model ID matching (no normalization)
+    - Updates with `uv update litellm`
+    """
+    from conduit.core.pricing import get_all_model_pricing
+
+    pricing_data = get_all_model_pricing()
+
     return {
         model_id: {
             "input_cost_per_1m": pricing.input_cost_per_million,
@@ -132,8 +137,8 @@ async def _load_pricing_from_conduit():
     }
 
 
-# Load pricing at module import time
-_PRICING_CACHE = asyncio.run(_load_pricing_from_conduit())
+# Load pricing at module import time (synchronous, no database)
+_PRICING_CACHE = _load_pricing_from_litellm()
 
 
 def _detect_provider(model_id: str) -> str:
@@ -408,6 +413,11 @@ def generate(
     help="Timeout in seconds for HumanEval code execution",
     show_default=True,
 )
+@click.option(
+    "--sync-pricing",
+    is_flag=True,
+    help="Sync LiteLLM pricing to database before running (for historical tracking)",
+)
 def run(
     dataset: str,
     preset: str | None,
@@ -420,6 +430,7 @@ def run(
     oracle_reference: Path | None,
     mmlu_limit: int,
     code_timeout: int,
+    sync_pricing: bool,
 ) -> None:
     """Run benchmark experiments.
 
@@ -439,6 +450,38 @@ def run(
     """
 
     async def _run() -> None:
+        # Sync pricing to database if requested (for historical tracking)
+        if sync_pricing:
+            console.print("\n[bold cyan]Syncing LiteLLM pricing to database...[/bold cyan]")
+            try:
+                import subprocess
+                import sys
+                result = subprocess.run(
+                    [sys.executable, "-m", "conduit.scripts.sync_pricing"],
+                    capture_output=True,
+                    text=True,
+                )
+                if result.returncode == 0:
+                    console.print("[green]✓ Pricing synced to database[/green]")
+                else:
+                    # Try direct script path as fallback
+                    from pathlib import Path
+                    conduit_path = Path(__file__).parent.parent.parent / "conduit" / "scripts" / "sync_pricing.py"
+                    if conduit_path.exists():
+                        result = subprocess.run(
+                            [sys.executable, str(conduit_path)],
+                            capture_output=True,
+                            text=True,
+                        )
+                        if result.returncode == 0:
+                            console.print("[green]✓ Pricing synced to database[/green]")
+                        else:
+                            console.print(f"[yellow]Warning: Pricing sync failed: {result.stderr}[/yellow]")
+                    else:
+                        console.print("[yellow]Warning: Could not find sync_pricing script[/yellow]")
+            except Exception as e:
+                console.print(f"[yellow]Warning: Pricing sync failed: {e}[/yellow]")
+
         # Handle preset configurations
         # Oracle excluded from all presets due to 6x cost (executes all 6 models per query)
         ALGORITHM_PRESETS = {

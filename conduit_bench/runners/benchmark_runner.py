@@ -472,10 +472,19 @@ class BenchmarkRunner:
         # Calculate final metrics (all queries are now evaluated)
         average_quality = total_quality / len(dataset) if dataset else 0.0
 
-        # Calculate convergence using quality history
+        # Calculate convergence using algorithm state history (parameter-based)
         from conduit_bench.analysis.metrics import calculate_convergence
         quality_history = [eval.quality_score for eval in feedback_list]
-        convergence_result = calculate_convergence(quality_history)
+        algorithm_state_history = [
+            eval.metadata.get("algorithm_state")
+            for eval in feedback_list
+            if eval.metadata.get("algorithm_state")
+        ]
+        convergence_result = calculate_convergence(
+            quality_history,
+            algorithm_name=algorithm.name,
+            algorithm_state_history=algorithm_state_history if algorithm_state_history else None,
+        )
 
         # Update algorithm run with final metrics in database
         if self.enable_db_write and self.database:

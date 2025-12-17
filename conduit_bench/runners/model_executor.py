@@ -3,7 +3,7 @@
 Handles direct PydanticAI calls to LLM models with cost tracking,
 latency measurement, and error handling.
 
-Uses Arbiter's CostCalculator for dynamic pricing from llm-prices.com.
+Uses Conduit's LiteLLM-based pricing for accurate cost calculation.
 """
 
 import asyncio
@@ -12,7 +12,7 @@ import time
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.models import KnownModelName
-from arbiter_ai import get_cost_calculator
+from conduit.core.pricing import compute_cost
 
 from conduit.engines.bandits import ModelArm
 
@@ -87,8 +87,6 @@ class ModelExecutor:
         """
         self.timeout = timeout
         self.max_retries = max_retries
-        self._cost_calculator = get_cost_calculator()
-        self._pricing_loaded = False
 
     async def execute(
         self,
@@ -141,15 +139,11 @@ class ModelExecutor:
                     input_tokens = getattr(usage, "request_tokens", 0) or 0
                     output_tokens = getattr(usage, "response_tokens", 0) or 0
 
-                # Calculate cost using Arbiter's dynamic pricing
-                if not self._pricing_loaded:
-                    await self._cost_calculator.ensure_loaded()
-                    self._pricing_loaded = True
-
-                cost_usd = self._cost_calculator.calculate_cost(
-                    arm.model_id,
+                # Calculate cost using Conduit's LiteLLM-based pricing
+                cost_usd = compute_cost(
                     input_tokens=input_tokens,
-                    output_tokens=output_tokens
+                    output_tokens=output_tokens,
+                    model_id=arm.model_id,
                 )
 
                 latency = time.time() - start_time
