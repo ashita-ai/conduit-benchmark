@@ -129,7 +129,8 @@ Current pricing for benchmark models (as of December 2025):
 | Model | Provider | Input ($/1M) | Output ($/1M) | Notes |
 |-------|----------|--------------|---------------|-------|
 | claude-opus-4-5-20251101 | Anthropic | $15.00 | $75.00 | Highest quality |
-| gpt-4-turbo | OpenAI | $10.00 | $30.00 | GPT-4 Turbo |
+| gemini-3-pro-preview | Google | $7.00 | $21.00 | Latest Gemini |
+| gpt-5.1-2025-11-13 | OpenAI | $5.00 | $15.00 | GPT-5.1 |
 
 ### Tier 2: Balanced Models
 
@@ -163,7 +164,8 @@ Relative to cheapest model (gpt-5-nano):
 | gpt-5-mini | 4.0x | 4.0x | 4.0x |
 | claude-haiku-4.5 | 8.0x | 10.0x | 9.0x |
 | claude-sonnet-4.5 | 30.0x | 37.5x | 33.8x |
-| gpt-4-turbo | 100.0x | 75.0x | 87.5x |
+| gpt-5.1 | 50.0x | 37.5x | 43.8x |
+| gemini-3-pro | 70.0x | 52.5x | 61.3x |
 | claude-opus-4.5 | 150.0x | 187.5x | 168.8x |
 
 ---
