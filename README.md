@@ -90,10 +90,10 @@ All algorithms are imported from `conduit.engines.bandits`. No duplication.
 
 ## Model Pool & Configuration (from Conduit)
 
-**Dynamic Pricing**: Pricing loaded from Conduit's PricingManager with three-tier fallback:
-1. **Database**: Latest pricing snapshots from `model_prices` table
-2. **Cache**: Redis-cached pricing (24-hour TTL)
-3. **Live Fetch**: llm-prices.com API for latest pricing
+**Dynamic Pricing**: Pricing loaded from LiteLLM's bundled pricing database via `conduit.core.pricing`:
+- No external API calls or database required
+- Pricing updates with `uv update litellm`
+- Optional: Use `--sync-pricing` flag to sync to database for historical tracking
 
 **Quality Priors**: Context-specific quality expectations loaded from `conduit.yaml`:
 

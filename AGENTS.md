@@ -105,7 +105,7 @@ Action Taken: Proposed rule update to user mid-session, updated AGENTS.md
 - **Role**: Contains ALL bandit algorithm implementations, pricing, and quality priors
 - **Location**:
   - Algorithms: `conduit.engines.bandits` (7 algorithms)
-  - Pricing: `conduit.core.pricing.PricingManager` (Database → Cache → llm-prices.com)
+  - Pricing: `conduit.core.pricing` (LiteLLM bundled database)
   - Quality Priors: `conduit.core.config.load_context_priors()` from `conduit.yaml`
 - **Import**: `from conduit.engines.bandits import ThompsonSamplingBandit, UCB1Bandit, ...`
 - **Why**: Single source of truth for algorithms, pricing, and quality expectations
@@ -216,7 +216,7 @@ poetry run mypy conduit_bench/ && echo "✅ Type checking passed" || echo "🚨 
 ### Mistake 2: Hardcoding Configuration Data
 **Detection**: Pricing or quality priors defined directly in benchmark code
 **Prevention**:
-- Pricing: Use `PricingManager` from Conduit
+- Pricing: Use `conduit.core.pricing` (LiteLLM-based)
 - Quality: Use `load_context_priors()` from Conduit
 **Fix**: Import configuration dynamically from Conduit
 **Why It Matters**: Configuration updates should happen in one place (Conduit)
@@ -417,9 +417,9 @@ class MyBandit(BanditAlgorithm):
 ### Configuration Loading
 
 ```python
-# Dynamic Pricing (from Conduit's PricingManager)
-# Three-tier fallback: Database → Cache → llm-prices.com
-# Loaded automatically when creating bandit arms
+# Dynamic Pricing (from Conduit's conduit.core.pricing)
+# Uses LiteLLM's bundled pricing database (no external API calls)
+# Updates with: uv update litellm
 
 # Quality Priors (from Conduit's conduit.yaml)
 from conduit.core.config import load_context_priors
@@ -442,7 +442,7 @@ for model_id, (alpha, beta) in priors_beta.items():
 
 ```python
 # Algorithms imported from Conduit (single source of truth)
-# Pricing loaded from PricingManager (Database → Cache → llm-prices.com)
+# Pricing loaded from LiteLLM's bundled database via conduit.core.pricing
 # Quality priors loaded from conduit.yaml via load_context_priors()
 
 # Run benchmark using CLI with quality context
