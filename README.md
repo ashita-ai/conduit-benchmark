@@ -164,8 +164,7 @@ Generated via `conduit_bench.generators.SyntheticQueryGenerator`:
 - Conduit installed (`pip install -e ../conduit`)
 - Arbiter installed (`pip install -e ../arbiter`)
 - API keys for LLM providers (OpenAI, Anthropic, Google)
-- PostgreSQL database (optional - for pricing database mode)
-- Redis (optional - for pricing cache mode)
+- PostgreSQL database (optional - for storing benchmark results)
 
 ### Installation
 

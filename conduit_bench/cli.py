@@ -169,9 +169,9 @@ def get_default_arms() -> list[ModelArm]:
     Uses conduit.core.config.settings.default_models as the single source of truth.
     Maps conduit's internal model names to actual API model names.
 
-    Pricing is loaded dynamically from Conduit's PricingManager at module import time.
+    Pricing is loaded from LiteLLM's bundled database via conduit.core.pricing.
     Quality priors are used by baseline algorithms (AlwaysBest/AlwaysCheapest) to make
-    informed decisions. Actual execution costs are calculated dynamically by Arbiter.
+    informed decisions. Actual execution costs are calculated via conduit.core.pricing.compute_cost.
 
     Returns:
         List of ModelArm objects for benchmarking.
@@ -182,7 +182,7 @@ def get_default_arms() -> list[ModelArm]:
         api_model_name = CONDUIT_TO_API_MODEL.get(conduit_model_id, conduit_model_id)
         provider = _detect_provider(api_model_name)
 
-        # Get pricing from Conduit's PricingManager (fallback to defaults if not found)
+        # Get pricing from LiteLLM cache (fallback to defaults if not found)
         pricing = _PRICING_CACHE.get(conduit_model_id, {
             "input_cost_per_1m": 2.0,
             "output_cost_per_1m": 8.0,
