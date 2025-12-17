@@ -72,7 +72,7 @@ CONDUIT_TO_API_MODEL = {
     "claude-haiku-4-5-20251001": "claude-haiku-4-5-20251001",
     "gemini-2.5-pro": "gemini-2.5-pro",
     "gemini-2.5-flash": "gemini-2.5-flash",
-    "gemini-3-pro-preview": "gemini-3-pro-preview",  # Cutting edge (preview)
+    "gemini-2.0-flash": "gemini-2.0-flash",
     # Legacy mappings (backwards compat with old conduit internal names)
     "o4-mini": "gpt-4o-mini",
     "gpt-5": "gpt-4o",

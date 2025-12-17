@@ -144,19 +144,17 @@ Multi-Armed Bandits
 3. **Cost range**: 100x cost difference between cheapest and most expensive
 4. **Availability**: API access, reasonable rate limits
 
-### Selected Models (8)
+### Selected Models (7)
 
 | Model | Provider | Tier | Rationale |
 |-------|----------|------|-----------|
 | claude-opus-4.5 | Anthropic | Premium | Highest quality benchmark |
-| gpt-5.1 | OpenAI | Premium | Latest OpenAI flagship |
-| gemini-3-pro | Google | Premium | Latest Google flagship |
+| gpt-4-turbo | OpenAI | Premium | High quality flagship |
 | claude-sonnet-4.5 | Anthropic | Balanced | Best for code, popular |
 | gemini-2.5-pro | Google | Balanced | Strong reasoning |
-| gpt-5-mini | OpenAI | Efficient | Fast, cost-effective |
+| gpt-4o-mini | OpenAI | Efficient | Fast, cost-effective |
 | claude-haiku-4.5 | Anthropic | Efficient | Budget Anthropic |
 | gemini-2.5-flash | Google | Minimal | Fastest, cheapest |
-| gpt-5-nano | OpenAI | Minimal | Smallest footprint |
 
 ### Coverage Analysis
 
@@ -164,7 +162,7 @@ Multi-Armed Bandits
 |-----------|----------|
 | Providers | 3 (Anthropic, OpenAI, Google) |
 | Capability tiers | 4 (Premium, Balanced, Efficient, Minimal) |
-| Cost range | 168x (opus vs nano) |
+| Cost range | ~200x (opus vs flash) |
 | Quality range | ~0.70 - 0.95 expected |
 
 ### Excluded Models (with rationale)

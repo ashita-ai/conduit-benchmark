@@ -377,8 +377,8 @@ reward = 1.0 if result.returncode == 0 else 0.0
 | `gpt-4-turbo` | OpenAI | Flagship | High quality |
 | `claude-sonnet-4-5-20250929` | Anthropic | Balanced | Best for code |
 | `claude-opus-4-5-20251101` | Anthropic | Premium | Highest quality |
-| `gemini-2.5-pro` | Google | Flagship | Stable |
-| `gemini-3-pro-preview` | Google | Cutting Edge | Preview (may change) |
+| `gemini-2.5-pro` | Google | Flagship | Strong reasoning |
+| `gemini-2.5-flash` | Google | Budget | Fastest, cheapest |
 
 **Documentation sources**:
 - OpenAI: https://platform.openai.com/docs/models
@@ -390,10 +390,9 @@ reward = 1.0 if result.returncode == 0 else 0.0
 #### Why These Models
 
 **Tier distribution**:
-- Budget: 1 model (gpt-4o-mini)
+- Budget: 2 models (gpt-4o-mini, gemini-2.5-flash)
 - Balanced: 2 models (gpt-4-turbo, claude-sonnet-4-5)
-- Premium: 2 models (claude-opus-4-5, gemini-2.5-pro)
-- Cutting edge: 1 model (gemini-3-pro-preview)
+- Premium/Flagship: 2 models (claude-opus-4-5, gemini-2.5-pro)
 
 **Provider diversity**: 2 OpenAI, 2 Anthropic, 2 Google (balanced representation)
 
