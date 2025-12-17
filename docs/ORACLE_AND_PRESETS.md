@@ -31,7 +31,7 @@ conduit-bench run --dataset mmlu --preset balanced  # No Oracle ✓
 
 ### Oracle Implementation
 
-Oracle is implemented in `/Users/evan/Documents/gh/conduit-benchmark/conduit_bench/runners/benchmark_runner.py` (lines 246-325):
+Oracle is implemented in `conduit_bench/runners/benchmark_runner.py` (lines 271-328):
 
 ```python
 if algorithm.name == "oracle":

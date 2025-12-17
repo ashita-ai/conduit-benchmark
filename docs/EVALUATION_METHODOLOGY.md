@@ -1,6 +1,6 @@
 # Evaluation Methodology
 
-**Last Updated**: 2025-12-01
+**Last Updated**: 2025-12-17
 
 Comprehensive documentation of evaluation strategies, dataset characteristics, and quality assessment methods for conduit-benchmark.
 
@@ -11,21 +11,28 @@ Comprehensive documentation of evaluation strategies, dataset characteristics, a
 1. [Evaluation Strategy Overview](#evaluation-strategy-overview)
 2. [Dataset Comparison](#dataset-comparison)
 3. [Evaluator Types](#evaluator-types)
-4. [Why Arbiter for GSM8K](#why-arbiter-for-gsm8k)
-5. [Quality Measurement](#quality-measurement)
-6. [Cost & Performance](#cost--performance)
+4. [Quality Measurement](#quality-measurement)
+5. [Cost & Performance](#cost--performance)
 
 ---
 
 ## Evaluation Strategy Overview
 
-**Core Principle**: Use the most appropriate quality measurement for each dataset's domain and answer format.
+**Core Principle**: Use **objective evaluation only** - no LLM-as-judge to avoid circular dependencies.
 
 | Dataset | Domain | Evaluator | Reason |
 |---------|--------|-----------|--------|
 | **MMLU** | Knowledge (57 subjects) | `exact_match` | Multiple choice (A/B/C/D) → binary correctness |
-| **GSM8K** | Math reasoning | `arbiter` | Step-by-step reasoning → nuanced quality scoring |
+| **GSM8K** | Math reasoning | `exact_match` | Extract `#### N` format → binary correctness |
 | **HumanEval** | Code generation | `code_execution` | Executable tests → objective pass/fail |
+
+**Why No LLM-as-Judge (Arbiter)?**
+- **Circular dependency**: Using LLMs to judge LLMs creates bias
+- **Cost**: Each evaluation costs ~$0.001-$0.005
+- **Non-determinism**: LLM judges produce variable scores
+- **Reproducibility**: Exact match/code execution are fully reproducible
+
+> **Note**: Arbiter is available for **production use** where no ground truth exists, but is NOT used for benchmarking.
 
 ---
 
@@ -47,6 +54,8 @@ Question: What is the capital of France?
 
 Correct Answer: C
 ```
+
+**Evaluation Method**: Extract single letter (A/B/C/D) and compare to ground truth.
 
 **Why Exact Match**:
 - **Unambiguous correctness**: Only one answer is correct
@@ -70,37 +79,30 @@ Correct Answer: C
 Question: Natalia sold clips to 48 friends in April and half as many in May.
           How many clips did she sell altogether?
 
-Expected Answer: "Natalia sold 48/2 = 24 clips in May.
-                  Natalia sold 48+24 = 72 clips altogether.
-                  #### 72"
-
-Model Response: "Let's solve step by step:
-                 - April sales: 48 clips
-                 - May sales: 48 ÷ 2 = 24 clips
-                 - Total: 48 + 24 = 72 clips
-
-                 The answer is 72."
+Ground Truth: "Natalia sold 48/2 = 24 clips in May.
+              Natalia sold 48+24 = 72 clips altogether.
+              #### 72"
 ```
 
-**Why Arbiter (Not Exact Match)**:
+**Evaluation Method**: Extract the numeric answer after `#### ` marker and compare to ground truth.
 
-❌ **Exact Match Fails**:
-- **Format variance**: Models don't reliably output `#### N` format
-- **Expression differences**: "72" vs "72 clips" vs "seventy-two"
-- **Missing reasoning**: Short answer misses quality of explanation
-- **Binary scoring**: Can't distinguish partial credit scenarios
+```python
+def extract_gsm8k_answer(text: str) -> str | None:
+    """Extract #### N format answer."""
+    match = re.search(r'####\s*(-?\d+(?:,\d+)*(?:\.\d+)?)', text)
+    return match.group(1).replace(',', '') if match else None
+```
 
-✅ **Arbiter Succeeds**:
-- **Semantic understanding**: Recognizes "72 clips" = "#### 72"
-- **Reasoning quality**: Evaluates step-by-step logic, not just final answer
-- **Partial credit**: 0.0-1.0 scoring for partially correct reasoning
-- **Robust extraction**: Handles format variations gracefully
+**Why Exact Match (Not Arbiter)**:
+- **Objective**: The `#### N` format provides unambiguous ground truth
+- **Zero cost**: No LLM API calls needed
+- **Reproducible**: Same input always produces same evaluation
+- **No circular dependency**: Avoids LLM-as-judge bias
+- **Fast**: Regex extraction is instant
 
-**Quality Score**: 0.0-1.0 (continuous)
-- 1.0: Correct answer with sound reasoning
-- 0.6-0.8: Correct answer with minor logical gaps
-- 0.3-0.5: Partially correct or right approach, wrong answer
-- 0.0: Completely incorrect
+**Quality Score**: 0.0 (incorrect or no `####` marker found) or 1.0 (correct)
+
+**Note**: Models are prompted to use the `#### N` format. If a model doesn't follow this format, it receives a 0.0 score, which is a valid signal about instruction-following capability.
 
 ---
 
@@ -126,6 +128,8 @@ assert has_close_elements([1.0, 2.0, 3.0], 0.5) == False
 assert has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0], 0.3) == True
 ```
 
+**Evaluation Method**: Execute generated code against unit tests.
+
 **Why Code Execution**:
 - **Objective correctness**: Code either passes tests or doesn't
 - **No ambiguity**: Executable unit tests provide ground truth
@@ -140,18 +144,28 @@ assert has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0], 0.3) == True
 
 ### 1. Exact Match Evaluator
 
-**Use Cases**: MMLU (multiple choice)
+**Use Cases**: MMLU (multiple choice), GSM8K (math)
 
 **How It Works**:
 ```python
-def evaluate_exact_match(response: str, ground_truth: str) -> float:
-    """Extract answer and compare with ground truth."""
-    # Extract answer (A, B, C, or D)
-    match = re.search(r'\b([ABCD])\b', response.upper())
-    predicted = match.group(1) if match else None
+class ExactMatchEvaluator(BaseEvaluator):
+    def __init__(self, dataset_type: Literal["gsm8k", "mmlu"]):
+        self.dataset_type = dataset_type
 
-    # Binary comparison
-    return 1.0 if predicted == ground_truth else 0.0
+    def extract_answer(self, response: str) -> str | None:
+        if self.dataset_type == "gsm8k":
+            # Extract number after #### marker
+            match = re.search(r'####\s*(-?\d+(?:,\d+)*(?:\.\d+)?)', response)
+            return match.group(1).replace(',', '') if match else None
+        else:  # mmlu
+            # Extract A/B/C/D choice
+            match = re.search(r'\b([ABCD])\b', response.upper())
+            return match.group(1) if match else None
+
+    def evaluate(self, response: str, ground_truth: str) -> float:
+        predicted = self.extract_answer(response)
+        expected = self._normalize_answer(ground_truth)
+        return 1.0 if predicted == expected else 0.0
 ```
 
 **Characteristics**:
@@ -159,92 +173,11 @@ def evaluate_exact_match(response: str, ground_truth: str) -> float:
 - ✅ Instant evaluation (<1ms)
 - ✅ Deterministic (same input = same output)
 - ✅ No circular dependency (doesn't use LLMs)
-- ❌ Binary only (no partial credit)
-- ❌ Requires unambiguous answer format
+- ✅ Fully reproducible
 
 ---
 
-### 2. Arbiter Evaluator
-
-**Use Cases**: GSM8K (math reasoning)
-
-**How It Works**:
-
-Arbiter is an **LLM-as-judge framework** that evaluates responses using multiple criteria:
-
-```python
-from arbiter_ai import evaluate
-
-async def evaluate_arbiter(
-    query: str,
-    response: str,
-    ground_truth: str
-) -> float:
-    """Evaluate using Arbiter's semantic + factuality judges."""
-
-    # Run evaluation with multiple judges
-    results = await evaluate(
-        query=query,
-        response=response,
-        reference=ground_truth,
-        evaluators=["semantic", "factuality"],
-        model="gpt-4o-mini"  # Judge model
-    )
-
-    # Aggregate scores (average of judges)
-    return (results["semantic"] + results["factuality"]) / 2
-```
-
-**Evaluator Components**:
-
-1. **Semantic Evaluator**: Query-response similarity
-   - Measures if response addresses the question
-   - Checks logical flow and reasoning
-   - Scores 0.0-1.0
-
-2. **Factuality Evaluator**: Correctness vs. ground truth
-   - Compares final answer to expected result
-   - Handles format variations ("72" vs "#### 72")
-   - Scores 0.0-1.0
-
-**Characteristics**:
-- ✅ Handles format variance (robust extraction)
-- ✅ Partial credit (0.0-1.0 continuous scoring)
-- ✅ Evaluates reasoning quality (not just final answer)
-- ✅ Semantic understanding (recognizes equivalent expressions)
-- ⚠️ **Costs ~$0.001 per evaluation** (judge LLM calls)
-- ⚠️ **Slower ~5-10 sec per evaluation** (API latency)
-- ⚠️ **API reliability dependency** (timeouts possible)
-- ⚠️ Non-deterministic (small variance in scores)
-
-**Configuration Settings** (`conduit.yaml`):
-
-```yaml
-arbiter:
-  sample_rate: 0.1                # Evaluate 10% of responses (cost control)
-  daily_budget: 10.0              # Maximum $10/day on evaluations
-  model: "gpt-5.1"                # Judge model for evaluation
-  evaluators:                     # Active evaluator types
-    - semantic                    # Query-response alignment
-    - factuality                  # Ground truth accuracy
-```
-
-**Rationale for Configuration**:
-- **`model: gpt-5.1`**: Premium judge model for highest-quality evaluations
-- **`evaluators: [semantic, factuality]`**: Dual-judge approach balances reasoning quality and correctness
-- **`sample_rate: 0.1`**: Budget-conscious setting (not used in benchmarks - we evaluate 100%)
-- **`daily_budget: 10.0`**: Safety limit to prevent runaway costs
-
-**Judge Model Selection**:
-| Model | Cost (per eval) | Speed | Quality | Choice |
-|-------|----------------|-------|---------|--------|
-| **gpt-5.1** | **~$0.005** | **5-10s** | **Excellent** | ✅ **Selected** |
-| gpt-5 | ~$0.002 | 5-10s | Excellent | Good alternative |
-| gpt-5-mini | ~$0.001 | 3-5s | Very Good | Budget option |
-
----
-
-### 3. Code Execution Evaluator
+### 2. Code Execution Evaluator
 
 **Use Cases**: HumanEval (code generation)
 
@@ -261,17 +194,12 @@ def evaluate_code_execution(
     # Build complete code
     full_code = f"{prompt}{response}\n\n{test_code}\ncheck({entry_point})"
 
-    # Write to temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py') as f:
-        f.write(full_code)
-        f.flush()
-
-        # Execute in subprocess with timeout
-        result = subprocess.run(
-            ['python', f.name],
-            timeout=10,
-            capture_output=True
-        )
+    # Execute in subprocess with timeout
+    result = subprocess.run(
+        ['python', '-c', full_code],
+        timeout=10,
+        capture_output=True
+    )
 
     # Return 1.0 if all tests passed, 0.0 otherwise
     return 1.0 if result.returncode == 0 else 0.0
@@ -283,77 +211,36 @@ def evaluate_code_execution(
 - ✅ Fast (~2 seconds including execution)
 - ✅ Deterministic
 - ⚠️ Requires sandbox security (subprocess isolation)
-- ⚠️ Binary only (no partial credit)
 
 ---
 
-## Why Arbiter for GSM8K
+### 3. Arbiter Evaluator (Production Only)
 
-### The Problem with Exact Match
+**Use Cases**: Production routing where no ground truth exists
 
-**Original approach** (documented in BENCHMARKING.md):
+> **Important**: Arbiter is NOT used for benchmarking due to circular dependency concerns. It's available for production use where ground truth answers don't exist.
+
+**How It Works**:
 ```python
-def extract_gsm8k_answer(text: str) -> str | None:
-    """Extract #### N format answer."""
-    match = re.search(r'####\s*(-?\d+(?:,\d+)*(?:\.\d+)?)', text)
-    return match.group(1).replace(',', '') if match else None
+from arbiter_ai import evaluate
+
+async def evaluate_arbiter(response: str, reference: str) -> float:
+    """Evaluate using Arbiter's semantic judges."""
+    results = await evaluate(
+        output=response,
+        reference=reference,
+        evaluators=["semantic", "factuality"],
+        model="gpt-4o-mini"
+    )
+    return results.overall_score
 ```
 
-**Failure modes**:
-
-1. **Format non-compliance**:
-   ```
-   Expected: "#### 72"
-   Got:      "The answer is 72 clips"  ❌ No match
-   Got:      "72"                       ❌ No #### marker
-   Got:      "seventy-two"              ❌ Non-numeric
-   ```
-
-2. **Quality blindness**:
-   ```
-   Response A: "48 + 24 = 72. Correct reasoning! #### 72"  ✅ (1.0)
-   Response B: "I'll guess #### 72"                        ✅ (1.0)
-   ```
-   Both get 1.0, but B has no reasoning!
-
-3. **Lost nuance**:
-   ```
-   Response: "48 ÷ 2 = 20 (wrong), 48 + 20 = 68. #### 68"
-   ```
-   - Shows problem-solving attempt
-   - Arithmetic error only
-   - Deserves partial credit (0.4-0.6)
-   - Exact match: 0.0 ❌
-
-### Arbiter's Advantages
-
-**Example evaluation**:
-
-```python
-Query: "Natalia sold 48 clips in April, half as many in May. Total?"
-Ground Truth: "#### 72"
-
-Response 1: "48 ÷ 2 = 24, 48 + 24 = 72. Answer: 72 clips"
-Arbiter Score: 1.0
-  - Semantic: 1.0 (addresses question, clear reasoning)
-  - Factuality: 1.0 (correct answer)
-
-Response 2: "I think the answer is 72"
-Arbiter Score: 0.6
-  - Semantic: 0.2 (no reasoning shown)
-  - Factuality: 1.0 (correct answer)
-
-Response 3: "48 ÷ 2 = 20, 48 + 20 = 68"
-Arbiter Score: 0.4
-  - Semantic: 0.8 (correct approach, arithmetic error)
-  - Factuality: 0.0 (wrong answer)
-```
-
-**Benefits**:
-- ✅ Captures reasoning quality
-- ✅ Handles format variations
-- ✅ Provides nuanced scoring (0.0-1.0)
-- ✅ Aligns with educational assessment (partial credit)
+**Characteristics**:
+- ✅ Handles format variance
+- ✅ Partial credit (0.0-1.0 continuous)
+- ⚠️ **NOT used in benchmarks** - creates circular dependency
+- ⚠️ Costs ~$0.001 per evaluation
+- ⚠️ Non-deterministic
 
 ---
 
@@ -375,18 +262,15 @@ From 1,000-query benchmark:
 
 ### GSM8K Quality Distribution
 
-From 10-query test:
+From full benchmark:
 
 | Algorithm | Avg Quality | Distribution |
 |-----------|-------------|--------------|
-| thompson_sampling | 0.633 | 0.3, 0.6, 1.0 (varied) |
-| ucb1 | 0.573 | 0.4, 0.6, 0.7, 0.8, 1.0 |
-| epsilon_greedy | 0.520 | 0.4, 0.6 (mixed) |
+| thompson_sampling | ~0.70 | Binary (0 or 1) |
+| ucb1 | ~0.68 | Binary (0 or 1) |
+| epsilon_greedy | ~0.65 | Binary (0 or 1) |
 
-**Interpretation**:
-- Math reasoning is harder (60% vs 90%)
-- Partial credit reveals learning quality
-- More granular quality assessment
+**Interpretation**: Math reasoning is harder than knowledge recall (~70% vs ~90%)
 
 ---
 
@@ -397,7 +281,6 @@ From 10-query test:
 | Evaluator | Cost | Latency | API Calls |
 |-----------|------|---------|-----------|
 | exact_match | $0.000 | <1ms | 0 |
-| arbiter | ~$0.001 | ~5-10s | 2 (semantic + factuality) |
 | code_execution | $0.000 | ~2s | 0 |
 
 ### Full Benchmark Costs
@@ -409,53 +292,18 @@ From 10-query test:
 
 **GSM8K (1,319 queries, 11 algorithms)**:
 - Model calls: 14,509 × $0.003 avg = **$44**
-- Arbiter evaluation: 14,509 × $0.001 = **$15**
-- **Total: ~$59**
+- Evaluation: 14,509 × $0 = **$0** (exact match)
+- **Total: ~$44**
 
-**Trade-off**: GSM8K costs 2.7× more but provides nuanced quality assessment for math reasoning.
-
----
-
-## Methodology Decisions
-
-### Why Not Exact Match for All?
-
-**Exact match works when**:
-- Answers have standardized format (A/B/C/D)
-- Correctness is unambiguous
-- No partial credit needed
-
-**Exact match fails when**:
-- Answers have format variance
-- Reasoning quality matters
-- Partial credit improves signal
-
-### Why Not Arbiter for All?
-
-**Arbiter adds value when**:
-- Reasoning quality matters (math, essays)
-- Format varies significantly
-- Partial credit is meaningful
-
-**Arbiter is overkill when**:
-- Binary correctness suffices (multiple choice)
-- Evaluation cost outweighs benefit
-- Speed is critical
-
-### Current Assignment Rationale
-
-| Dataset | Answer Type | Variance | Quality Granularity | Evaluator |
-|---------|-------------|----------|---------------------|-----------|
-| MMLU | Fixed (A/B/C/D) | None | Binary | exact_match ✅ |
-| GSM8K | Free-form text | High | Continuous | arbiter ✅ |
-| HumanEval | Code | Varies | Binary | code_execution ✅ |
+**HumanEval (164 queries, 11 algorithms)**:
+- Model calls: 1,804 × $0.003 avg = **$5**
+- Evaluation: 1,804 × $0 = **$0** (code execution)
+- **Total: ~$5**
 
 ---
 
 ## References
 
-- **Arbiter AI Framework**: https://arbiter-ai.readthedocs.io
 - **GSM8K Paper**: https://arxiv.org/abs/2110.14168
 - **MMLU Paper**: https://arxiv.org/abs/2009.03300
 - **HumanEval Paper**: https://arxiv.org/abs/2107.03374
-- **LLM-as-Judge Survey**: https://arxiv.org/abs/2306.05685

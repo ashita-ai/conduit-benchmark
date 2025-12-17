@@ -6,7 +6,7 @@ Generate a JSONL file named `synthetic_{{MODEL_NAME}}.jsonl` containing 100 prog
 
 ## Reference Example
 
-See `/Users/evan/Documents/gh/conduit-benchmark/data/synthetic_composer_example.jsonl` for the exact format.
+See `data/synthetic_composer_example.jsonl` for the exact format.
 
 ## Requirements
 

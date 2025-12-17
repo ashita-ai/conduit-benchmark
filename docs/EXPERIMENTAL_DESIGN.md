@@ -191,7 +191,7 @@ Multi-Armed Bandits
 | Dataset | Domain | Size | Evaluator | Rationale |
 |---------|--------|------|-----------|-----------|
 | **MMLU** | Knowledge (57 subjects) | 14,042 | Exact match | Standard knowledge benchmark |
-| **GSM8K** | Math reasoning | 1,319 | Arbiter (LLM judge) | Tests reasoning chains |
+| **GSM8K** | Math reasoning | 1,319 | Exact match (`#### N`) | Objective evaluation, no LLM-as-judge |
 | **HumanEval** | Code generation | 164 | Code execution | Objective correctness |
 
 ### Why These Datasets?
@@ -204,9 +204,9 @@ Multi-Armed Bandits
 
 **GSM8K (Grade School Math)**:
 - Multi-step reasoning required
-- Format variance necessitates LLM-as-judge
-- Tests reasoning quality, not just final answer
-- Partial credit meaningful
+- Uses `#### N` format for objective exact match evaluation
+- Tests math reasoning with clear right/wrong answers
+- No LLM-as-judge needed (avoids circular dependency)
 
 **HumanEval**:
 - Executable test cases provide ground truth
@@ -231,7 +231,7 @@ Multi-Armed Bandits
 | Dataset | Evaluator | Rationale |
 |---------|-----------|-----------|
 | MMLU | Exact Match | Unambiguous A/B/C/D answers |
-| GSM8K | Arbiter (LLM judge) | Format variance, reasoning quality |
+| GSM8K | Exact Match | Extract `#### N` format, objective evaluation |
 | HumanEval | Code Execution | Objective test cases |
 
 ### Why Different Evaluators?

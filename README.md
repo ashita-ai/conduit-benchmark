@@ -17,7 +17,7 @@ Benchmark bandit algorithms using real evaluation datasets (GSM8K, MMLU, HumanEv
 - **Real Datasets**: MMLU (~1,319 obs), GSM8K (~14,000 obs)
   - **Sampling**: Randomly sample 1,000 observations from each dataset for experiments
 - **Synthetic Queries**: Diverse categories with complexity variation
-- **Algorithm Presets**: balanced, quality, cost, speed (see [ORACLE_AND_PRESETS.md](DOCS/ORACLE_AND_PRESETS.md))
+- **Algorithm Presets**: balanced, quality, cost, speed (see [ORACLE_AND_PRESETS.md](docs/ORACLE_AND_PRESETS.md))
 
 **Goal**: Validate that Thompson Sampling and contextual bandits achieve 40-50% cost savings while maintaining 95%+ quality.
 
@@ -169,7 +169,7 @@ Generated via `conduit_bench.generators.SyntheticQueryGenerator`:
 ### Installation
 
 ```bash
-cd /Users/evan/Documents/gh/conduit-benchmark
+cd conduit-benchmark
 uv sync
 cp .env.example .env
 # Add API keys to .env
@@ -206,7 +206,7 @@ uv run conduit-bench run --dataset mmlu --mmlu-limit 100 --algorithms oracle,tho
 uv run conduit-bench analyze --results results/experiment_001/
 ```
 
-**Algorithm Presets** (see [ORACLE_AND_PRESETS.md](DOCS/ORACLE_AND_PRESETS.md) for details):
+**Algorithm Presets** (see [ORACLE_AND_PRESETS.md](docs/ORACLE_AND_PRESETS.md) for details):
 - `--preset balanced`: Best mix of learning algorithms (5 algorithms)
 - `--preset quality`: Prioritize accuracy over cost (4 algorithms)
 - `--preset cost`: Minimize inference costs (3 algorithms)
