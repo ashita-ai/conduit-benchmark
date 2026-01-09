@@ -19,7 +19,7 @@ I evaluated 11 routing algorithms across two real-world datasets (MMLU and GSM8K
 
 ### Experimental Setup
 
-- **Model Pool**: 7 LLMs (Claude Sonnet 4.5, Claude Opus 4, GPT-4o, GPT-4o-mini, Gemini 1.5 Pro, Gemini 1.5 Flash, Grok-2)
+- **Model Pool**: 9 LLMs (Claude Haiku 4.5, Claude Sonnet 4.5, Claude Opus 4.5, Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3 Pro Preview, GPT-5 Mini, GPT-5 Nano, GPT-5.1)
 - **Datasets**:
   - MMLU: 1,000 multiple-choice questions across 57 subjects
   - GSM8K: 1,319 grade-school math word problems
@@ -50,13 +50,15 @@ I evaluated 11 routing algorithms across two real-world datasets (MMLU and GSM8K
 ### Cost Model
 
 Actual API pricing (December 2025):
+- **Claude Haiku 4.5**: $1/M input, $5/M output
 - **Claude Sonnet 4.5**: $3/M input, $15/M output
-- **GPT-4o**: $2.50/M input, $10/M output
-- **Claude Opus 4**: $15/M input, $75/M output
-- **Gemini 1.5 Pro**: $1.25/M input, $5/M output
-- **GPT-4o-mini**: $0.15/M input, $0.60/M output
-- **Gemini 1.5 Flash**: $0.075/M input, $0.30/M output
-- **Grok-2**: $2/M input, $10/M output
+- **Claude Opus 4.5**: $5/M input, $25/M output
+- **Gemini 2.5 Flash**: $0.30/M input, $2.50/M output
+- **Gemini 2.5 Pro**: $1.25/M input, $10/M output
+- **Gemini 3 Pro Preview**: $2/M input, $12/M output
+- **GPT-5 Mini**: $0.25/M input, $2/M output
+- **GPT-5 Nano**: $0.05/M input, $0.40/M output
+- **GPT-5.1**: $1.25/M input, $10/M output
 
 ## Results
 
@@ -116,10 +118,10 @@ Pure bandits treat all queries identically. Pure contextual methods may overfit 
 
 ### The GSM8K Surprise
 
-On GSM8K, the "always best" baseline (Claude Opus 4) scored only 87.0% - worse than most learning algorithms. This happens because:
+On GSM8K, the "always best" baseline (Claude Opus 4.5) scored only 87.0% - worse than most learning algorithms. This happens because:
 
-1. Opus 4 is optimized for complex reasoning, not grade-school math
-2. Simpler models (GPT-4o-mini, Gemini Flash) are well-calibrated for straightforward problems
+1. Opus 4.5 is optimized for complex reasoning, not grade-school math
+2. Simpler models (GPT-5 Mini, Gemini 2.5 Flash) are well-calibrated for straightforward problems
 3. Learning algorithms discover this and route accordingly
 
 This validates the core thesis: **no single model is best for all queries**.
