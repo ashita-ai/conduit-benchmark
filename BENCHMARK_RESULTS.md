@@ -93,7 +93,7 @@ Actual API pricing (November 2025):
 | UCB1 | $9.03 | 91.3% | 6 |
 | Contextual Thompson | $8.53 | 90.4% | 7 |
 | Random | $8.32 | 90.2% | 8 |
-| Static model | $17.84 | 87.0% | 9 |
+| Static model (Gemini 2.5 Pro) | $17.84 | 87.0% | 9 |
 | Hybrid Thompson+LinUCB | $6.10 | 84.2% | 10 |
 | Always Cheapest | **$2.10** | 83.3% | 11 |
 
