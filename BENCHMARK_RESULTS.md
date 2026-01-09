@@ -42,7 +42,7 @@ I evaluated 11 routing algorithms on MMLU (1000 multiple-choice questions across
 
 **Baselines**:
 - Random
-- Always Best (oracle)
+- Static model (GPT-4-turbo)
 - Always Cheapest
 
 ### Cost Model
@@ -70,18 +70,18 @@ Actual API pricing (November 2025):
 | UCB1 | $2.47 | 86.7% | 7 |
 | Hybrid Thompson+LinUCB | $0.37 | 82.6% | 8 |
 | LinUCB | $0.19 | 82.3% | 9 |
-| Always Best | $0.20 | 82.0% | 10 |
+| Static model (GPT-4-turbo) | $0.20 | 82.0% | 10 |
 | Always Cheapest | **$0.17** | 76.4% | 11 |
 
 **Key Insights**:
 - **Dueling Bandit achieves 93.2% quality** - highest of all algorithms
 - Learning algorithms significantly outperform static model selection
-- The "always best" baseline (82.0%) is beaten by 7 different algorithms
+- Static routing to GPT-4-turbo (82.0%) is beaten by 7 different algorithms
 - Cost-quality tradeoffs vary widely: Dueling Bandit costs 10x more than LinUCB but gains 11% quality
 
 ### Why Learning Algorithms Win
 
-The "always best" baseline assumes one model dominates all queries. In practice, different models excel at different question types:
+Static model selection assumes one model dominates all queries. In practice, different models excel at different question types:
 
 1. **No single model is universally best** - performance varies by subject area
 2. **Learning algorithms adapt** - they discover which models work for which query types
@@ -173,7 +173,7 @@ conduit-bench analyze \
 
 **Learning algorithms consistently outperform static model selection** for LLM routing:
 
-1. **Quality**: Dueling Bandit achieves 93.2% vs 82.0% for "always best"
+1. **Quality**: Dueling Bandit achieves 93.2% vs 82.0% for static GPT-4-turbo
 2. **Adaptability**: Algorithms learn query-specific routing patterns
 3. **Fast Learning**: Most converge within 16-30 queries
 4. **Flexibility**: Different algorithms suit different cost-quality tradeoffs
