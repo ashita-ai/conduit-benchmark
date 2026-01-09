@@ -1,0 +1,2983 @@
+{
+  "benchmark_id": "05278811-ec6b-41a8-bb3f-99e70ec63882",
+  "dataset_size": 20,
+  "algorithms": [
+    {
+      "algorithm_name": "thompson_sampling",
+      "run_id": "1c4e5ad5-a053-4ce3-a317-83ff970a17f6",
+      "total_queries": 20,
+      "total_cost": 0.060409550000000006,
+      "average_quality": 0.9,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_1",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_2",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_3",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_4",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_5",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_6",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_7",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_8",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_9",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_10",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_11",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_12",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_13",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_14",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_15",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_16",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_17",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_18",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_19",
+          "gemini-3-pro-preview"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0049825,
+          "latency": 9.436830997467041,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 1,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 0.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 1.9085898929020995,
+                  "beta": 1.0914101070979005,
+                  "mean": 0.6361966309673664
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.000141,
+          "latency": 0.7386770248413086,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 2,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 0.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 1.9574867987511224,
+                  "beta": 1.0425132012488776,
+                  "mean": 0.6524955995837075
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 1.9085898929020995,
+                  "beta": 1.0914101070979005,
+                  "mean": 0.6361966309673664
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0021564,
+          "latency": 4.008275985717773,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 3,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 0.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 1.9574867987511224,
+                  "beta": 1.0425132012488776,
+                  "mean": 0.6524955995837075
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000113,
+          "latency": 0.8798198699951172,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 4,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 0.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 2.910660787635142,
+                  "beta": 1.089339212364858,
+                  "mean": 0.7276651969087855
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.00954375,
+          "latency": 9.04128885269165,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 5,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 2.910660787635142,
+                  "beta": 1.089339212364858,
+                  "mean": 0.7276651969087855
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.9080681753446247,
+                  "beta": 1.0919318246553753,
+                  "mean": 0.6360227251148749
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000348,
+          "latency": 1.1416501998901367,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 6,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 3.857284177862755,
+                  "beta": 1.1427158221372449,
+                  "mean": 0.7714568355725511
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.9080681753446247,
+                  "beta": 1.0919318246553753,
+                  "mean": 0.6360227251148749
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.000107,
+          "latency": 1.0637750625610352,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 7,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 4.80571767323349,
+                  "beta": 1.1942823267665101,
+                  "mean": 0.8009529455389149
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 1.9080681753446247,
+                  "beta": 1.0919318246553753,
+                  "mean": 0.6360227251148749
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0066125,
+          "latency": 5.400821924209595,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 8,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 4.80571767323349,
+                  "beta": 1.1942823267665101,
+                  "mean": 0.8009529455389149
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 2.8223773565359913,
+                  "beta": 1.1776226434640087,
+                  "mean": 0.7055943391339978
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.013127500000000002,
+          "latency": 11.699641227722168,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 9,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 0.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 4.80571767323349,
+                  "beta": 1.1942823267665101,
+                  "mean": 0.8009529455389149
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 3.727660114387751,
+                  "beta": 1.2723398856122488,
+                  "mean": 0.7455320228775502
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0006950000000000001,
+          "latency": 2.835402011871338,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 10,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 1.0,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 4.80571767323349,
+                  "beta": 1.1942823267665101,
+                  "mean": 0.8009529455389149
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 3.727660114387751,
+                  "beta": 1.2723398856122488,
+                  "mean": 0.7455320228775502
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_10",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 0.0,
+          "cost": 0.00017999999999999998,
+          "latency": 0.9161639213562012,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 11,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.8,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 5.057869281663008,
+                  "beta": 1.942130718336992,
+                  "mean": 0.7225527545232868
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 3.727660114387751,
+                  "beta": 1.2723398856122488,
+                  "mean": 0.7455320228775502
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_11",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 0.0,
+          "cost": 0.000128,
+          "latency": 0.8387789726257324,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 12,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.6666666666666666,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 5.312227600292305,
+                  "beta": 2.687772399707695,
+                  "mean": 0.6640284500365381
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 2.828126491673265,
+                  "beta": 1.171873508326735,
+                  "mean": 0.7070316229183162
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 3.727660114387751,
+                  "beta": 1.2723398856122488,
+                  "mean": 0.7455320228775502
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_12",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "D",
+          "quality_score": 1.0,
+          "cost": 0.0005738000000000001,
+          "latency": 1.584547996520996,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 13,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.6666666666666666,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 5.312227600292305,
+                  "beta": 2.687772399707695,
+                  "mean": 0.6640284500365381
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 3.766703282469634,
+                  "beta": 1.2332967175303662,
+                  "mean": 0.7533406564939268
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 3.727660114387751,
+                  "beta": 1.2723398856122488,
+                  "mean": 0.7455320228775502
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_13",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00010999999999999999,
+          "latency": 0.5740628242492676,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 14,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 3.766703282469634,
+                  "beta": 1.2332967175303662,
+                  "mean": 0.7533406564939268
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 3.727660114387751,
+                  "beta": 1.2723398856122488,
+                  "mean": 0.7455320228775502
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_14",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.009985,
+          "latency": 8.377904176712036,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 15,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 3.766703282469634,
+                  "beta": 1.2332967175303662,
+                  "mean": 0.7533406564939268
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 4.636346220682004,
+                  "beta": 1.3636537793179966,
+                  "mean": 0.7727243701136673
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_15",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0025,
+          "latency": 4.8304266929626465,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 16,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 1.9259339826892092,
+                  "beta": 1.0740660173107908,
+                  "mean": 0.6419779942297364
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 4.6833559327172445,
+                  "beta": 1.316644067282756,
+                  "mean": 0.7805593221195407
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 4.636346220682004,
+                  "beta": 1.3636537793179966,
+                  "mean": 0.7727243701136673
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_16",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0008250000000000001,
+          "latency": 2.4668612480163574,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 17,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 2.8546136535264646,
+                  "beta": 1.1453863464735354,
+                  "mean": 0.7136534133816161
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 4.6833559327172445,
+                  "beta": 1.316644067282756,
+                  "mean": 0.7805593221195407
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 4.636346220682004,
+                  "beta": 1.3636537793179966,
+                  "mean": 0.7727243701136673
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_17",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0005991000000000001,
+          "latency": 1.5186998844146729,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 18,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 2.8546136535264646,
+                  "beta": 1.1453863464735354,
+                  "mean": 0.7136534133816161
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 5.622939207680361,
+                  "beta": 1.3770607923196394,
+                  "mean": 0.8032770296686229
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 4.636346220682004,
+                  "beta": 1.3636537793179966,
+                  "mean": 0.7727243701136673
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_18",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0019000000000000002,
+          "latency": 2.636094093322754,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 19,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 0.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 3.7817364127276205,
+                  "beta": 1.2182635872723795,
+                  "mean": 0.7563472825455241
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 5.622939207680361,
+                  "beta": 1.3770607923196394,
+                  "mean": 0.8032770296686229
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 4.636346220682004,
+                  "beta": 1.3636537793179966,
+                  "mean": 0.7727243701136673
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_19",
+          "model_id": "gemini-3-pro-preview",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.005782,
+          "latency": 6.649976015090942,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "thompson_sampling",
+              "total_queries": 20,
+              "n_arms": 9,
+              "prior_alpha": 1.0,
+              "prior_beta": 1.0,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 7,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_successes": {
+                "claude-haiku-4-5-20251001": 5,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 0,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 4,
+                "gemini-3-pro-preview": 1,
+                "gpt-5-mini-2025-08-07": 0,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 0
+              },
+              "arm_success_rates": {
+                "claude-haiku-4-5-20251001": 0.7142857142857143,
+                "claude-opus-4-5-20251101": 1.0,
+                "claude-sonnet-4-5-20250929": 0.0,
+                "gemini-2.5-flash": 1.0,
+                "gemini-2.5-pro": 1.0,
+                "gemini-3-pro-preview": 1.0,
+                "gpt-5-mini-2025-08-07": 0.0,
+                "gpt-5-nano-2025-08-07": 0.0,
+                "gpt-5.1-2025-11-13": 0.0
+              },
+              "arm_distributions": {
+                "claude-haiku-4-5-20251001": {
+                  "alpha": 6.275735468521361,
+                  "beta": 2.7242645314786382,
+                  "mean": 0.6973039409468179
+                },
+                "claude-opus-4-5-20251101": {
+                  "alpha": 3.7817364127276205,
+                  "beta": 1.2182635872723795,
+                  "mean": 0.7563472825455241
+                },
+                "claude-sonnet-4-5-20250929": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gemini-2.5-flash": {
+                  "alpha": 5.622939207680361,
+                  "beta": 1.3770607923196394,
+                  "mean": 0.8032770296686229
+                },
+                "gemini-2.5-pro": {
+                  "alpha": 4.636346220682004,
+                  "beta": 1.3636537793179966,
+                  "mean": 0.7727243701136673
+                },
+                "gemini-3-pro-preview": {
+                  "alpha": 1.9119221842758805,
+                  "beta": 1.0880778157241195,
+                  "mean": 0.6373073947586269
+                },
+                "gpt-5-mini-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5-nano-2025-08-07": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                },
+                "gpt-5.1-2025-11-13": {
+                  "alpha": 1.0,
+                  "beta": 1.0,
+                  "mean": 0.5
+                }
+              }
+            }
+          }
+        }
+      ],
+      "cumulative_cost": [
+        0.0049825,
+        0.0051235,
+        0.0072799,
+        0.0073929,
+        0.01693665,
+        0.017284650000000002,
+        0.01739165,
+        0.024004150000000002,
+        0.03713165,
+        0.03782665,
+        0.03800665,
+        0.038134650000000006,
+        0.038708450000000005,
+        0.038818450000000004,
+        0.048803450000000005,
+        0.05130345000000001,
+        0.05212845000000001,
+        0.052727550000000005,
+        0.054627550000000004,
+        0.060409550000000006
+      ],
+      "converged": true,
+      "convergence_point": 11.0,
+      "started_at": "2025-12-07T02:48:16.257735Z",
+      "completed_at": "2025-12-07T02:49:42.950454Z",
+      "metadata": {
+        "name": "thompson_sampling",
+        "total_queries": 20,
+        "n_arms": 9,
+        "prior_alpha": 1.0,
+        "prior_beta": 1.0,
+        "arm_pulls": {
+          "claude-haiku-4-5-20251001": 7,
+          "claude-opus-4-5-20251101": 3,
+          "claude-sonnet-4-5-20250929": 0,
+          "gemini-2.5-flash": 5,
+          "gemini-2.5-pro": 4,
+          "gemini-3-pro-preview": 1,
+          "gpt-5-mini-2025-08-07": 0,
+          "gpt-5-nano-2025-08-07": 0,
+          "gpt-5.1-2025-11-13": 0
+        },
+        "arm_successes": {
+          "claude-haiku-4-5-20251001": 5,
+          "claude-opus-4-5-20251101": 3,
+          "claude-sonnet-4-5-20250929": 0,
+          "gemini-2.5-flash": 5,
+          "gemini-2.5-pro": 4,
+          "gemini-3-pro-preview": 1,
+          "gpt-5-mini-2025-08-07": 0,
+          "gpt-5-nano-2025-08-07": 0,
+          "gpt-5.1-2025-11-13": 0
+        },
+        "arm_success_rates": {
+          "claude-haiku-4-5-20251001": 0.7142857142857143,
+          "claude-opus-4-5-20251101": 1.0,
+          "claude-sonnet-4-5-20250929": 0.0,
+          "gemini-2.5-flash": 1.0,
+          "gemini-2.5-pro": 1.0,
+          "gemini-3-pro-preview": 1.0,
+          "gpt-5-mini-2025-08-07": 0.0,
+          "gpt-5-nano-2025-08-07": 0.0,
+          "gpt-5.1-2025-11-13": 0.0
+        },
+        "arm_distributions": {
+          "claude-haiku-4-5-20251001": {
+            "alpha": 6.275735468521361,
+            "beta": 2.7242645314786382,
+            "mean": 0.6973039409468179
+          },
+          "claude-opus-4-5-20251101": {
+            "alpha": 3.7817364127276205,
+            "beta": 1.2182635872723795,
+            "mean": 0.7563472825455241
+          },
+          "claude-sonnet-4-5-20250929": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gemini-2.5-flash": {
+            "alpha": 5.622939207680361,
+            "beta": 1.3770607923196394,
+            "mean": 0.8032770296686229
+          },
+          "gemini-2.5-pro": {
+            "alpha": 4.636346220682004,
+            "beta": 1.3636537793179966,
+            "mean": 0.7727243701136673
+          },
+          "gemini-3-pro-preview": {
+            "alpha": 1.9119221842758805,
+            "beta": 1.0880778157241195,
+            "mean": 0.6373073947586269
+          },
+          "gpt-5-mini-2025-08-07": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gpt-5-nano-2025-08-07": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          },
+          "gpt-5.1-2025-11-13": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "mean": 0.5
+          }
+        }
+      }
+    },
+    {
+      "algorithm_name": "random",
+      "run_id": "b22ac138-385c-4d45-b195-86451a46f41a",
+      "total_queries": 20,
+      "total_cost": 0.03786405000000001,
+      "average_quality": 0.9,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_1",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_2",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_3",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_4",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_5",
+          "claude-sonnet-4-5-20250929"
+        ],
+        [
+          "mmlu_test_6",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_7",
+          "gpt-5.1-2025-11-13"
+        ],
+        [
+          "mmlu_test_8",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5-mini-2025-08-07"
+        ],
+        [
+          "mmlu_test_10",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_11",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_12",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_13",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_14",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_15",
+          "gpt-5.1-2025-11-13"
+        ],
+        [
+          "mmlu_test_16",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_17",
+          "gpt-5.1-2025-11-13"
+        ],
+        [
+          "mmlu_test_18",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_19",
+          "gpt-5.1-2025-11-13"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0009500000000000001,
+          "latency": 1.120377779006958,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 1,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.000141,
+          "latency": 0.6690177917480469,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 2,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.013566250000000002,
+          "latency": 9.796657085418701,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 3,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0002471,
+          "latency": 0.8835511207580566,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 4,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0008194000000000001,
+          "latency": 2.0189480781555176,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 5,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "claude-sonnet-4-5-20250929",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0119775,
+          "latency": 10.486976146697998,
+          "success": true,
+          "error": "{\"claude-sonnet-4-5-20250929\": \"UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation\"}",
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 6,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0005350000000000001,
+          "latency": 2.3679819107055664,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 7,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "gpt-5.1-2025-11-13",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00020125,
+          "latency": 1.073779821395874,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 8,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0013850000000000002,
+          "latency": 1.9990320205688477,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 9,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5-mini-2025-08-07",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00030274999999999996,
+          "latency": 2.5115089416503906,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 10,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_10",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "C",
+          "quality_score": 0.0,
+          "cost": 0.00017999999999999998,
+          "latency": 0.5392880439758301,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 11,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_11",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000128,
+          "latency": 0.5681920051574707,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 12,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_12",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "D",
+          "quality_score": 1.0,
+          "cost": 0.000515,
+          "latency": 1.4769530296325684,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 13,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_13",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0006218,
+          "latency": 1.6537208557128906,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 14,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_14",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0008917,
+          "latency": 2.0438880920410156,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 15,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_15",
+          "model_id": "gpt-5.1-2025-11-13",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0006075000000000001,
+          "latency": 1.0535590648651123,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 16,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_16",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "D",
+          "quality_score": 0.0,
+          "cost": 0.000165,
+          "latency": 0.6708071231842041,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 17,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_17",
+          "model_id": "gpt-5.1-2025-11-13",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.000225,
+          "latency": 0.7765510082244873,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 18,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_18",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0041723,
+          "latency": 7.873747825622559,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 19,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_19",
+          "model_id": "gpt-5.1-2025-11-13",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0002325,
+          "latency": 1.0337700843811035,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 20,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 4,
+                "claude-opus-4-5-20251101": 4,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 5,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 4
+              }
+            }
+          }
+        }
+      ],
+      "cumulative_cost": [
+        0.0009500000000000001,
+        0.0010910000000000002,
+        0.014657250000000002,
+        0.014904350000000002,
+        0.01572375,
+        0.027701250000000004,
+        0.028236250000000004,
+        0.028437500000000004,
+        0.029822500000000005,
+        0.030125250000000006,
+        0.030305250000000006,
+        0.030433250000000005,
+        0.030948250000000007,
+        0.03157005000000001,
+        0.03246175000000001,
+        0.03306925000000001,
+        0.03323425000000001,
+        0.03345925000000001,
+        0.037631550000000014,
+        0.03786405000000001
+      ],
+      "converged": false,
+      "convergence_point": null,
+      "started_at": "2025-12-07T02:49:43.865215Z",
+      "completed_at": "2025-12-07T02:51:04.805546Z",
+      "metadata": {
+        "name": "random",
+        "total_queries": 20,
+        "n_arms": 9,
+        "arm_pulls": {
+          "claude-haiku-4-5-20251001": 4,
+          "claude-opus-4-5-20251101": 4,
+          "claude-sonnet-4-5-20250929": 1,
+          "gemini-2.5-flash": 5,
+          "gemini-2.5-pro": 1,
+          "gemini-3-pro-preview": 0,
+          "gpt-5-mini-2025-08-07": 1,
+          "gpt-5-nano-2025-08-07": 0,
+          "gpt-5.1-2025-11-13": 4
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-12-07T02:51:05.031385Z",
+  "metadata": {
+    "algorithm_names": [
+      "thompson_sampling",
+      "random"
+    ],
+    "parallel": false,
+    "dataset": {
+      "name": "mmlu",
+      "size": 20,
+      "max_queries": 20,
+      "mmlu_limit": 1000
+    },
+    "evaluator": {
+      "type": "exact_match",
+      "model": null
+    },
+    "model_pool": {
+      "arms": [
+        {
+          "model_id": "claude-haiku-4-5-20251001",
+          "model_name": "claude-haiku-4-5-20251001",
+          "provider": "anthropic",
+          "input_price_per_m": 0.001,
+          "output_price_per_m": 0.005,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "claude-opus-4-5-20251101",
+          "model_name": "claude-opus-4-5-20251101",
+          "provider": "anthropic",
+          "input_price_per_m": 0.005,
+          "output_price_per_m": 0.025,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "claude-sonnet-4-5-20250929",
+          "model_name": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "input_price_per_m": 0.003,
+          "output_price_per_m": 0.015000000000000001,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gemini-2.5-flash",
+          "model_name": "gemini-2.5-flash",
+          "provider": "google-gla",
+          "input_price_per_m": 0.0003,
+          "output_price_per_m": 0.0025,
+          "expected_quality": 0.74
+        },
+        {
+          "model_id": "gemini-2.5-pro",
+          "model_name": "gemini-2.5-pro",
+          "provider": "google-gla",
+          "input_price_per_m": 0.00125,
+          "output_price_per_m": 0.01,
+          "expected_quality": 0.83
+        },
+        {
+          "model_id": "gemini-3-pro-preview",
+          "model_name": "gemini-3-pro-preview",
+          "provider": "google-gla",
+          "input_price_per_m": 0.002,
+          "output_price_per_m": 0.012,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gpt-5-mini-2025-08-07",
+          "model_name": "gpt-5-mini-2025-08-07",
+          "provider": "openai",
+          "input_price_per_m": 0.00025,
+          "output_price_per_m": 0.002,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gpt-5-nano-2025-08-07",
+          "model_name": "gpt-5-nano-2025-08-07",
+          "provider": "openai",
+          "input_price_per_m": 0.000049999999999999996,
+          "output_price_per_m": 0.00039999999999999996,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gpt-5.1-2025-11-13",
+          "model_name": "gpt-5.1-2025-11-13",
+          "provider": "openai",
+          "input_price_per_m": 0.00125,
+          "output_price_per_m": 0.01,
+          "expected_quality": 0.8
+        }
+      ]
+    },
+    "config": {
+      "max_concurrency": 5,
+      "timeout_per_query": 30
+    }
+  }
+}

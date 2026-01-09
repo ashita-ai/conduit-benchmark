@@ -210,6 +210,96 @@ def get_default_arms() -> list[ModelArm]:
 DEFAULT_ARMS = get_default_arms()
 
 
+def _load_mmlu_stratified(
+    loader: MMLULoader, total_limit: int
+) -> list[BenchmarkQuery]:
+    """Load MMLU with stratified sampling across all 57 subjects.
+
+    Ensures proportional representation of all subject areas rather than
+    random sampling which might over-represent some categories.
+
+    Args:
+        loader: MMLULoader instance
+        total_limit: Total number of questions to load
+
+    Returns:
+        List of BenchmarkQuery objects with balanced subject representation
+    """
+    import random
+
+    all_subjects = loader.SUBJECTS
+    n_subjects = len(all_subjects)
+
+    # Calculate samples per subject (at least 1 per subject if possible)
+    samples_per_subject = max(1, total_limit // n_subjects)
+    remainder = total_limit - (samples_per_subject * n_subjects)
+
+    all_queries: list[BenchmarkQuery] = []
+
+    for i, subject in enumerate(all_subjects):
+        # Give extra samples to first 'remainder' subjects
+        subject_limit = samples_per_subject + (1 if i < remainder else 0)
+
+        subject_queries = loader.load(
+            split="test",
+            limit=subject_limit,
+            subjects=[subject],
+            seed=42 + i,  # Different seed per subject for variety
+        )
+        all_queries.extend(subject_queries)
+
+    # Shuffle to mix subjects
+    random.seed(42)
+    random.shuffle(all_queries)
+
+    return all_queries
+
+
+def _create_thompson_with_priors(
+    arms: list[ModelArm], context: str
+) -> ThompsonSamplingBandit:
+    """Create Thompson Sampling bandit with context-specific priors from conduit.yaml.
+
+    Loads Bayesian priors from conduit.yaml's 'priors' section for the given context
+    (code, creative, analysis, simple_qa, general) and applies them to warm-start
+    the bandit algorithm.
+
+    Args:
+        arms: List of model arms for the bandit
+        context: Query context for prior lookup (from conduit.yaml priors section)
+
+    Returns:
+        ThompsonSamplingBandit initialized with per-arm priors
+
+    Example:
+        >>> bandit = _create_thompson_with_priors(DEFAULT_ARMS, "code")
+        >>> # claude-sonnet-4-5 starts with alpha=9200, beta=800 (92% prior)
+    """
+    bandit = ThompsonSamplingBandit(arms)
+
+    # Load context-specific priors from conduit.yaml
+    context_priors = load_context_priors(context)
+
+    if context_priors:
+        # Apply per-arm priors (overwrite default uniform priors)
+        for model_id, (alpha, beta) in context_priors.items():
+            if model_id in bandit.alpha:
+                bandit.alpha[model_id] = alpha
+                bandit.beta[model_id] = beta
+
+        # Log which priors were applied
+        applied_count = sum(1 for m in context_priors if m in bandit.alpha)
+        console.print(
+            f"[cyan]Thompson priors: Loaded {applied_count} priors for '{context}' context[/cyan]"
+        )
+    else:
+        console.print(
+            f"[yellow]Thompson priors: No priors found for '{context}' context, using uniform[/yellow]"
+        )
+
+    return bandit
+
+
 @click.group()
 @click.version_option(version="0.1.0")
 def main() -> None:
@@ -418,6 +508,19 @@ def generate(
     is_flag=True,
     help="Sync LiteLLM pricing to database before running (for historical tracking)",
 )
+@click.option(
+    "--context",
+    "-c",
+    type=click.Choice(["code", "creative", "analysis", "simple_qa", "general"]),
+    default="general",
+    help="Context for Thompson Sampling cold-start priors (from conduit.yaml)",
+    show_default=True,
+)
+@click.option(
+    "--mmlu-stratified",
+    is_flag=True,
+    help="Sample proportionally from all 57 MMLU subject categories",
+)
 def run(
     dataset: str,
     preset: str | None,
@@ -431,6 +534,8 @@ def run(
     mmlu_limit: int,
     code_timeout: int,
     sync_pricing: bool,
+    context: str,
+    mmlu_stratified: bool,
 ) -> None:
     """Run benchmark experiments.
 
@@ -519,9 +624,18 @@ def run(
             console.print("[cyan]Loading MMLU from HuggingFace...[/cyan]")
             loader = MMLULoader()
             limit = max_queries or mmlu_limit
-            queries = loader.load(split="test", limit=limit)
+
+            if mmlu_stratified:
+                # Stratified sampling: sample proportionally from each of 57 subjects
+                queries = _load_mmlu_stratified(loader, limit)
+                console.print(
+                    f"[green]Loaded {len(queries)} MMLU questions (stratified across {len(loader.SUBJECTS)} subjects)[/green]"
+                )
+            else:
+                queries = loader.load(split="test", limit=limit)
+                console.print(f"[green]Loaded {len(queries)} MMLU questions[/green]")
+
             selected_evaluator = ExactMatchEvaluator(dataset_type="mmlu")
-            console.print(f"[green]Loaded {len(queries)} MMLU questions[/green]")
 
         elif dataset_name == "humaneval":
             # Load HumanEval from HuggingFace
@@ -614,7 +728,7 @@ def run(
                 )
             ),
             # Standard (non-contextual) bandits
-            "thompson": ThompsonSamplingBandit(DEFAULT_ARMS),
+            "thompson": _create_thompson_with_priors(DEFAULT_ARMS, context),
             "ucb1": UCB1Bandit(DEFAULT_ARMS, c=1.5),
             "epsilon": EpsilonGreedyBandit(DEFAULT_ARMS, epsilon=0.1),
             # Contextual bandits - use feature_dim from QueryAnalyzer

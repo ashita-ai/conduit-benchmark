@@ -170,14 +170,20 @@ class ModelExecutor:
             except asyncio.TimeoutError as e:
                 last_error = e
                 if attempt < self.max_retries:
-                    await asyncio.sleep(1.0 * (attempt + 1))  # Exponential backoff
+                    # Exponential backoff with jitter: 2^attempt + random(0-1)
+                    import random
+                    backoff = (2 ** attempt) + random.random()
+                    await asyncio.sleep(backoff)
                     continue
                 break
 
             except Exception as e:
                 last_error = e
                 if attempt < self.max_retries:
-                    await asyncio.sleep(1.0 * (attempt + 1))  # Exponential backoff
+                    # Exponential backoff with jitter: 2^attempt + random(0-1)
+                    import random
+                    backoff = (2 ** attempt) + random.random()
+                    await asyncio.sleep(backoff)
                     continue
                 break
 

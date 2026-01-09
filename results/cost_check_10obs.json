@@ -1,0 +1,468 @@
+{
+  "benchmark_id": "beebf7ca-f379-4eb4-bb00-e88a882c0f31",
+  "dataset_size": 10,
+  "algorithms": [
+    {
+      "algorithm_name": "random",
+      "run_id": "95ef25c7-ebf1-4c35-b3e8-5434cc7a1d60",
+      "total_queries": 10,
+      "total_cost": 0.028367750000000004,
+      "average_quality": 1.0,
+      "selections": [
+        [
+          "mmlu_test_0",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_1",
+          "claude-haiku-4-5-20251001"
+        ],
+        [
+          "mmlu_test_2",
+          "gemini-2.5-pro"
+        ],
+        [
+          "mmlu_test_3",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_4",
+          "gemini-2.5-flash"
+        ],
+        [
+          "mmlu_test_5",
+          "claude-sonnet-4-5-20250929"
+        ],
+        [
+          "mmlu_test_6",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_7",
+          "gpt-5.1-2025-11-13"
+        ],
+        [
+          "mmlu_test_8",
+          "claude-opus-4-5-20251101"
+        ],
+        [
+          "mmlu_test_9",
+          "gpt-5-mini-2025-08-07"
+        ]
+      ],
+      "feedback": [
+        {
+          "query_id": "mmlu_test_0",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0009500000000000001,
+          "latency": 2.3513078689575195,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 1,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_1",
+          "model_id": "claude-haiku-4-5-20251001",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.000141,
+          "latency": 0.6484968662261963,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 2,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_2",
+          "model_id": "gemini-2.5-pro",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.011736250000000002,
+          "latency": 9.547382116317749,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 3,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_3",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0003346,
+          "latency": 0.9420270919799805,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 4,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_4",
+          "model_id": "gemini-2.5-flash",
+          "response_text": "A",
+          "quality_score": 1.0,
+          "cost": 0.0008844,
+          "latency": 2.0208277702331543,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 5,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_5",
+          "model_id": "claude-sonnet-4-5-20250929",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0118975,
+          "latency": 10.250433206558228,
+          "success": true,
+          "error": "{\"claude-sonnet-4-5-20250929\": \"UnexpectedModelBehavior: Exceeded maximum retries (1) for output validation\"}",
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 6,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_6",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.0005350000000000001,
+          "latency": 2.551405906677246,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 7,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_7",
+          "model_id": "gpt-5.1-2025-11-13",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.00020125,
+          "latency": 1.1157090663909912,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 8,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_8",
+          "model_id": "claude-opus-4-5-20251101",
+          "response_text": "C",
+          "quality_score": 1.0,
+          "cost": 0.0013850000000000002,
+          "latency": 2.2341198921203613,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 9,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        },
+        {
+          "query_id": "mmlu_test_9",
+          "model_id": "gpt-5-mini-2025-08-07",
+          "response_text": "B",
+          "quality_score": 1.0,
+          "cost": 0.00030274999999999996,
+          "latency": 2.2224998474121094,
+          "success": true,
+          "error": null,
+          "metadata": {
+            "algorithm_state": {
+              "name": "random",
+              "total_queries": 10,
+              "n_arms": 9,
+              "arm_pulls": {
+                "claude-haiku-4-5-20251001": 1,
+                "claude-opus-4-5-20251101": 3,
+                "claude-sonnet-4-5-20250929": 1,
+                "gemini-2.5-flash": 2,
+                "gemini-2.5-pro": 1,
+                "gemini-3-pro-preview": 0,
+                "gpt-5-mini-2025-08-07": 1,
+                "gpt-5-nano-2025-08-07": 0,
+                "gpt-5.1-2025-11-13": 1
+              }
+            }
+          }
+        }
+      ],
+      "cumulative_cost": [
+        0.0009500000000000001,
+        0.0010910000000000002,
+        0.012827250000000002,
+        0.013161850000000003,
+        0.014046250000000003,
+        0.02594375,
+        0.026478750000000002,
+        0.026680000000000002,
+        0.028065000000000003,
+        0.028367750000000004
+      ],
+      "converged": false,
+      "convergence_point": null,
+      "started_at": "2025-12-07T03:02:38.212944Z",
+      "completed_at": "2025-12-07T03:03:44.107001Z",
+      "metadata": {
+        "name": "random",
+        "total_queries": 10,
+        "n_arms": 9,
+        "arm_pulls": {
+          "claude-haiku-4-5-20251001": 1,
+          "claude-opus-4-5-20251101": 3,
+          "claude-sonnet-4-5-20250929": 1,
+          "gemini-2.5-flash": 2,
+          "gemini-2.5-pro": 1,
+          "gemini-3-pro-preview": 0,
+          "gpt-5-mini-2025-08-07": 1,
+          "gpt-5-nano-2025-08-07": 0,
+          "gpt-5.1-2025-11-13": 1
+        }
+      }
+    }
+  ],
+  "oracle_cost": null,
+  "oracle_quality": null,
+  "created_at": "2025-12-07T03:03:44.748970Z",
+  "metadata": {
+    "algorithm_names": [
+      "random"
+    ],
+    "parallel": false,
+    "dataset": {
+      "name": "mmlu",
+      "size": 10,
+      "max_queries": 10,
+      "mmlu_limit": 1000
+    },
+    "evaluator": {
+      "type": "exact_match",
+      "model": null
+    },
+    "model_pool": {
+      "arms": [
+        {
+          "model_id": "claude-haiku-4-5-20251001",
+          "model_name": "claude-haiku-4-5-20251001",
+          "provider": "anthropic",
+          "input_price_per_m": 0.001,
+          "output_price_per_m": 0.005,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "claude-opus-4-5-20251101",
+          "model_name": "claude-opus-4-5-20251101",
+          "provider": "anthropic",
+          "input_price_per_m": 0.005,
+          "output_price_per_m": 0.025,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "claude-sonnet-4-5-20250929",
+          "model_name": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "input_price_per_m": 0.003,
+          "output_price_per_m": 0.015000000000000001,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gemini-2.5-flash",
+          "model_name": "gemini-2.5-flash",
+          "provider": "google-gla",
+          "input_price_per_m": 0.0003,
+          "output_price_per_m": 0.0025,
+          "expected_quality": 0.74
+        },
+        {
+          "model_id": "gemini-2.5-pro",
+          "model_name": "gemini-2.5-pro",
+          "provider": "google-gla",
+          "input_price_per_m": 0.00125,
+          "output_price_per_m": 0.01,
+          "expected_quality": 0.83
+        },
+        {
+          "model_id": "gemini-3-pro-preview",
+          "model_name": "gemini-3-pro-preview",
+          "provider": "google-gla",
+          "input_price_per_m": 0.002,
+          "output_price_per_m": 0.012,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gpt-5-mini-2025-08-07",
+          "model_name": "gpt-5-mini-2025-08-07",
+          "provider": "openai",
+          "input_price_per_m": 0.00025,
+          "output_price_per_m": 0.002,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gpt-5-nano-2025-08-07",
+          "model_name": "gpt-5-nano-2025-08-07",
+          "provider": "openai",
+          "input_price_per_m": 0.000049999999999999996,
+          "output_price_per_m": 0.00039999999999999996,
+          "expected_quality": 0.8
+        },
+        {
+          "model_id": "gpt-5.1-2025-11-13",
+          "model_name": "gpt-5.1-2025-11-13",
+          "provider": "openai",
+          "input_price_per_m": 0.00125,
+          "output_price_per_m": 0.01,
+          "expected_quality": 0.8
+        }
+      ]
+    },
+    "config": {
+      "max_concurrency": 5,
+      "timeout_per_query": 30
+    }
+  }
+}

@@ -1,47 +1,18 @@
 {
-  "benchmark_id": "53a9319b-3c4c-40c3-a0ce-5f1c990c022e",
-  "dataset_size": 1000,
   "summary": {
-    "num_algorithms": 11,
-    "best_quality_algorithm": "dueling_bandit",
-    "best_cost_algorithm": "always_cheapest",
-    "quality_rankings": [
-      "dueling_bandit",
-      "hybrid_thompson_linucb",
-      "epsilon_greedy",
-      "thompson_sampling",
-      "ucb1",
-      "contextual_thompson_sampling",
-      "random",
-      "hybrid_ucb1_linucb",
-      "linucb",
-      "always_best",
-      "always_cheapest"
-    ],
-    "cost_rankings": [
-      "always_cheapest",
-      "linucb",
-      "always_best",
-      "hybrid_ucb1_linucb",
-      "hybrid_thompson_linucb",
-      "dueling_bandit",
-      "contextual_thompson_sampling",
-      "thompson_sampling",
-      "random",
-      "ucb1",
-      "epsilon_greedy"
-    ]
+    "num_algorithms": 0,
+    "best_quality_algorithm": null,
+    "best_cost_algorithm": null,
+    "quality_rankings": [],
+    "cost_rankings": []
   },
-  "algorithms": {
-    "thompson_sampling": {
-      "total_cost": 2.302739899999998,
-      "average_quality": 0.882,
-      "quality_ci": [
-        0.862,
-        0.901
-      ],
-      "cumulative_cost": 2.302739899999998,
-      "normalized_cost": 0.002302739899999998,
-      "cost_per_query": 0.002302739899999998,
-      "convergence": {
-        "converged": 
+  "algorithms": {},
+  "statistical_tests": {
+    "friedman": {
+      "statistic": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    }
+  },
+  "pareto_frontier": []
+}
